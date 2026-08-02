@@ -192,12 +192,14 @@
         <table style="margin: 0;">
             <tr>
                 <td style="border: none; padding: 5px;">Subtotal:</td>
-                <td class="text-right" style="border: none; padding: 5px;">€{{ quote.total_price }}</td>
+                <td class="text-right" style="border: none; padding: 5px;">€{{ quote.subtotal }}</td>
             </tr>
+            {% if quote.include_tax %}
             <tr>
-                <td style="border: none; padding: 5px;">Impuestos (IVA incl.):</td>
-                <td class="text-right" style="border: none; padding: 5px;">-</td>
+                <td style="border: none; padding: 5px;">{{ quote.tax_name }} ({{ quote.tax_percentage|floatformat:0 }}%):</td>
+                <td class="text-right" style="border: none; padding: 5px;">€{{ quote.tax_amount }}</td>
             </tr>
+            {% endif %}
             <tr>
                 <td class="total-final" style="border: none; padding: 5px;"><strong>TOTAL:</strong></td>
                 <td class="total-final text-right" style="border: none; padding: 5px;"><strong>€{{ quote.total_price }}</strong></td>

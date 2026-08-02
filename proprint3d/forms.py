@@ -121,9 +121,12 @@ class QuoteForm(forms.ModelForm):
     """
     class Meta:
         model = Quote
-        fields = ['client_name', 'client_contact', 'notes']
+        fields = ['client_name', 'client_contact', 'notes', 'include_tax', 'tax_name', 'tax_percentage']
         widgets = {
-            'client_name': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600'}),
-            'client_contact': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600'}),
-            'notes': forms.Textarea(attrs={'class': 'form-textarea w-full rounded-md bg-gray-800 text-white border-gray-600', 'rows': 3}),
+            'client_name': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'}),
+            'client_contact': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'}),
+            'notes': forms.Textarea(attrs={'class': 'form-textarea w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'rows': 3}),
+            'include_tax': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-cyan-600 bg-gray-800 border-gray-600 rounded focus:ring-cyan-500 focus:ring-offset-gray-900', 'id': 'include-tax-checkbox'}),
+            'tax_name': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'id': 'tax-name-input'}),
+            'tax_percentage': forms.NumberInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'step': '0.01', 'id': 'tax-percent-input'}),
         }

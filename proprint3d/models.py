@@ -202,6 +202,11 @@ class Quote(models.Model):
     client_name = models.CharField(max_length=150)
     client_contact = models.CharField(max_length=150, help_text="Email o Teléfono")
     created_at = models.DateTimeField(auto_now_add=True)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    include_tax = models.BooleanField(default=False)
+    tax_name = models.CharField(max_length=50, default="IVA incl.")
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=21.00)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Draft')
     notes = models.TextField(blank=True, null=True)
@@ -213,8 +218,16 @@ class Quote(models.Model):
         Se llama cada vez que se modifica una línea.
         """
         # Sumamos 'calculated_cost' de todos los items
-        total = sum((item.calculated_cost or 0) for item in self.items.all())
-        self.total_price = total
+        total_items = sum((item.calculated_cost or 0) for item in self.items.all())
+        self.subtotal = total_items
+        
+        if self.include_tax:
+            self.tax_amount = (self.subtotal * self.tax_percentage) / 100
+            self.total_price = self.subtotal + self.tax_amount
+        else:
+            self.tax_amount = 0
+            self.total_price = self.subtotal
+            
         self.save()
 
     def __str__(self):

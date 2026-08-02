@@ -33,6 +33,28 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contacto (Email / Teléfono)</label>
                         {{ quote_form.client_contact }}
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas Adicionales</label>
+                        {{ quote_form.notes }}
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <label class="flex items-center space-x-3 mb-3 cursor-pointer">
+                            {{ quote_form.include_tax }}
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">Añadir Impuestos al Total</span>
+                        </label>
+                        
+                        <div id="tax-options" class="flex gap-4 opacity-50 pointer-events-none transition-opacity">
+                            <div class="flex-1">
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Nombre (ej. IVA)</label>
+                                {{ quote_form.tax_name }}
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Porcentaje (%)</label>
+                                {{ quote_form.tax_percentage }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -101,11 +123,15 @@
                 
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800 flex justify-between items-end">
                     <div>
-                        <span class="block text-sm text-gray-500 dark:text-gray-400 font-medium">Total Estimado</span>
+                        <div class="flex flex-col text-right mr-4 mb-2">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Subtotal: <span id="sub-total-el">€0.00</span></span>
+                            <span id="tax-row" class="text-sm text-gray-500 dark:text-gray-400 hidden">Impuestos: <span id="tax-amount-el">€0.00</span></span>
+                        </div>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400 font-medium">Total Final</span>
                         <span id="grand-total" class="text-3xl font-black text-gray-900 dark:text-white">€0.00</span>
                     </div>
                     <button type="submit" id="submit-btn" disabled class="bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold py-3 px-6 rounded-xl cursor-not-allowed">
-                        Generar Presupuesto y PDF
+                        Generar Presupuesto
                     </button>
                 </div>
             </div>
@@ -134,6 +160,29 @@
         const grandTotalEl = document.getElementById('grand-total');
         const jsonInput = document.getElementById('items-json-input');
         const submitBtn = document.getElementById('submit-btn');
+        
+        const includeTaxCheck = document.getElementById('include-tax-checkbox');
+        const taxNameInput = document.getElementById('tax-name-input');
+        const taxPercentInput = document.getElementById('tax-percent-input');
+        const taxOptionsDiv = document.getElementById('tax-options');
+        const subTotalEl = document.getElementById('sub-total-el');
+        const taxRow = document.getElementById('tax-row');
+        const taxAmountEl = document.getElementById('tax-amount-el');
+
+        function toggleTaxOptions() {
+            if (includeTaxCheck.checked) {
+                taxOptionsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                taxRow.classList.remove('hidden');
+            } else {
+                taxOptionsDiv.classList.add('opacity-50', 'pointer-events-none');
+                taxRow.classList.add('hidden');
+            }
+            renderTable();
+        }
+
+        includeTaxCheck.addEventListener('change', toggleTaxOptions);
+        taxPercentInput.addEventListener('input', renderTable);
+        taxNameInput.addEventListener('input', renderTable);
         
         // Autocompletar precio si existe en el catálogo
         nameInput.addEventListener('input', function() {
@@ -230,9 +279,23 @@
                 });
             }
             
-            grandTotalEl.textContent = `€${total.toFixed(2)}`;
+            let finalTotal = total;
+            let taxAmount = 0;
+            
+            if (includeTaxCheck.checked) {
+                const pct = parseFloat(taxPercentInput.value) || 0;
+                taxAmount = (total * pct) / 100;
+                finalTotal = total + taxAmount;
+            }
+            
+            subTotalEl.textContent = `€${total.toFixed(2)}`;
+            taxAmountEl.textContent = `€${taxAmount.toFixed(2)}`;
+            grandTotalEl.textContent = `€${finalTotal.toFixed(2)}`;
             jsonInput.value = JSON.stringify(quoteItems);
         }
+        
+        // Initial setup
+        toggleTaxOptions();
     });
 </script>
 {% endblock %}
