@@ -213,7 +213,7 @@ class Quote(models.Model):
         Se llama cada vez que se modifica una línea.
         """
         # Sumamos 'calculated_cost' de todos los items
-        total = sum(item.calculated_cost for item in self.items.all())
+        total = sum((item.calculated_cost or 0) for item in self.items.all())
         self.total_price = total
         self.save()
 
@@ -241,8 +241,10 @@ class QuoteItem(models.Model):
         (precio unitario * cantidad).
         """
         # Lógica matemática: multiplicar unit_price x quantity
-        if self.unit_price and self.quantity:
+        if self.unit_price is not None and self.quantity is not None:
             self.calculated_cost = self.unit_price * self.quantity
+        else:
+            self.calculated_cost = 0
             
         # Si se seleccionó un producto y no se dio título custom, usar el del producto
         if self.product and not self.custom_title:
