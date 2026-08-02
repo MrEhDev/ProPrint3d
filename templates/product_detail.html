@@ -25,7 +25,7 @@
             <div class="md:w-1/2 relative bg-gray-100 dark:bg-gray-800 flex flex-col min-h-[400px]">
                 {% if product.main_image or product.images.all %}
                 <!-- Carrusel -->
-                <div class="relative w-full h-full flex-1" id="product-carousel">
+                <div class="relative w-full aspect-square" id="product-carousel">
                     {% if product.main_image %}
                     <img src="{{ product.main_image.url }}" alt="{{ product.title }}"
                         class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 carousel-image">
