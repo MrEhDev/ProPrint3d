@@ -272,7 +272,7 @@
                                     {% elif order.status == 'Entregado' %}bg-purple-500
                                     {% elif order.status == 'Cobrado' %}bg-green-500
                                     {% else %}bg-gray-400{% endif %}" title="{{ order.status }}"></span>
-                                <select onchange="updateOrderStatus({{ order.id }}, this.value)" class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1 py-1 w-full max-w-[120px]">
+                                <select onchange="updateOrderStatus({{ order.id }}, this.value)" class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1 py-1 w-auto min-w-[110px]">
                                     <option value="Pendiente" {% if order.status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
                                     <option value="Realizado" {% if order.status == 'Realizado' %}selected{% endif %}>Realizado</option>
                                     <option value="Pdt de envío" {% if order.status == 'Pdt de envío' %}selected{% endif %}>Pdt de envío</option>
