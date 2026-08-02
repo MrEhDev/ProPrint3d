@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Presupuesto #{{ quote.id }}</title>
@@ -7,13 +8,14 @@
         @page {
             size: A4;
             margin: 2cm;
+
             @bottom-center {
                 content: "Página " counter(page) " de " counter(pages);
                 font-size: 10pt;
                 color: #7f8c8d;
             }
         }
-        
+
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #2c3e50;
@@ -90,11 +92,11 @@
             padding: 12px;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         .text-right {
             text-align: right;
         }
-        
+
         .text-center {
             text-align: center;
         }
@@ -132,14 +134,15 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
         <div class="company-info">
             <h1>ProPrint3D</h1>
             <p><strong>Servicios de Impresión 3D Profesional</strong></p>
-            <p>123 Calle Principal, Ciudad</p>
-            <p>contacto@proprint3d.es | +34 123 456 789</p>
+            <p>Lliça d'Amunt, Vallès Oriental, Barcelona, España</p>
+            <p>contacto@proprint3d.es | +34 660 90 45 15 </p>
         </div>
         <div class="quote-info">
             <h2 style="font-size: 22pt; color: #cbd5e1; text-transform: uppercase;">Presupuesto</h2>
@@ -197,7 +200,8 @@
             </tr>
             <tr>
                 <td class="total-final" style="border: none; padding: 5px;"><strong>TOTAL:</strong></td>
-                <td class="total-final text-right" style="border: none; padding: 5px;"><strong>€{{ quote.total_price }}</strong></td>
+                <td class="total-final text-right" style="border: none; padding: 5px;"><strong>€{{ quote.total_price
+                        }}</strong></td>
             </tr>
         </table>
     </div>
@@ -205,9 +209,12 @@
 
     <div class="footer-note">
         <p><strong>Términos y Condiciones:</strong></p>
-        <p>Este presupuesto está sujeto a revisión de los archivos finales (STL/OBJ). El tiempo estimado de producción comenzará tras la confirmación del pedido y recepción del pago. No se admiten devoluciones de piezas a medida.</p>
+        <p>Este presupuesto está sujeto a revisión de los archivos finales (STL/OBJ). El tiempo estimado de producción
+            comenzará tras la confirmación del pedido y recepción del pago. No se admiten devoluciones de piezas a
+            medida.</p>
         <p>Gracias por confiar en ProPrint3D.</p>
     </div>
 
 </body>
+
 </html>
