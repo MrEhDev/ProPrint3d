@@ -71,9 +71,9 @@ def product_detail_view(request, slug):
         product = get_object_or_404(Product, slug=slug, is_active=True)
     
     absolute_url = request.build_absolute_uri()
-    wa_message = f"Hola ProPrint3d, estoy interesado en la pieza: {product.title}\n\nEnlace: {absolute_url}"
+    wa_message = f"Hola ProPrint3d, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
     import urllib.parse
-    wa_url = f"https://wa.me/34600000000?text={urllib.parse.quote(wa_message)}"
+    wa_url = f"https://wa.me/34660904515?text={urllib.parse.quote(wa_message)}"
     
     context = {
         'product': product,
