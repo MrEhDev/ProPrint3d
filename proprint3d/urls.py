@@ -31,6 +31,7 @@ urlpatterns = [
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
     path('crm/order/new/', views.order_create_view, name='order_create'),
     path('crm/api/order/<int:order_id>/status/', views.update_order_status_api, name='update_order_status_api'),
+    path('crm/api/order/<int:order_id>/cost/', views.update_order_cost_api, name='update_order_cost_api'),
     
     # APIs rápidas de producto
     path('product/<slug:slug>/toggle-sale/', views.toggle_sale_api, name='toggle_sale_api'),

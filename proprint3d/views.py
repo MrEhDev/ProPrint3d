@@ -364,6 +364,22 @@ def update_order_status_api(request, order_id):
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
 @staff_member_required
+def update_order_cost_api(request, order_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_cost = data.get('cost')
+            order = Order.objects.get(id=order_id)
+            if new_cost is not None:
+                order.total_cost = float(new_cost)
+                order.save()
+                return JsonResponse({'success': True})
+            return JsonResponse({'success': False, 'error': 'Coste inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
 def toggle_sale_api(request, slug):
     if request.method == 'POST':
         product = get_object_or_404(Product, slug=slug)
