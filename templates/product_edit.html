@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Botón volver -->
+    <a href="{% url 'product_detail' product.slug %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary mb-8 transition-colors">
+        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Volver a {{ product.title }}
+    </a>
+
+    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Editar Producto</h2>
+        
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="mb-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded relative">
+                <strong class="font-bold">Error en el formulario:</strong>
+                <ul class="list-disc pl-5 mt-1 text-sm">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
+                {{ form.title }}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría Existente</label>
+                    {{ form.category }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">O Nueva Categoría</label>
+                    {{ form.new_category }}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.new_category.help_text }}</p>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imagen Principal</label>
+                {% if product.main_image %}
+                <div class="mb-2 flex items-center gap-3">
+                    <img src="{{ product.main_image.url }}" class="w-16 h-16 object-cover rounded-lg border border-gray-300 dark:border-gray-700">
+                    <span class="text-xs text-gray-500">Imagen principal actual. Sube una nueva para reemplazarla.</span>
+                </div>
+                {% endif %}
+                {{ form.main_image }}
+            </div>
+            
+            <!-- Imágenes actuales de la galería -->
+            {% if product.images.all %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imágenes de Galería Actuales</label>
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3" id="gallery-grid">
+                    {% for img in product.images.all %}
+                    <div class="relative group" id="img-wrapper-{{ img.id }}">
+                        <img src="{{ img.image.url }}" class="w-full h-20 object-cover rounded-lg border-2 {% if img.is_cover %}border-primary{% else %}border-gray-200 dark:border-gray-700{% endif %}">
+                        {% if img.is_cover %}
+                        <span class="absolute bottom-0 left-0 right-0 bg-primary text-white text-xs text-center py-0.5 rounded-b-lg font-bold">Portada</span>
+                        {% endif %}
+                        <button type="button" onclick="deleteGalleryImage({{ img.id }}, '{{ csrf_token }}')" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow">✕</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Pasa el ratón por encima de una imagen y pulsa la ✕ roja para eliminarla.</p>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Añadir Más Imágenes a la Galería</label>
+                {{ form.gallery_images }}
+            </div>
+
+            <script>
+                function deleteGalleryImage(imageId, csrfToken) {
+                    if (!confirm('¿Eliminar esta imagen de la galería?')) return;
+                    fetch(`/product-image/${imageId}/delete/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById(`img-wrapper-${imageId}`).remove();
+                        } else {
+                            alert('Error al eliminar la imagen.');
+                        }
+                    });
+                }
+            </script>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (g)</label>
+                    {{ form.weight_grams }}
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Horas</label>
+                        {{ form.print_time_hours }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Minutos</label>
+                        {{ form.print_time_minutes }}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Otros Costes (€)</label>
+                    {{ form.extra_costs }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Medidas</label>
+                    {{ form.dimensions }}
+                </div>
+                <div class="col-span-2 md:col-span-1">
+                    <button type="button" id="force-calc-btn" class="w-full bg-secondary hover:bg-primary text-white font-bold py-2 px-4 rounded-md transition-colors mt-6">
+                        Calcular Costes
+                    </button>
+                </div>
+                <div class="col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-primary font-bold">Precio Final (€)</label>
+                        {{ form.price }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Oferta (€)</label>
+                        {{ form.sale_price }}
+                    </div>
+                    <div class="flex items-center h-[42px]">
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form.is_on_sale }}
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">En Oferta</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center h-[42px]">
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form.is_active }}
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Visible en catálogo</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-span-2">
+                    <div id="price-suggestion-container" class="hidden mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
+                        <span class="w-full text-xs text-gray-500 mb-1 block">Sugerencias clickables (Coste Total: €<span id="cost-val">0.00</span>):</span>
+                        <button type="button" id="apply-suggestion-x25-btn" class="text-xs bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 px-3 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border border-gray-300 dark:border-gray-600">
+                            x2.5: €<span id="suggested-price-x25-val" class="font-bold">0.00</span>
+                        </button>
+                        <button type="button" id="apply-suggestion-x30-btn" class="text-xs bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 px-3 py-1.5 rounded hover:bg-green-200 dark:hover:bg-green-800 transition-colors whitespace-nowrap border border-green-300 dark:border-green-700">
+                            x3.0: €<span id="suggested-price-x30-val" class="font-bold">0.00</span>
+                        </button>
+                        <button type="button" id="apply-suggestion-x40-btn" class="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-3 py-1.5 rounded hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors whitespace-nowrap border border-purple-300 dark:border-purple-700">
+                            x4.0: €<span id="suggested-price-x40-val" class="font-bold">0.00</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL MakerWorld (Opcional)</label>
+                {{ form.makerworld_url }}
+            </div>
+
+            <button type="submit" class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">
+                Guardar Cambios
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Lógica eliminada: El precio de oferta siempre está visible
+
+    // Lógica para autocalcular precio sugerido
+    document.addEventListener('DOMContentLoaded', function() {
+        const weightInput = document.querySelector('input[name="weight_grams"]');
+        const hoursInput = document.querySelector('input[name="print_time_hours"]');
+        const minsInput = document.querySelector('input[name="print_time_minutes"]');
+        const extraInput = document.querySelector('input[name="extra_costs"]');
+        const priceInput = document.querySelector('input[name="price"]');
+        
+        const suggestionContainer = document.getElementById('price-suggestion-container');
+        const costVal = document.getElementById('cost-val');
+        const valX25 = document.getElementById('suggested-price-x25-val');
+        const valX30 = document.getElementById('suggested-price-x30-val');
+        const valX40 = document.getElementById('suggested-price-x40-val');
+        
+        const btnX25 = document.getElementById('apply-suggestion-x25-btn');
+        const btnX30 = document.getElementById('apply-suggestion-x30-btn');
+        const btnX40 = document.getElementById('apply-suggestion-x40-btn');
+        const calcBtn = document.getElementById('force-calc-btn');
+        
+        function calculateSuggested() {
+            const w = parseFloat(weightInput.value) || 0;
+            const h = parseFloat(hoursInput.value) || 0;
+            const m = parseFloat(minsInput.value) || 0;
+            const extra = parseFloat(extraInput.value) || 0;
+            
+            const totalHours = h + (m / 60);
+            
+            if (w > 0 && totalHours > 0) {
+                const cost_filament = 0.02 * w;
+                const cost_energy = 0.15 * 0.12 * totalHours;
+                const cost_wear = 0.025 * totalHours;
+                
+                const cost_subtotal = cost_filament + cost_energy + cost_wear;
+                const error_margin = cost_subtotal * 0.15;
+                
+                const base_var = cost_filament + cost_energy;
+                const fixed_costs = cost_wear + error_margin + extra;
+                
+                const total_cost = base_var + fixed_costs;
+                costVal.textContent = total_cost.toFixed(2);
+                
+                valX25.textContent = ((base_var * 2.5) + fixed_costs).toFixed(2);
+                valX30.textContent = ((base_var * 3.0) + fixed_costs).toFixed(2);
+                valX40.textContent = ((base_var * 4.0) + fixed_costs).toFixed(2);
+                
+                suggestionContainer.classList.remove('hidden');
+            } else {
+                suggestionContainer.classList.add('hidden');
+            }
+        }
+        
+        if (calcBtn) calcBtn.addEventListener('click', calculateSuggested);
+        
+        [weightInput, hoursInput, minsInput, extraInput].forEach(el => {
+            if(el) el.addEventListener('input', calculateSuggested);
+        });
+        
+        if (btnX25) btnX25.addEventListener('click', () => priceInput.value = valX25.textContent);
+        if (btnX30) btnX30.addEventListener('click', () => priceInput.value = valX30.textContent);
+        if (btnX40) btnX40.addEventListener('click', () => priceInput.value = valX40.textContent);
+        
+        calculateSuggested();
+    });
+</script>
+{% endblock %}

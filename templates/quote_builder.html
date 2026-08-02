@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- =====================================================================
+  VISTA: quote_builder.html
+  Propósito: Panel para construir presupuestos y enviarlos o generar PDF.
+====================================================================== -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8 flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Creador de Presupuestos</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">Genera y envía presupuestos en PDF a tus clientes.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-2 px-4 rounded-xl transition-colors">
+            Volver al Dashboard
+        </a>
+    </div>
+
+    <form method="POST" id="quote-form" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {% csrf_token %}
+        <input type="hidden" name="items_json" id="items-json-input" value="[]">
+        
+        <!-- Datos del Cliente (Izquierda) -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Datos del Cliente</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente</label>
+                        {{ quote_form.client_name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contacto (Email / Teléfono)</label>
+                        {{ quote_form.client_contact }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Añadir al Presupuesto</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Concepto / Producto</label>
+                        <input type="text" id="product-name" list="products-datalist" placeholder="Escribe un concepto o elige del catálogo..." class="form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500 mb-2">
+                        <datalist id="products-datalist">
+                            {% for product in products %}
+                            <option value="{{ product.title }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Ud. (€)</label>
+                            <input type="number" step="0.01" id="item-price" value="0.00" class="form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad</label>
+                            <input type="number" id="item-quantity" value="1" min="1" class="form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500">
+                        </div>
+                        <div class="flex-1 flex items-end">
+                            <button type="button" id="add-item-btn" class="w-full bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded-xl transition-colors shadow-md">
+                                Añadir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constructor (Derecha) - UI Visual -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-6 h-full flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Líneas de Presupuesto</h2>
+                </div>
+                
+                <div id="empty-state" class="flex-1 bg-gray-50 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center p-8">
+                    <div class="text-center">
+                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">No hay piezas añadidas al presupuesto todavía.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Selecciona una pieza del catálogo para empezar.</p>
+                    </div>
+                </div>
+                
+                <div id="items-table-container" class="flex-1 hidden">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Concepto</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">Cant.</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">Precio Ud.</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-tbody" class="divide-y divide-gray-200 dark:divide-gray-800">
+                            <!-- JS inyecta filas aquí -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800 flex justify-between items-end">
+                    <div>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400 font-medium">Total Estimado</span>
+                        <span id="grand-total" class="text-3xl font-black text-gray-900 dark:text-white">€0.00</span>
+                    </div>
+                    <button type="submit" id="submit-btn" disabled class="bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold py-3 px-6 rounded-xl cursor-not-allowed">
+                        Generar Presupuesto y PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let quoteItems = [];
+        
+        {% load l10n %}
+        const productMap = {
+            {% for p in products %}
+            "{{ p.title|escapejs }}": {{ p.price|unlocalize }},
+            {% endfor %}
+        };
+        
+        const nameInput = document.getElementById('product-name');
+        const priceInput = document.getElementById('item-price');
+        const qtyInput = document.getElementById('item-quantity');
+        const addBtn = document.getElementById('add-item-btn');
+        const tbody = document.getElementById('items-tbody');
+        const emptyState = document.getElementById('empty-state');
+        const tableContainer = document.getElementById('items-table-container');
+        const grandTotalEl = document.getElementById('grand-total');
+        const jsonInput = document.getElementById('items-json-input');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        // Autocompletar precio si existe en el catálogo
+        nameInput.addEventListener('input', function() {
+            const val = this.value.trim();
+            if (productMap[val] !== undefined) {
+                priceInput.value = productMap[val];
+            }
+        });
+
+        addBtn.addEventListener('click', function() {
+            const title = nameInput.value.trim();
+            if (!title) return;
+            
+            const price = parseFloat(priceInput.value) || 0;
+            const qty = parseInt(qtyInput.value) || 1;
+            
+            // Usamos el título como ID virtual ya que pueden ser items manuales
+            const productId = title;
+            
+            const existing = quoteItems.find(i => i.product_id === productId);
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                quoteItems.push({
+                    product_id: productId,
+                    title: title,
+                    unit_price: price,
+                    quantity: qty
+                });
+            }
+            
+            renderTable();
+            nameInput.value = '';
+            priceInput.value = '0.00';
+            qtyInput.value = 1;
+            nameInput.focus();
+        });
+        
+        window.removeItem = function(index) {
+            quoteItems.splice(index, 1);
+            renderTable();
+        };
+        
+        window.updatePrice = function(index, newPrice) {
+            quoteItems[index].unit_price = parseFloat(newPrice) || 0;
+            renderTable();
+        };
+        
+        window.updateQty = function(index, newQty) {
+            quoteItems[index].quantity = parseInt(newQty) || 1;
+            renderTable();
+        };
+
+        function renderTable() {
+            tbody.innerHTML = '';
+            let total = 0;
+            
+            if (quoteItems.length === 0) {
+                emptyState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                submitBtn.disabled = true;
+                submitBtn.className = "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold py-3 px-6 rounded-xl cursor-not-allowed";
+            } else {
+                emptyState.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.className = "bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:scale-105";
+                
+                quoteItems.forEach((item, index) => {
+                    const rowTotal = item.unit_price * item.quantity;
+                    total += rowTotal;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "text-gray-900 dark:text-gray-300";
+                    tr.innerHTML = `
+                        <td class="px-3 py-4 text-sm font-medium">${item.title}</td>
+                        <td class="px-3 py-4 text-sm text-right">
+                            <input type="number" min="1" value="${item.quantity}" onchange="updateQty(${index}, this.value)" class="w-16 px-2 py-1 text-right bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded text-sm">
+                        </td>
+                        <td class="px-3 py-4 text-sm text-right">
+                            <div class="flex items-center justify-end">
+                                <span>€</span>
+                                <input type="number" step="0.01" value="${item.unit_price.toFixed(2)}" onchange="updatePrice(${index}, this.value)" class="w-20 px-2 py-1 ml-1 text-right bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded text-sm">
+                            </div>
+                        </td>
+                        <td class="px-3 py-4 text-sm text-right font-bold">€${rowTotal.toFixed(2)}</td>
+                        <td class="px-3 py-4 text-right">
+                            <button type="button" onclick="removeItem(${index})" class="text-red-500 hover:text-red-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            
+            grandTotalEl.textContent = `€${total.toFixed(2)}`;
+            jsonInput.value = JSON.stringify(quoteItems);
+        }
+    });
+</script>
+{% endblock %}

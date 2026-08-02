@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProPrint3D - Catálogo y Presupuestos</title>
+    <!-- Tailwind CSS vía CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración personalizada de Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9', // Cian
+                        secondary: '#3b82f6', // Azul
+                        dark: '#0f172a',
+                        darker: '#020617',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos base y transiciones suaves */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+</head>
+<!-- =====================================================================
+  PLANTILLA BASE (base.html)
+  Propósito: Estructura HTML principal, importación de Tailwind y 
+  gestión de tema Claro/Oscuro. Las demás vistas heredan de esta.
+====================================================================== -->
+<body class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 min-h-screen flex flex-col font-sans">
+    
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'catalog' %}" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                        ProPrint3D
+                    </a>
+                </div>
+                
+                <!-- Enlaces de navegación y Botón Tema -->
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'catalog' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Catálogo</a>
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'admin_dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Añadir</a>
+                    <a href="{% url 'crm_dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-bold text-primary">CRM</a>
+                    <a href="{% url 'quote_builder' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Presupuestos</a>
+                    {% endif %}
+                    
+                    <!-- Botón Toggle Tema -->
+                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <!-- Icono Luna -->
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <!-- Icono Sol -->
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-4.22 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 18a1 1 0 01-1-1v-1a1 1 0 112 0v1a1 1 0 01-1 1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.415zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            &copy; 2026 ProPrint3D. Desarrollado para revolucionar la impresión 3D.
+        </div>
+    </footer>
+
+    <!-- Lógica de Cambio de Tema -->
+    <script>
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Cambiar iconos según tema actual en localStorage o sistema
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+            document.documentElement.classList.add('dark');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+            document.documentElement.classList.remove('dark');
+        }
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            // Alternar iconos
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            // Lógica de alternancia y guardado
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

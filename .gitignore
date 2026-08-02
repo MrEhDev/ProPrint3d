@@ -1,0 +1,26 @@
+# Entornos Virtuales
+venv/
+env/
+.env
+
+# Archivos de la Base de Datos
+db.sqlite3
+*.sqlite3
+
+# Compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos estáticos y subidas de usuarios
+media/
+staticfiles/
+
+# Archivos del Sistema y Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Archivos temporales que hemos ido creando
+proprint3d_deploy.zip
+scratch/

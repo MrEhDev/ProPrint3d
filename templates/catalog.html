@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- =====================================================================
+  VISTA: catalog.html
+  Propósito: Renderizar la cuadrícula de productos con filtros y búsqueda.
+  Diseño: Interfaz moderna, hero section llamativo y tarjetas (cards)
+  con micro-interacciones (hover en la imagen).
+====================================================================== -->
+
+<!-- Hero Section -->
+<div class="relative bg-darker overflow-hidden border-b border-gray-800 py-16 sm:py-24">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
+            Catálogo de Piezas <span class="text-primary">3D</span>
+        </h1>
+        <p class="mt-4 max-w-2xl text-xl text-gray-300 mx-auto">
+            Explora nuestra biblioteca de modelos listos para imprimir. Alta calidad, precisión y resistencia aseguradas.
+        </p>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Barra de Búsqueda y Filtros -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 space-y-4 md:space-y-0">
+        <!-- Filtro por Categorías -->
+        <div class="flex space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+            <a href="{% url 'catalog' %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if not category_slug %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+                Todos
+            </a>
+            <a href="?category=ofertas{% if search_query %}&q={{ search_query }}{% endif %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if category_slug == 'ofertas' %}bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md{% else %}bg-gray-200 text-orange-600 dark:bg-gray-800 dark:text-orange-400 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+                🔥 En Oferta
+            </a>
+            {% for cat in categories %}
+            <a href="?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if category_slug == cat.slug %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Búsqueda -->
+        <form method="GET" action="{% url 'catalog' %}" class="w-full md:w-1/3 relative">
+            {% if category_slug %}
+                <input type="hidden" name="category" value="{{ category_slug }}">
+            {% endif %}
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar piezas..." 
+                   class="w-full pl-10 pr-4 py-2 rounded-full bg-white dark:bg-dark border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-shadow shadow-sm">
+            <div class="absolute left-3 top-2.5 text-gray-400">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </form>
+    </div>
+
+    <!-- Grid de Productos -->
+    {% if products %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {% for product in products %}
+        <div onclick="window.location.href='{% url 'product_detail' product.slug %}'" class="bg-white dark:bg-dark rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col {% if not product.is_active %}opacity-50 grayscale{% endif %} relative cursor-pointer">
+            {% if not product.is_active %}
+            <div class="absolute top-0 left-0 right-0 z-10 bg-orange-500 text-white text-xs text-center font-bold py-1 uppercase tracking-wide">
+                🚫 Oculto del catálogo
+            </div>
+            {% endif %}
+            <!-- Imagen con badge -->
+            <div class="relative h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 {% if not product.is_active %}mt-6{% endif %}">
+                {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.title }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                {% endif %}
+                <div class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                    {{ product.category.name|default:"General" }}
+                </div>
+                {% if product.is_on_sale %}
+                <div class="absolute top-3 left-3 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md uppercase tracking-wider transform -rotate-2">
+                    ¡Oferta!
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contenido de la Tarjeta -->
+            <div class="p-5 flex-grow flex flex-col">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1" title="{{ product.title }}">{{ product.title }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 flex-grow">{{ product.description }}</p>
+                
+                <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <div class="flex flex-col">
+                        {% if product.is_on_sale and product.sale_price %}
+                            <span class="text-sm text-gray-400 line-through">€{{ product.price }}</span>
+                            <span class="text-xl font-black text-red-600 dark:text-red-400">€{{ product.sale_price }}</span>
+                        {% else %}
+                            <span class="text-xl font-black text-gray-900 dark:text-white">€{{ product.price }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'product_detail' product.slug %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-secondary hover:bg-primary transition-colors">
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado Vacío -->
+    <div class="text-center py-20">
+        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No se encontraron piezas</h3>
+        <p class="mt-1 text-gray-500 dark:text-gray-400">Intenta ajustar tu búsqueda o filtros de categoría.</p>
+        <a href="{% url 'catalog' %}" class="mt-6 inline-block bg-primary text-white px-6 py-2 rounded-full hover:bg-secondary transition-colors">Limpiar Filtros</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Banner de Piezas Personalizadas -->
+<div class="bg-gradient-to-r from-primary to-secondary py-12 border-y border-gray-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-extrabold text-white mb-4">¿No encuentras lo que buscas?</h2>
+        <p class="text-lg text-gray-100 mb-8">Diseñamos e imprimimos piezas a medida. Explícanos tu idea y te haremos un presupuesto sin compromiso.</p>
+        <a href="{% url 'custom_order' %}" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-full text-primary bg-white hover:bg-gray-100 shadow-lg hover:-translate-y-1 transition-all duration-300">
+            Pedir Pieza Personalizada
+        </a>
+    </div>
+</div>
+
+<!-- Sección de Valoraciones -->
+{% if reviews %}
+<div class="bg-gray-50 dark:bg-darker py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-10">Lo que opinan nuestros clientes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for review in reviews %}
+            <div class="bg-white dark:bg-dark p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col h-full">
+                <div class="flex items-center mb-4 text-yellow-400">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        {% else %}
+                            <svg class="w-5 h-5 text-gray-300 dark:text-gray-700 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 italic mb-4 flex-grow">"{{ review.text }}"</p>
+                <div class="mt-auto border-t border-gray-100 dark:border-gray-800 pt-4">
+                    <p class="font-bold text-gray-900 dark:text-white">{{ review.client_name }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
