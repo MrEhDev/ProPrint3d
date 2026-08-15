@@ -144,7 +144,16 @@
 
                 <!-- Acciones -->
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <!-- WhatsApp -->
+                    <!-- Añadir al carrito -->
+                    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-primary hover:bg-secondary transition-all hover:scale-105">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Añadir al carrito
+                        </button>
+                    </form>
+                    
+                    <!-- WhatsApp (Compra Rápida) -->
                     <a href="{{ wa_url }}" target="_blank"
                         class="flex-1 inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-green-600 hover:bg-green-700 transition-all hover:scale-105">
                         <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -152,7 +161,7 @@
                                 d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z">
                             </path>
                         </svg>
-                        Solicitar por WhatsApp
+                        Compra rápida por WhatsApp
                     </a>
                 </div>
 

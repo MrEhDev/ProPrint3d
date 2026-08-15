@@ -367,3 +367,35 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.client_name} - {self.rating} estrellas"
+
+# =====================================================================
+# MODELO: Cart y CartItem
+# Propósito: Funcionalidad del carrito de compras para usuarios.
+# =====================================================================
+class Cart(models.Model):
+    session_key = models.CharField(max_length=40, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        return sum(item.total_price for item in self.items.all())
+
+    def __str__(self):
+        return f"Cart {self.id} ({self.session_key})"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    @property
+    def unit_price(self):
+        return self.product.sale_price if (self.product.is_on_sale and self.product.sale_price) else self.product.price
+
+    @property
+    def total_price(self):
+        return self.unit_price * self.quantity
+
+    def __str__(self):
+        return f"{self.quantity}x {self.product.title}"

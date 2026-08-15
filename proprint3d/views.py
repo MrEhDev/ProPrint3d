@@ -10,7 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 import io
 
 # Modelos, Formularios y Utilidades
-from .models import Category, Product, Quote, QuoteItem, Order, ProductImage, Review
+from .models import Category, Product, Quote, QuoteItem, Order, ProductImage, Review, Cart, CartItem
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
@@ -482,3 +482,82 @@ def order_create_view(request):
         'id', 'title', 'price', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs'
     )
     return render(request, 'order_form.html', {'form': form, 'products': products, 'products_with_id': products_with_id})
+
+# =====================================================================
+# VISTAS DEL CARRITO DE COMPRAS
+# =====================================================================
+import urllib.parse
+
+def _get_or_create_cart(request):
+    if not request.session.session_key:
+        request.session.create()
+    session_key = request.session.session_key
+    cart, created = Cart.objects.get_or_create(session_key=session_key)
+    return cart
+
+def cart_view(request):
+    """Muestra el carrito y genera el enlace a WhatsApp con el pedido completo."""
+    cart = _get_or_create_cart(request)
+    items = cart.items.all().order_by('id')
+    
+    # Construir mensaje de WhatsApp
+    if items.exists():
+        message_lines = ["Hola ProPrint3d, quiero realizar el siguiente pedido:"]
+        for item in items:
+            absolute_url = request.build_absolute_uri(reverse('product_detail', args=[item.product.slug]))
+            message_lines.append(f"- {item.quantity}x {item.product.title} ({item.unit_price}€/u) -> {absolute_url}")
+        
+        message_lines.append(f"\nTotal: {cart.total_price}€")
+        wa_message = "\n".join(message_lines)
+        wa_url = f"https://wa.me/34660904515?text={urllib.parse.quote(wa_message)}"
+    else:
+        wa_url = "#"
+        
+    context = {
+        'cart': cart,
+        'items': items,
+        'wa_url': wa_url,
+    }
+    return render(request, 'cart.html', context)
+
+def add_to_cart_view(request, product_id):
+    """Añade un producto al carrito."""
+    if request.method == 'POST':
+        cart = _get_or_create_cart(request)
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Verificar si ya está en el carrito
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+            
+        return redirect(request.META.get('HTTP_REFERER', 'catalog'))
+    return redirect('catalog')
+
+def remove_from_cart_view(request, item_id):
+    """Elimina un producto del carrito."""
+    if request.method == 'POST':
+        cart = _get_or_create_cart(request)
+        item = get_object_or_404(CartItem, id=item_id, cart=cart)
+        item.delete()
+    return redirect('cart')
+
+def update_cart_view(request, item_id):
+    """Actualiza la cantidad de un producto."""
+    if request.method == 'POST':
+        cart = _get_or_create_cart(request)
+        item = get_object_or_404(CartItem, id=item_id, cart=cart)
+        action = request.POST.get('action')
+        
+        if action == 'increase':
+            item.quantity += 1
+            item.save()
+        elif action == 'decrease':
+            if item.quantity > 1:
+                item.quantity -= 1
+                item.save()
+            else:
+                item.delete()
+    return redirect('cart')
+
