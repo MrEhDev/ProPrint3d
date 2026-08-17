@@ -69,6 +69,13 @@ def product_detail_view(request, slug):
         product = get_object_or_404(Product, slug=slug)
     else:
         product = get_object_or_404(Product, slug=slug, is_active=True)
+        
+    related_products = []
+    if product.category:
+        related_products = Product.objects.filter(
+            category=product.category, 
+            is_active=True
+        ).exclude(id=product.id).order_by('?')[:5]
     
     absolute_url = request.build_absolute_uri()
     wa_message = f"Hola ProPrint3d, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
@@ -77,7 +84,8 @@ def product_detail_view(request, slug):
     
     context = {
         'product': product,
-        'wa_url': wa_url
+        'wa_url': wa_url,
+        'related_products': related_products
     }
     return render(request, 'product_detail.html', context)
 
@@ -378,6 +386,15 @@ def update_order_cost_api(request, order_id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def check_product_title_api(request):
+    """Verifica si un producto con este título ya existe."""
+    title = request.GET.get('title', '')
+    if not title:
+        return JsonResponse({'exists': False})
+    exists = Product.objects.filter(title__iexact=title).exists()
+    return JsonResponse({'exists': exists})
 
 @staff_member_required
 def toggle_sale_api(request, slug):

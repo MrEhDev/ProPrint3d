@@ -34,6 +34,7 @@ urlpatterns = [
     path('crm/api/order/<int:order_id>/cost/', views.update_order_cost_api, name='update_order_cost_api'),
     
     # APIs rápidas de producto
+    path('api/product/check-title/', views.check_product_title_api, name='check_product_title_api'),
     path('product/<slug:slug>/toggle-sale/', views.toggle_sale_api, name='toggle_sale_api'),
     path('product/<slug:slug>/toggle-active/', views.toggle_active_api, name='toggle_active_api'),
     path('product/<slug:slug>/delete/', views.product_delete_view, name='product_delete'),

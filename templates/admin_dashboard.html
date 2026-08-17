@@ -303,5 +303,78 @@
         // Ejecutar cálculo inicial por si los campos ya tienen datos
         calculateSuggested();
     });
+
+    // Lógica para comprobar si el nombre del producto ya existe antes de enviarlo
+    document.addEventListener('DOMContentLoaded', function () {
+        const saveButton = document.querySelector('button[name="save_product"]');
+        if (saveButton) {
+            const productForm = saveButton.closest('form');
+            let confirmedForce = false;
+
+            productForm.addEventListener('submit', function(e) {
+                if (confirmedForce) {
+                    return; // Permite el envío normal
+                }
+                
+                // Previene el envío inmediato
+                e.preventDefault();
+                
+                const titleInput = productForm.querySelector('input[name="title"]');
+                if (!titleInput || !titleInput.value) {
+                    confirmedForce = true;
+                    productForm.submit();
+                    return;
+                }
+
+                // Deshabilita temporalmente el botón para evitar doble clic
+                const originalText = saveButton.innerText;
+                saveButton.innerText = "Comprobando...";
+                saveButton.disabled = true;
+
+                fetch(`/api/product/check-title/?title=${encodeURIComponent(titleInput.value)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        saveButton.innerText = originalText;
+                        saveButton.disabled = false;
+                        
+                        if (data.exists) {
+                            if (confirm('El nombre "' + titleInput.value + '" ya existe en el catálogo.\n\n¿Deseas añadir este producto de todas formas?')) {
+                                confirmedForce = true;
+                                // Añade input oculto para simular el clic en el botón original
+                                const hiddenSave = document.createElement('input');
+                                hiddenSave.type = 'hidden';
+                                hiddenSave.name = 'save_product';
+                                hiddenSave.value = '1';
+                                productForm.appendChild(hiddenSave);
+                                productForm.submit();
+                            } else {
+                                // Usuario canceló, no hacemos nada
+                            }
+                        } else {
+                            confirmedForce = true;
+                            const hiddenSave = document.createElement('input');
+                            hiddenSave.type = 'hidden';
+                            hiddenSave.name = 'save_product';
+                            hiddenSave.value = '1';
+                            productForm.appendChild(hiddenSave);
+                            productForm.submit();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error comprobando título:', err);
+                        saveButton.innerText = originalText;
+                        saveButton.disabled = false;
+                        confirmedForce = true;
+                        
+                        const hiddenSave = document.createElement('input');
+                        hiddenSave.type = 'hidden';
+                        hiddenSave.name = 'save_product';
+                        hiddenSave.value = '1';
+                        productForm.appendChild(hiddenSave);
+                        productForm.submit();
+                    });
+            });
+        }
+    });
 </script>
 {% endblock %}

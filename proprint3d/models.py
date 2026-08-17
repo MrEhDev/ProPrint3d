@@ -102,7 +102,17 @@ class Product(models.Model):
         y comprimir la imagen principal si ha cambiado.
         """
         if not self.slug:
-            self.slug = slugify(self.title)
+            original_slug = slugify(self.title)
+            queryset = Product.objects.all()
+            if self.pk:
+                queryset = queryset.exclude(pk=self.pk)
+            
+            slug = original_slug
+            counter = 1
+            while queryset.filter(slug=slug).exists():
+                slug = f"{original_slug}-{counter}"
+                counter += 1
+            self.slug = slug
             
         # Comprimir imagen solo si es nueva o ha cambiado
         do_compress = False
