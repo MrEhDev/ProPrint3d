@@ -468,9 +468,14 @@ def update_order_cost_api(request, order_id):
             new_cost = data.get('cost')
             order = Order.objects.get(id=order_id)
             if new_cost is not None:
-                order.total_cost = float(new_cost)
-                order.save()
-                return JsonResponse({'success': True})
+                import decimal
+                cleaned_cost = str(new_cost).strip().replace(',', '.')
+                if cleaned_cost:
+                    order.total_cost = decimal.Decimal(cleaned_cost)
+                    if order.quantity and order.quantity > 0:
+                        order.unit_cost = order.total_cost / decimal.Decimal(str(order.quantity))
+                    order.save()
+                    return JsonResponse({'success': True})
             return JsonResponse({'success': False, 'error': 'Coste inválido'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
