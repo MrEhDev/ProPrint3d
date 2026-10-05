@@ -288,10 +288,8 @@ class QuoteItem(models.Model):
 # =====================================================================
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('Pendiente', 'Pendiente'),
+        ('Presupuestado', 'Presupuestado'),
         ('Realizado', 'Realizado'),
-        ('Pdt de envío', 'Pdt de envío'),
-        ('Pdt. entrega', 'Pdt. entrega'),
         ('Enviado', 'Enviado'),
         ('Entregado', 'Entregado'),
         ('Cobrado', 'Cobrado'),
@@ -336,7 +334,7 @@ class Order(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Precio Unitario Cobrado (€)")
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Precio Final Cobrado (€)")
     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pendiente')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Presupuestado')
     deadline = models.DateField(null=True, blank=True, help_text="Fecha límite")
     
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, default='Wallapop Elyest')

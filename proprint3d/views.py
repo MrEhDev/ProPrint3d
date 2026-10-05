@@ -314,15 +314,14 @@ def crm_dashboard_view(request):
         except ValueError:
             pass
             
-    # Kanban: pedidos no cobrados
-    unpaid_orders_qs = orders.exclude(status='Cobrado').exclude(status='Cancelado')
+    # Kanban: Pasos solicitados -> Presupuestado - Realizado - Enviado - Entregado - Cobrado
+    active_orders_qs = orders.exclude(status='Cancelado')
     kanban_columns = {
-        'Pendiente': unpaid_orders_qs.filter(status='Pendiente'),
-        'Realizado': unpaid_orders_qs.filter(status='Realizado'),
-        'Pdt de envío': unpaid_orders_qs.filter(status='Pdt de envío'),
-        'Pdt. entrega': unpaid_orders_qs.filter(status='Pdt. entrega'),
-        'Enviado': unpaid_orders_qs.filter(status='Enviado'),
-        'Entregado': unpaid_orders_qs.filter(status='Entregado'),
+        'Presupuestado': active_orders_qs.filter(status='Presupuestado'),
+        'Realizado': active_orders_qs.filter(status='Realizado'),
+        'Enviado': active_orders_qs.filter(status='Enviado'),
+        'Entregado': active_orders_qs.filter(status='Entregado'),
+        'Cobrado': active_orders_qs.filter(status='Cobrado'),
     }
     
     # Cálculos globales (excluir cancelados)

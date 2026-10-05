@@ -6,36 +6,47 @@
 {% block content %}
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Panel de Pedidos</h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, ganancias y estado de impresión.</p>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <span>📋</span> Panel de Pedidos
+            </h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción, rentabilidad y flujo Kanban.</p>
         </div>
-        <div>
-            <a href="{% url 'order_create' %}" class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm inline-flex items-center">
-                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'order_create' %}" class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Nuevo Pedido
             </a>
         </div>
     </div>
 
-    <!-- Filtros de Fecha -->
-    <div class="mb-6 flex justify-end">
-        <form method="GET" class="flex items-center space-x-4 bg-white dark:bg-dark p-3 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
+    <!-- Filtros de Fecha con Persistencia en LocalStorage -->
+    <div class="mb-6 flex flex-wrap justify-between items-center gap-4 bg-white dark:bg-dark p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Filtrar por período:</span>
+            {% if current_year or current_month %}
+            <button type="button" onclick="clearFilters()" class="text-xs text-primary hover:underline font-medium ml-2">
+                ✕ Limpiar filtro
+            </button>
+            {% endif %}
+        </div>
+
+        <form id="filter-form" method="GET" class="flex flex-wrap items-center gap-3">
             <div class="flex items-center space-x-2">
-                <label for="year" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año:</label>
-                <select name="year" id="year" onchange="this.form.submit()" class="form-select text-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
-                    <option value="">Todos</option>
+                <label for="year" class="text-xs font-semibold text-gray-700 dark:text-gray-300">Año:</label>
+                <select name="year" id="year" onchange="onFilterChange()" class="form-select text-xs py-1.5 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                    <option value="">Todos los años</option>
                     <option value="2024" {% if current_year == '2024' %}selected{% endif %}>2024</option>
                     <option value="2025" {% if current_year == '2025' %}selected{% endif %}>2025</option>
                     <option value="2026" {% if current_year == '2026' %}selected{% endif %}>2026</option>
                 </select>
             </div>
             
-            <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4">
-                <label for="month" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes:</label>
-                <select name="month" id="month" onchange="this.form.submit()" class="form-select text-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
-                    <option value="">Todos</option>
+            <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-3">
+                <label for="month" class="text-xs font-semibold text-gray-700 dark:text-gray-300">Mes:</label>
+                <select name="month" id="month" onchange="onFilterChange()" class="form-select text-xs py-1.5 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                    <option value="">Todos los meses</option>
                     <option value="1" {% if current_month == '1' %}selected{% endif %}>Enero</option>
                     <option value="2" {% if current_month == '2' %}selected{% endif %}>Febrero</option>
                     <option value="3" {% if current_month == '3' %}selected{% endif %}>Marzo</option>
@@ -53,42 +64,96 @@
         </form>
     </div>
 
-    <!-- Kanban: Pedidos Pendientes -->
+    <!-- Tablero Kanban: 5 Pasos -->
     {% if kanban_columns %}
-    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Tablero Kanban</h2>
-    <div class="flex overflow-x-auto space-x-6 mb-8 pb-4 kanban-board">
-        {% for status_name, group_orders in kanban_columns.items %}
-        <!-- Columna Kanban -->
-        <div class="flex-none w-80 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 kanban-col" data-status="{{ status_name }}" ondragover="allowDrop(event)" ondrop="drop(event)">
-            <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
-                {{ status_name }}
-                <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs py-1 px-2 rounded-full">{{ group_orders.count }}</span>
-            </h3>
-            
-            <div class="space-y-4 kanban-items min-h-[100px]">
-                {% for order in group_orders %}
-                <!-- Tarjeta Kanban -->
-                <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 cursor-grab hover:shadow-md transition-shadow kanban-card relative" draggable="true" ondragstart="drag(event)" data-id="{{ order.id }}">
-                    
-                    <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-1 pr-6">{{ order.description }}</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">👤 {{ order.client_name }}</p>
-                    
-                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                        <span class="font-bold text-primary text-sm">€{{ order.price }}</span>
-                        <a href="{% url 'admin:proprint3d_order_change' order.id %}" class="text-xs text-gray-400 hover:text-primary">Editar</a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>📌</span> Flujo de Pedidos (Tablero Kanban)
+            </h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra las tarjetas para cambiar su estado</span>
         </div>
-        {% endfor %}
+
+        <div class="flex overflow-x-auto space-x-4 pb-4 kanban-board">
+            {% for status_name, group_orders in kanban_columns.items %}
+            <!-- Columna Kanban -->
+            <div class="flex-none w-72 bg-gray-50/80 dark:bg-gray-800/40 rounded-xl p-3.5 kanban-col border border-gray-200/80 dark:border-gray-700/60
+                {% if status_name == 'Presupuestado' %}border-t-4 border-t-indigo-500
+                {% elif status_name == 'Realizado' %}border-t-4 border-t-yellow-400
+                {% elif status_name == 'Enviado' %}border-t-4 border-t-blue-500
+                {% elif status_name == 'Entregado' %}border-t-4 border-t-purple-500
+                {% elif status_name == 'Cobrado' %}border-t-4 border-t-emerald-500
+                {% endif %}" 
+                data-status="{{ status_name }}" ondragover="allowDrop(event)" ondrop="drop(event)">
+                
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                        {% if status_name == 'Presupuestado' %}<span>📝</span>
+                        {% elif status_name == 'Realizado' %}<span>⚙️</span>
+                        {% elif status_name == 'Enviado' %}<span>🚚</span>
+                        {% elif status_name == 'Entregado' %}<span>📦</span>
+                        {% elif status_name == 'Cobrado' %}<span>💰</span>
+                        {% endif %}
+                        {{ status_name }}
+                    </h3>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-bold
+                        {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
+                        {% elif status_name == 'Realizado' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300
+                        {% elif status_name == 'Enviado' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
+                        {% elif status_name == 'Entregado' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
+                        {% elif status_name == 'Cobrado' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
+                        {% else %}bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
+                        {{ group_orders.count }}
+                    </span>
+                </div>
+                
+                <div class="space-y-3 kanban-items min-h-[120px]">
+                    {% for order in group_orders %}
+                    <!-- Tarjeta Kanban -->
+                    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-3.5 cursor-grab hover:shadow-md transition-shadow kanban-card relative" draggable="true" ondragstart="drag(event)" data-id="{{ order.id }}">
+                        
+                        <div class="flex items-start justify-between gap-1 mb-1">
+                            <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-snug">{{ order.description }}</h4>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
+                                x{{ order.quantity }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">👤 {{ order.client_name }}</p>
+                        
+                        {% if order.weight_grams or order.print_time_hours %}
+                        <div class="flex items-center gap-2 mb-2 text-[10px] text-gray-400 dark:text-gray-500">
+                            {% if order.weight_grams %}<span>⚖️ {{ order.weight_grams }}g</span>{% endif %}
+                            {% if order.print_time_hours %}<span>⏱️ {{ order.print_time_hours }}h</span>{% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+                            <span class="font-bold text-primary">€{{ order.price }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold" title="Ganancia">
+                                    +€{{ order.profit }}
+                                </span>
+                                <a href="{% url 'admin:proprint3d_order_change' order.id %}" class="text-[11px] text-gray-400 hover:text-primary" title="Editar">✏️</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="h-24 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg flex items-center justify-center text-xs text-gray-400">
+                        Sin pedidos
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
-    <!-- Script Drag & Drop -->
+    <!-- Script Drag & Drop y LocalStorage -->
     <script>
         function allowDrop(ev) {
             ev.preventDefault();
-            ev.currentTarget.classList.add('bg-indigo-50', 'dark:bg-indigo-900/20'); // Highlight
+            ev.currentTarget.classList.add('bg-indigo-50', 'dark:bg-indigo-900/20');
         }
         
         function drag(ev) {
@@ -99,14 +164,13 @@
         function drop(ev) {
             ev.preventDefault();
             const col = ev.currentTarget.closest('.kanban-col');
-            col.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20'); // Remove highlight
+            col.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20');
             
             const orderId = ev.dataTransfer.getData("text");
             const newStatus = col.dataset.status;
             const card = document.querySelector(`.kanban-card[data-id="${orderId}"]`);
             
-            if(card && col) {
-                // Mover la tarjeta visualmente al contenedor items de la columna
+            if (card && col) {
                 col.querySelector('.kanban-items').appendChild(card);
                 card.classList.remove('opacity-50');
                 
@@ -120,10 +184,10 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if(!data.success) {
-                        alert('Error al actualizar el estado: ' + data.error);
+                    if (!data.success) {
+                        alert('Error al actualizar el estado: ' + (data.error || ''));
                     }
-                    window.location.reload(); // Recargar para sincronizar vista
+                    window.location.reload();
                 })
                 .catch(error => {
                     alert('Error de conexión');
@@ -143,8 +207,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                if(!data.success) {
-                    alert('Error al actualizar el estado: ' + data.error);
+                if (!data.success) {
+                    alert('Error al actualizar el estado: ' + (data.error || ''));
                 }
                 window.location.reload();
             })
@@ -165,8 +229,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                if(!data.success) {
-                    alert('Error al actualizar el coste: ' + data.error);
+                if (!data.success) {
+                    alert('Error al actualizar el coste: ' + (data.error || ''));
                 }
                 window.location.reload();
             })
@@ -176,7 +240,7 @@
             });
         }
         
-        // Remove highlight if drag leaves column
+        // Drag events cleanup
         document.querySelectorAll('.kanban-col').forEach(col => {
             col.addEventListener('dragleave', function(ev) {
                 ev.currentTarget.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20');
@@ -184,6 +248,44 @@
             col.addEventListener('dragend', function(ev) {
                 document.querySelectorAll('.kanban-card').forEach(c => c.classList.remove('opacity-50'));
             });
+        });
+
+        // Persistencia de Filtros en LocalStorage
+        function onFilterChange() {
+            const y = document.getElementById('year').value;
+            const m = document.getElementById('month').value;
+            localStorage.setItem('crm_filter_year', y);
+            localStorage.setItem('crm_filter_month', m);
+            document.getElementById('filter-form').submit();
+        }
+
+        function clearFilters() {
+            localStorage.setItem('crm_filter_year', '');
+            localStorage.setItem('crm_filter_month', '');
+            window.location.href = window.location.pathname;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasYear = urlParams.has('year');
+            const hasMonth = urlParams.has('month');
+
+            // Si se entra directo sin params en URL, cargar desde localStorage
+            if (!hasYear && !hasMonth) {
+                const savedYear = localStorage.getItem('crm_filter_year');
+                const savedMonth = localStorage.getItem('crm_filter_month');
+                if ((savedYear !== null && savedYear !== '') || (savedMonth !== null && savedMonth !== '')) {
+                    const params = new URLSearchParams();
+                    if (savedYear) params.set('year', savedYear);
+                    if (savedMonth) params.set('month', savedMonth);
+                    window.location.replace(window.location.pathname + '?' + params.toString());
+                    return;
+                }
+            } else {
+                // Sincronizar localStorage con los parámetros actuales
+                localStorage.setItem('crm_filter_year', urlParams.get('year') || '');
+                localStorage.setItem('crm_filter_month', urlParams.get('month') || '');
+            }
         });
     </script>
     {% endif %}
@@ -211,7 +313,7 @@
         </div>
     </div>
 
-    <!-- Tabla Principal -->
+    <!-- Tabla Principal de Pedidos -->
     <div class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
@@ -278,19 +380,15 @@
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
                             <label class="flex items-center justify-center space-x-2">
                                 <span class="w-3 h-3 rounded-full flex-shrink-0
-                                    {% if order.status == 'Pendiente' %}bg-red-500
+                                    {% if order.status == 'Presupuestado' %}bg-indigo-500
                                     {% elif order.status == 'Realizado' %}bg-yellow-400
-                                    {% elif order.status == 'Pdt de envío' %}bg-orange-500
-                                    {% elif order.status == 'Pdt. entrega' %}bg-amber-500
                                     {% elif order.status == 'Enviado' %}bg-blue-500
                                     {% elif order.status == 'Entregado' %}bg-purple-500
-                                    {% elif order.status == 'Cobrado' %}bg-green-500
+                                    {% elif order.status == 'Cobrado' %}bg-emerald-500
                                     {% else %}bg-gray-400{% endif %}" title="{{ order.status }}"></span>
-                                <select onchange="updateOrderStatus({{ order.id }}, this.value)" class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1 py-1 w-auto min-w-[110px]">
-                                    <option value="Pendiente" {% if order.status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <select onchange="updateOrderStatus({{ order.id }}, this.value)" class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1.5 py-1 w-auto min-w-[125px]">
+                                    <option value="Presupuestado" {% if order.status == 'Presupuestado' %}selected{% endif %}>Presupuestado</option>
                                     <option value="Realizado" {% if order.status == 'Realizado' %}selected{% endif %}>Realizado</option>
-                                    <option value="Pdt de envío" {% if order.status == 'Pdt de envío' %}selected{% endif %}>Pdt de envío</option>
-                                    <option value="Pdt. entrega" {% if order.status == 'Pdt. entrega' %}selected{% endif %}>Pdt. entrega</option>
                                     <option value="Enviado" {% if order.status == 'Enviado' %}selected{% endif %}>Enviado</option>
                                     <option value="Entregado" {% if order.status == 'Entregado' %}selected{% endif %}>Entregado</option>
                                     <option value="Cobrado" {% if order.status == 'Cobrado' %}selected{% endif %}>Cobrado</option>
@@ -321,10 +419,10 @@
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay pedidos</h3>
-                            <p class="mt-1 text-sm text-gray-500">Comienza añadiendo un nuevo pedido a tu CRM.</p>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay pedidos para este filtro</h3>
+                            <p class="mt-1 text-sm text-gray-500">Prueba cambiando el mes/año o añade un nuevo pedido.</p>
                             <div class="mt-6">
-                                <a href="{% url 'admin:proprint3d_order_add' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <a href="{% url 'order_create' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                                     Añadir Nuevo Pedido
                                 </a>
                             </div>
