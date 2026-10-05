@@ -29,7 +29,7 @@ class QuoteAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'description', 'client_name', 'quantity', 'unit_price', 'price', 'unit_cost', 'total_cost', 'profit', 'status', 'platform', 'shipping', 'order_date')
+    list_display = ('id', 'description', 'client_name', 'quantity', 'unit_price', 'price', 'profit', 'status', 'platform', 'shipping', 'order_date', 'shipped_date', 'delivered_date', 'paid_date')
     list_filter = ('status', 'platform', 'shipping', 'order_date')
     search_fields = ('description', 'client_name', 'notes')
 

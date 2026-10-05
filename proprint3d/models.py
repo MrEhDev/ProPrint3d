@@ -297,6 +297,7 @@ class Order(models.Model):
     ]
     
     PLATFORM_CHOICES = [
+        ('Wallapop', 'Wallapop'),
         ('Wallapop Elyest', 'Wallapop Elyest'),
         ('Vinted', 'Vinted'),
         ('Web', 'Web'),
@@ -337,12 +338,37 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Presupuestado')
     deadline = models.DateField(null=True, blank=True, help_text="Fecha límite")
     
-    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, default='Wallapop Elyest')
-    shipping = models.CharField(max_length=50, choices=SHIPPING_CHOICES, default='Inpost')
+    # Fechas de seguimiento de estado
+    shipped_date = models.DateField(null=True, blank=True, help_text="Fecha de Envío")
+    delivered_date = models.DateField(null=True, blank=True, help_text="Fecha de Entrega")
+    paid_date = models.DateField(null=True, blank=True, help_text="Fecha de Cobro")
+    
+    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES, blank=True, null=True, default='', help_text="Plataforma de venta")
+    shipping = models.CharField(max_length=50, choices=SHIPPING_CHOICES, blank=True, null=True, default='', help_text="Método de envío")
     
     notes = models.TextField(blank=True, null=True, help_text="Notas adicionales")
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def update_status_dates(self, new_status=None):
+        """Actualiza automáticamente las fechas de estado si no han sido fijadas."""
+        import datetime
+        current = new_status or self.status
+        today = datetime.date.today()
+        if current == 'Enviado' and not self.shipped_date:
+            self.shipped_date = today
+        elif current == 'Entregado':
+            if not self.delivered_date:
+                self.delivered_date = today
+            if not self.shipped_date:
+                self.shipped_date = today
+        elif current == 'Cobrado':
+            if not self.paid_date:
+                self.paid_date = today
+            if not self.delivered_date:
+                self.delivered_date = today
+            if not self.shipped_date:
+                self.shipped_date = today
 
     def calculate_unit_cost(self):
         """Calcula el coste unitario de producción según peso, tiempo y extras."""
@@ -392,6 +418,9 @@ class Order(models.Model):
                 self.print_time_minutes = self.product.print_time_minutes
             if self.extra_costs is None or self.extra_costs == 0:
                 self.extra_costs = self.product.extra_costs or decimal.Decimal('0.00')
+
+        # Auto-asignar fechas según estado
+        self.update_status_dates()
 
         # Calcular coste unitario
         calc_u_cost = self.calculate_unit_cost()

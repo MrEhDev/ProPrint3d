@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-proprint3d-secret-key
 DEBUG = False
 # os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['proprint3d.shop', 'www.proprint3d.shop', 'tienda.proprint3d.shop', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['proprint3d.shop', 'www.proprint3d.shop', 'tienda.proprint3d.shop', 'localhost', '127.0.0.1', 'testserver', '*']
 
 # Application definition
 INSTALLED_APPS = [

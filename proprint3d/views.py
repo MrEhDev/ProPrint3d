@@ -293,26 +293,82 @@ def generate_quote_pdf_view(request, quote_id):
 # =====================================================================
 from django.db.models import Sum, F
 
+import calendar
+import datetime
+from django.http import JsonResponse
+import json
+
 @staff_member_required
 def crm_dashboard_view(request):
     """
-    Muestra la lista de pedidos y calcula estadísticas generales.
+    Muestra la lista de pedidos con filtro de período desde-hasta y buscador.
     """
-    month_filter = request.GET.get('month')
-    year_filter = request.GET.get('year')
+    search_query = request.GET.get('q', '').strip()
+    
+    # Filtros de rango
+    year_from = request.GET.get('year_from', '').strip()
+    month_from = request.GET.get('month_from', '').strip()
+    year_to = request.GET.get('year_to', '').strip()
+    month_to = request.GET.get('month_to', '').strip()
+    
+    # Compatibilidad con parámetros simples antiguos
+    if not year_from and request.GET.get('year'):
+        year_from = request.GET.get('year').strip()
+    if not month_from and request.GET.get('month'):
+        month_from = request.GET.get('month').strip()
+        
     orders = Order.objects.all().order_by('-order_date')
     
-    if month_filter:
+    date_from = None
+    date_to = None
+    
+    if year_from:
         try:
-            orders = orders.filter(order_date__month=int(month_filter))
+            y_f = int(year_from)
+            m_f = int(month_from) if month_from else 1
+            date_from = datetime.date(y_f, m_f, 1)
         except ValueError:
             pass
             
-    if year_filter:
+    if year_to:
         try:
-            orders = orders.filter(order_date__year=int(year_filter))
+            y_t = int(year_to)
+            m_t = int(month_to) if month_to else 12
+            last_day = calendar.monthrange(y_t, m_t)[1]
+            date_to = datetime.date(y_t, m_t, last_day)
         except ValueError:
             pass
+    elif year_from and month_to:
+        try:
+            y_t = int(year_from)
+            m_t = int(month_to)
+            last_day = calendar.monthrange(y_t, m_t)[1]
+            date_to = datetime.date(y_t, m_t, last_day)
+        except ValueError:
+            pass
+    elif year_from and month_from and not year_to and not month_to:
+        # Si sólo se especificó un mes y año concretos (desde = hasta)
+        try:
+            y_t = int(year_from)
+            m_t = int(month_from)
+            last_day = calendar.monthrange(y_t, m_t)[1]
+            date_to = datetime.date(y_t, m_t, last_day)
+        except ValueError:
+            pass
+
+    if date_from:
+        orders = orders.filter(order_date__gte=date_from)
+    if date_to:
+        orders = orders.filter(order_date__lte=date_to)
+        
+    if search_query:
+        orders = orders.filter(
+            Q(description__icontains=search_query) |
+            Q(client_name__icontains=search_query) |
+            Q(notes__icontains=search_query) |
+            Q(platform__icontains=search_query) |
+            Q(shipping__icontains=search_query)
+        )
             
     # Kanban: Pasos solicitados -> Presupuestado - Realizado - Enviado - Entregado - Cobrado
     active_orders_qs = orders.exclude(status='Cancelado')
@@ -342,8 +398,11 @@ def crm_dashboard_view(request):
     context = {
         'orders': orders,
         'kanban_columns': kanban_columns,
-        'current_month': month_filter,
-        'current_year': year_filter,
+        'search_query': search_query,
+        'year_from': year_from,
+        'month_from': month_from,
+        'year_to': year_to,
+        'month_to': month_to,
         'total_sales': total_sales,
         'total_costs': total_costs,
         'total_profit': total_profit,
@@ -351,8 +410,6 @@ def crm_dashboard_view(request):
     }
     
     return render(request, 'crm_dashboard.html', context)
-from django.http import JsonResponse
-import json
 
 @staff_member_required
 def update_order_status_api(request, order_id):
@@ -363,9 +420,42 @@ def update_order_status_api(request, order_id):
             order = Order.objects.get(id=order_id)
             if new_status in [s[0] for s in Order.STATUS_CHOICES]:
                 order.status = new_status
+                order.update_status_dates(new_status)
                 order.save()
-                return JsonResponse({'success': True})
+                return JsonResponse({
+                    'success': True,
+                    'status': order.status,
+                    'shipped_date': order.shipped_date.strftime('%d/%m/%Y') if order.shipped_date else None,
+                    'delivered_date': order.delivered_date.strftime('%d/%m/%Y') if order.delivered_date else None,
+                    'paid_date': order.paid_date.strftime('%d/%m/%Y') if order.paid_date else None,
+                })
             return JsonResponse({'success': False, 'error': 'Estado inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def update_order_dates_api(request, order_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order = Order.objects.get(id=order_id)
+            def parse_date(val):
+                if val:
+                    return datetime.date.fromisoformat(val)
+                return None
+            
+            if 'shipped_date' in data:
+                order.shipped_date = parse_date(data['shipped_date'])
+            if 'delivered_date' in data:
+                order.delivered_date = parse_date(data['delivered_date'])
+            if 'paid_date' in data:
+                order.paid_date = parse_date(data['paid_date'])
+            if 'deadline' in data:
+                order.deadline = parse_date(data['deadline'])
+                
+            order.save()
+            return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
@@ -455,17 +545,35 @@ class SmartOrderForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary', 'list': 'products-datalist', 'placeholder': 'Escribe o selecciona del catálogo...'})
     )
 
+    platform = forms.ChoiceField(
+        choices=[('', 'Selecciona plataforma...')] + Order.PLATFORM_CHOICES,
+        required=False,
+        label="Plataforma",
+        initial=''
+    )
+
+    shipping = forms.ChoiceField(
+        choices=[('', 'Selecciona método de envío...')] + Order.SHIPPING_CHOICES,
+        required=False,
+        label="Método de Envío",
+        initial=''
+    )
+
     class Meta:
         model = Order
         fields = [
             'client_name', 'order_date', 'deadline', 'status', 'quantity', 
             'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs',
             'unit_cost', 'total_cost', 'unit_price', 'price',
+            'shipped_date', 'delivered_date', 'paid_date',
             'platform', 'shipping', 'notes'
         ]
         widgets = {
             'order_date': forms.DateInput(attrs={'type': 'date'}),
             'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'shipped_date': forms.DateInput(attrs={'type': 'date'}),
+            'delivered_date': forms.DateInput(attrs={'type': 'date'}),
+            'paid_date': forms.DateInput(attrs={'type': 'date'}),
             'weight_grams': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
             'print_time_hours': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
             'print_time_minutes': forms.NumberInput(attrs={'step': '1', 'min': '0', 'max': '59', 'placeholder': '0'}),
@@ -488,6 +596,9 @@ class SmartOrderForm(forms.ModelForm):
         self.fields['unit_cost'].required = False
         self.fields['total_cost'].required = False
         self.fields['deadline'].required = False
+        self.fields['shipped_date'].required = False
+        self.fields['delivered_date'].required = False
+        self.fields['paid_date'].required = False
         self.fields['notes'].required = False
         
         # Add Tailwind classes dynamically
