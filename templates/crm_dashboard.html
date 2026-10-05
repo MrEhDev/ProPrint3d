@@ -157,11 +157,23 @@
                     <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-3.5 cursor-grab hover:shadow-md transition-shadow kanban-card relative"
                         draggable="true" ondragstart="drag(event)" data-id="{{ order.id }}">
 
-                        <div class="flex items-start justify-between gap-1 mb-1">
-                            <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-snug">{{
-                                order.description }}</h4>
+                        <div class="flex items-start justify-between gap-1 mb-1.5">
+                            <div class="flex-1 min-w-0 pr-1">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-snug">
+                                    {% if order.product %}
+                                        {{ order.product.title }}
+                                    {% elif order.description %}
+                                        {{ order.description }}
+                                    {% else %}
+                                        Pedido #{{ order.id }}
+                                    {% endif %}
+                                </h4>
+                                {% if order.product and order.description and order.description != order.product.title %}
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400 italic truncate" title="{{ order.description }}">{{ order.description }}</p>
+                                {% endif %}
+                            </div>
                             <span
-                                class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
+                                class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap flex-shrink-0">
                                 x{{ order.quantity }}
                             </span>
                         </div>

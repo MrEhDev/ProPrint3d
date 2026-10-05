@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,63 +24,107 @@
             }
         }
     </script>
+    <script>
+        // Prevenir parpadeo y aplicar tema antes de renderizar
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <style>
-        /* Estilos base y transiciones suaves */
+        /* Transiciones suaves para cambio de modo */
         body {
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
     </style>
 </head>
-<!-- =====================================================================
-  PLANTILLA BASE (base.html)
-  Propósito: Estructura HTML principal, importación de Tailwind y 
-  gestión de tema Claro/Oscuro. Las demás vistas heredan de esta.
-====================================================================== -->
 <body class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 min-h-screen flex flex-col font-sans">
     
-    <!-- Navbar -->
+    <!-- Navbar Principal -->
     <nav class="bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <img src="{% static 'images/favicon.jpg' %}" alt="ProPrint3D Logo" class="h-8 w-8 rounded border border-gray-200 dark:border-gray-700">
-                    <a href="{% url 'catalog' %}" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                <div class="flex-shrink-0 flex items-center gap-2.5">
+                    <img src="{% static 'images/favicon.jpg' %}" alt="ProPrint3D Logo" class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 object-cover shadow-sm">
+                    <a href="{% url 'catalog' %}" class="text-xl sm:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight">
                         ProPrint3D
                     </a>
                 </div>
                 
-                <!-- Enlaces de navegación y Botón Tema -->
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'catalog' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Catálogo</a>
+                <!-- Menú Desktop -->
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-3">
+                    <a href="{% url 'catalog' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                        Catálogo
+                    </a>
                     {% if request.user.is_staff %}
-                    <a href="{% url 'admin_dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Añadir</a>
-                    <a href="{% url 'crm_dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-bold text-primary">CRM</a>
-                    <a href="{% url 'quote_builder' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Presupuestos</a>
+                    <a href="{% url 'admin_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                        Añadir
+                    </a>
+                    <a href="{% url 'crm_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-bold text-primary hover:bg-primary/10 transition-colors">
+                        CRM
+                    </a>
+                    <a href="{% url 'quote_builder' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                        Presupuestos
+                    </a>
                     {% endif %}
-                    
+                </div>
+
+                <!-- Acciones Derecha (Carrito, Theme Toggle y Botón Móvil) -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
                     <!-- Botón Carrito -->
-                    <a href="{% url 'cart' %}" class="relative p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{% url 'cart' %}" class="relative p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors" title="Ver carrito">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                         {% if cart_item_count and cart_item_count > 0 %}
-                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">{{ cart_item_count }}</span>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full shadow-sm">
+                            {{ cart_item_count }}
+                        </span>
                         {% endif %}
                     </a>
                     
                     <!-- Botón Toggle Tema -->
-                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <!-- Icono Luna -->
+                    <button id="theme-toggle" type="button" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" title="Cambiar Tema (Claro/Oscuro)">
+                        <!-- Icono Luna (Visible en modo Claro para pasar a Oscuro) -->
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                         </svg>
-                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <!-- Icono Sol -->
+                        <!-- Icono Sol (Visible en modo Oscuro para pasar a Claro) -->
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-4.22 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 18a1 1 0 01-1-1v-1a1 1 0 112 0v1a1 1 0 01-1 1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.415zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
                     </button>
+
+                    <!-- Botón Hamburguesa Móvil -->
+                    <button id="mobile-menu-btn" type="button" class="md:hidden p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary transition-colors" aria-label="Abrir Menú">
+                        <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="close-icon" class="hidden w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Menú Desplegable Móvil -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 dark:border-gray-800 py-3 space-y-1">
+                <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                    <span>🛍️</span> Catálogo
+                </a>
+                {% if request.user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                    <span>➕</span> Añadir Producto
+                </a>
+                <a href="{% url 'crm_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-primary bg-primary/10 transition-colors">
+                    <span>📋</span> CRM Pedidos
+                </a>
+                <a href="{% url 'quote_builder' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                    <span>🧾</span> Presupuestos
+                </a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -97,46 +141,61 @@
         </div>
     </footer>
 
-    <!-- Lógica de Cambio de Tema -->
+    <!-- Scripts de Tema y Menú Móvil -->
     <script>
+        // Elementos de UI de Tema
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
-        // Cambiar iconos según tema actual en localStorage o sistema
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            themeToggleLightIcon.classList.remove('hidden');
-            document.documentElement.classList.add('dark');
-        } else {
-            themeToggleDarkIcon.classList.remove('hidden');
-            document.documentElement.classList.remove('dark');
-        }
-
         const themeToggleBtn = document.getElementById('theme-toggle');
 
-        themeToggleBtn.addEventListener('click', function() {
-            // Alternar iconos
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-
-            // Lógica de alternancia y guardado
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
+        function syncThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                if (themeToggleLightIcon) themeToggleLightIcon.classList.remove('hidden');
+                if (themeToggleDarkIcon) themeToggleDarkIcon.classList.add('hidden');
             } else {
-                if (document.documentElement.classList.contains('dark')) {
+                if (themeToggleDarkIcon) themeToggleDarkIcon.classList.remove('hidden');
+                if (themeToggleLightIcon) themeToggleLightIcon.classList.add('hidden');
+            }
+        }
+
+        // Sincronizar iconos al cargar la página
+        syncThemeIcons();
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                const isDark = document.documentElement.classList.contains('dark');
+                if (isDark) {
                     document.documentElement.classList.remove('dark');
                     localStorage.setItem('color-theme', 'light');
                 } else {
                     document.documentElement.classList.add('dark');
                     localStorage.setItem('color-theme', 'dark');
                 }
-            }
-        });
+                syncThemeIcons();
+            });
+        }
+
+        // Menú Móvil
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', function() {
+                const isExpanded = !mobileMenu.classList.contains('hidden');
+                if (isExpanded) {
+                    mobileMenu.classList.add('hidden');
+                    hamburgerIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                } else {
+                    mobileMenu.classList.remove('hidden');
+                    hamburgerIcon.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
+                }
+            });
+        }
     </script>
 </body>
 </html>
