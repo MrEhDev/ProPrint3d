@@ -184,15 +184,9 @@
                         <!-- Fechas en la tarjeta -->
                         <div class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mb-2">
                             <div>📅 Pedido: {{ order.order_date|date:"d/m/Y" }}</div>
-                            {% if order.shipped_date %}<div>🚚 Enviado: <span
-                                    class="text-blue-600 dark:text-blue-400 font-medium">{{
-                                    order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if order.delivered_date %}<div>📦 Entregado: <span
-                                    class="text-purple-600 dark:text-purple-400 font-medium">{{
-                                    order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if order.paid_date %}<div>💰 Cobrado: <span
-                                    class="text-emerald-600 dark:text-emerald-400 font-medium">{{
-                                    order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if order.shipped_date %}<div>🚚 Enviado: <span class="text-blue-600 dark:text-blue-400 font-medium">{{ order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if order.delivered_date %}<div>📦 Entregado: <span class="text-purple-600 dark:text-purple-400 font-medium">{{ order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if order.paid_date %}<div>💰 Cobrado: <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
                         </div>
 
                         <div
@@ -347,9 +341,7 @@
                             <div
                                 class="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 font-normal">
                                 {% if order.weight_grams %}<span>⚖️ {{ order.weight_grams }}g</span>{% endif %}
-                                {% if order.print_time_hours %}<span>⏱️ {{ order.print_time_hours }}h{% if
-                                    order.print_time_minutes %} {{ order.print_time_minutes }}m{% endif %}</span>{%
-                                endif %}
+                                {% if order.print_time_hours %}<span>⏱️ {{ order.print_time_hours }}h{% if order.print_time_minutes %} {{ order.print_time_minutes }}m{% endif %}</span>{% endif %}
                             </div>
                             {% endif %}
                         </td>
