@@ -1,189 +1,597 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load l10n %}
-{% block title %}Nuevo Pedido - ProPrint3D{% endblock %}
+{% block title %}Nuevo Pedido - Mini CRM ProPrint3D{% endblock %}
+
 {% block content %}
 <style>
-.of-input{display:block;width:100%;padding:.5rem .75rem;border-radius:.5rem;border:1px solid #d1d5db;background:#f9fafb;color:#111827;font-size:.875rem;transition:border-color .15s;outline:none}
-.dark .of-input{border-color:#374151;background:#1f2937;color:#f3f4f6}
-.of-input:focus{border-color:#7c3aed;box-shadow:0 0 0 2px rgba(124,58,237,.2)}
-.of-field input,.of-field select,.of-field textarea{display:block;width:100%;padding:.5rem .75rem;border-radius:.5rem;border:1px solid #d1d5db;background:#f9fafb;color:#111827;font-size:.875rem;outline:none}
-.dark .of-field input,.dark .of-field select,.dark .of-field textarea{border-color:#374151;background:#1f2937;color:#f3f4f6}
+.of-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  color: #111827;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+}
+.dark .of-input {
+  border-color: #374151;
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+.of-input:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+}
+.of-field input, .of-field select, .of-field textarea {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  color: #111827;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+}
+.dark .of-field input, .dark .of-field select, .dark .of-field textarea {
+  border-color: #374151;
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+.of-field input:focus, .of-field select:focus, .of-field textarea:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+}
 </style>
 
-<div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-  <a href="{% url 'crm_dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary mb-8 transition-colors">
-    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-    Volver al CRM
-  </a>
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6 flex items-center justify-between">
+    <a href="{% url 'crm_dashboard' %}" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary transition-colors">
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Volver al CRM de Pedidos
+    </a>
+    <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300 font-medium">
+      Mini-CRM ProPrint3D
+    </span>
+  </div>
 
-  <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-2xl rounded-2xl p-8">
-    <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">Alta de Nuevo Pedido</h2>
-    <form method="POST" class="space-y-6">
+  <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl overflow-hidden">
+    <!-- Header Card -->
+    <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-6 py-6 sm:px-8 text-white border-b border-gray-700">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+            <span class="p-2 bg-primary/20 rounded-xl text-primary">📦</span>
+            Alta de Nuevo Pedido
+          </h2>
+          <p class="mt-1 text-sm text-gray-300">
+            Calcula el coste de producción por peso/tiempo y fija el precio unitario y total automáticamente.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form method="POST" class="p-6 sm:p-8 space-y-8">
       {% csrf_token %}
+
       {% if form.errors %}
-      <div class="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-        <strong>Corrige los errores:</strong>
-        <ul class="list-disc pl-5 mt-1 text-sm">{% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}</ul>
+      <div class="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
+        <div class="flex items-center gap-2 font-bold mb-1">
+          <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+          Revisa los siguientes campos:
+        </div>
+        <ul class="list-disc pl-6 text-xs space-y-1">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
       </div>
       {% endif %}
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Info Cliente -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 text-gray-900 dark:text-white">Informacion del Cliente</h3>
-          <div class="of-field">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente</label>
+      <!-- SECCIÓN 1: CLIENTE Y FECHA -->
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          1. Información del Cliente
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="of-field sm:col-span-1">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente *</label>
             {{ form.client_name }}
           </div>
           <div class="of-field">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex justify-between items-center">
-              <span>Fecha de Pedido</span>
-              <button type="button" id="btn-today" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-primary hover:text-white px-2 py-1 rounded transition-colors text-gray-600 dark:text-gray-300 font-medium">Hoy</button>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex justify-between items-center">
+              <span>Fecha de Pedido *</span>
+              <button type="button" id="btn-today" class="text-[11px] bg-gray-200 dark:bg-gray-700 hover:bg-primary hover:text-white px-2 py-0.5 rounded transition-colors text-gray-700 dark:text-gray-300">Hoy</button>
             </label>
             {{ form.order_date }}
           </div>
           <div class="of-field">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado Inicial</label>
-            {{ form.status }}
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite (Opcional)</label>
+            {{ form.deadline }}
           </div>
         </div>
+      </div>
 
-        <!-- Producto -->
+      <!-- SECCIÓN 2: PRODUCTO, PESO Y TIEMPO (FABRICACIÓN) -->
+      <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          2. Pieza y Parámetros de Fabricación
+        </h3>
+        
         <div class="space-y-4">
-          <h3 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 text-gray-900 dark:text-white">Detalles de Pieza</h3>
+          <!-- Selector Inteligente de Producto -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Producto o Descripcion</label>
-            <input type="text" id="id_smart_product_name" name="smart_product_name"
-              list="products-datalist" autocomplete="off"
-              class="of-input" placeholder="Escribe o selecciona del catalogo...">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              Producto o Pieza a Medida *
+            </label>
+            <div class="relative">
+              <input type="text" id="id_smart_product_name" name="smart_product_name"
+                list="products-datalist" autocomplete="off"
+                class="of-input pr-10 font-medium"
+                placeholder="Escribe el nombre o selecciona un producto del catálogo..."
+                value="{{ form.smart_product_name.value|default:'' }}">
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+            </div>
             <datalist id="products-datalist">
               {% for p in products %}<option value="{{ p }}"></option>{% endfor %}
             </datalist>
-            <p class="text-xs text-gray-500 mt-1">Al seleccionar un producto del catalogo se calculara el precio.</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+              💡 Al seleccionar un producto del catálogo se autorrellenan el peso, horas, minutos y precio. También puedes escribir un encargo custom.
+            </p>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="of-field">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad</label>
-              {{ form.quantity }}
-            </div>
-            <div class="of-field">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Cobrado (EUR)</label>
-              {{ form.price }}
-            </div>
-          </div>
-          <!-- Preview precio x cantidad -->
-          <div id="price-preview" class="hidden bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4">
-            <div class="flex justify-around items-center gap-2 flex-wrap text-center">
-              <div>
-                <p class="text-xs text-indigo-500 font-medium uppercase tracking-wide">Precio unit.</p>
-                <p class="text-xl font-black text-indigo-700 dark:text-indigo-300">EUR<span id="unit-price">0.00</span></p>
-              </div>
-              <span class="text-indigo-400 font-black text-2xl">x</span>
-              <div>
-                <p class="text-xs text-indigo-500 font-medium uppercase tracking-wide">Cantidad</p>
-                <p class="text-xl font-black text-indigo-700 dark:text-indigo-300" id="preview-qty">1</p>
-              </div>
-              <span class="text-indigo-400 font-black text-2xl">=</span>
-              <div>
-                <p class="text-xs text-green-500 font-medium uppercase tracking-wide">Total</p>
-                <p class="text-2xl font-black text-green-600 dark:text-green-400">EUR<span id="total-price">0.00</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Logistica -->
-        <div class="space-y-4 md:col-span-2">
-          <h3 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 text-gray-900 dark:text-white">Logistica</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="of-field">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
-              {{ form.platform }}
+          <!-- Métricas de Impresión: Peso, Horas, Minutos, Otros -->
+          <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                ⚙️ Cálculo de Coste de Producción (Por Unidad)
+              </span>
+              <span id="badge-source" class="text-[11px] px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                Personalizado
+              </span>
             </div>
-            <div class="of-field">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Envio</label>
-              {{ form.shipping }}
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="of-field">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (g)</label>
+                {{ form.weight_grams }}
+              </div>
+              <div class="of-field">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Horas Impresión</label>
+                {{ form.print_time_hours }}
+              </div>
+              <div class="of-field">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Minutos Extra</label>
+                {{ form.print_time_minutes }}
+              </div>
+              <div class="of-field">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Otros Costes (€)</label>
+                {{ form.extra_costs }}
+              </div>
+            </div>
+
+            <!-- Desglose de Coste Calculado y Precios Sugeridos -->
+            <div id="cost-calc-panel" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                
+                <!-- Coste unitario y total de producción -->
+                <div class="flex items-center gap-4 bg-white dark:bg-dark p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div class="flex-1">
+                    <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">Coste Unitario</p>
+                    <p class="text-lg font-black text-red-600 dark:text-red-400">
+                      €<span id="live-unit-cost">0.00</span>
+                    </p>
+                  </div>
+                  <div class="border-l border-gray-200 dark:border-gray-700 pl-4 flex-1">
+                    <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">Coste Total Prod.</p>
+                    <p class="text-lg font-black text-red-500">
+                      €<span id="live-total-cost">0.00</span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Botones de Margen Rápido (Sugerencias) -->
+                <div>
+                  <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+                    ⚡ Aplicar Margen Sugerido al Precio Unitario:
+                  </p>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="btn-sugg-x25" class="px-2 py-1.5 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg text-left transition-all group">
+                      <span class="block text-[10px] text-yellow-700 dark:text-yellow-400 font-bold uppercase">x2.5</span>
+                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x25">0.00</span></span>
+                    </button>
+                    <button type="button" id="btn-sugg-x30" class="px-2 py-1.5 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg text-left transition-all group">
+                      <span class="block text-[10px] text-green-700 dark:text-green-400 font-bold uppercase">x3.0</span>
+                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x30">0.00</span></span>
+                    </button>
+                    <button type="button" id="btn-sugg-x40" class="px-2 py-1.5 bg-purple-50 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg text-left transition-all group">
+                      <span class="block text-[10px] text-purple-700 dark:text-purple-400 font-bold uppercase">x4.0</span>
+                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x40">0.00</span></span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Campos ocultos sincronizados del coste -->
+            <div class="hidden">
+              {{ form.unit_cost }}
+              {{ form.total_cost }}
             </div>
           </div>
         </div>
       </div>
 
-      <button type="submit" class="w-full mt-4 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white font-bold py-4 rounded-xl transition-all shadow-xl transform hover:scale-[1.01] flex justify-center items-center gap-2">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-        Guardar Pedido
-      </button>
+      <!-- SECCIÓN 3: PRECIOS, CANTIDAD Y RENTABILIDAD -->
+      <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          3. Precios y Cantidad Cobrada
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <!-- Cantidad -->
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Cantidad *</label>
+            {{ form.quantity }}
+          </div>
+          <!-- Precio Unitario -->
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Precio Unitario (€)</label>
+            {{ form.unit_price }}
+          </div>
+          <!-- Total Cobrado -->
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Total Cobrado Final (€) *</label>
+            {{ form.price }}
+          </div>
+        </div>
+
+        <!-- Banner en vivo: Preview de Rentabilidad y Ganancia -->
+        <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-xl p-4">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center items-center">
+            <div>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase">Total Venta</p>
+              <p class="text-xl font-black text-gray-900 dark:text-white">€<span id="preview-total-sale">0.00</span></p>
+            </div>
+            <div>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase">Coste Prod.</p>
+              <p class="text-xl font-black text-red-500">€<span id="preview-total-cost">0.00</span></p>
+            </div>
+            <div>
+              <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Ganancia Neta</p>
+              <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400">€<span id="preview-profit">0.00</span></p>
+            </div>
+            <div>
+              <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Margen</p>
+              <p class="text-lg font-black text-emerald-600 dark:text-emerald-400"><span id="preview-margin">0</span>%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: LOGÍSTICA, ESTADO Y NOTAS -->
+      <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
+        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          4. Logística y Estado
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado Inicial</label>
+            {{ form.status }}
+          </div>
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
+            {{ form.platform }}
+          </div>
+          <div class="of-field">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de Envío</label>
+            {{ form.shipping }}
+          </div>
+        </div>
+
+        <div class="of-field">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas Adicionales</label>
+          {{ form.notes }}
+        </div>
+      </div>
+
+      <!-- BOTÓN SUBMIT -->
+      <div class="pt-4">
+        <button type="submit" class="w-full bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Guardar Pedido en el CRM
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
-<!-- Calculadora de Margenes -->
-<div id="order-calc" class="hidden max-w-3xl mx-auto mt-6 px-4 sm:px-6 lg:px-8 pb-12">
-  <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-6">
-    <h4 class="font-bold text-indigo-900 dark:text-indigo-300 mb-4 flex items-center gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-      Calculadora de Margenes &mdash; <span id="oc-product-name" class="text-primary ml-1 font-extrabold"></span>
-    </h4>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-      <div><label class="block text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Peso (g)</label><input type="number" step="any" id="oc-weight" class="of-input text-sm" readonly></div>
-      <div><label class="block text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Horas</label><input type="number" step="any" id="oc-hours" class="of-input text-sm" readonly></div>
-      <div><label class="block text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Minutos</label><input type="number" id="oc-mins" class="of-input text-sm" readonly></div>
-      <div><label class="block text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Otros (EUR)</label><input type="number" step="any" id="oc-extra" class="of-input text-sm" readonly></div>
-    </div>
-    <div class="border-t border-indigo-200 dark:border-indigo-700 pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-      <div class="bg-white dark:bg-dark rounded-xl p-3 border border-indigo-100 dark:border-indigo-800"><p class="text-xs text-indigo-500 uppercase font-medium mb-1">Coste Base</p><p class="text-xl font-black text-red-500">EUR<span id="oc-cost">-</span></p></div>
-      <div class="bg-white dark:bg-dark rounded-xl p-3 border border-indigo-100 dark:border-indigo-800"><p class="text-xs text-indigo-500 uppercase font-medium mb-1">x 2.5</p><p class="text-xl font-black text-yellow-600 dark:text-yellow-400">EUR<span id="oc-x25">-</span></p></div>
-      <div class="bg-white dark:bg-dark rounded-xl p-3 border border-indigo-100 dark:border-indigo-800"><p class="text-xs text-indigo-500 uppercase font-medium mb-1">x 3</p><p class="text-xl font-black text-green-500">EUR<span id="oc-x3">-</span></p></div>
-      <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 border border-green-200 dark:border-green-900"><p class="text-xs text-green-600 dark:text-green-400 uppercase font-medium mb-1">PVP Catalogo</p><p class="text-xl font-black text-indigo-700 dark:text-indigo-300">EUR<span id="oc-pvp">-</span></p></div>
-    </div>
-  </div>
-</div>
-
 <script>
-const productMap={
+// Diccionario de productos desde el backend
+const productMap = {
   {% for p in products_with_id %}
-  "{{ p.title }}":{price:{{ p.price|unlocalize }},weight:{{ p.weight_grams|default:0|unlocalize }},hours:{{ p.print_time_hours|default:0|unlocalize }},mins:{{ p.print_time_minutes|default:0 }},extra:{{ p.extra_costs|default:0|unlocalize }}},
+  "{{ p.title|escapejs }}": {
+    price: {{ p.price|unlocalize }},
+    salePrice: {% if p.is_on_sale and p.sale_price %}{{ p.sale_price|unlocalize }}{% else %}null{% endif %},
+    weight: {{ p.weight_grams|default:0|unlocalize }},
+    hours: {{ p.print_time_hours|default:0|unlocalize }},
+    mins: {{ p.print_time_minutes|default:0 }},
+    extra: {{ p.extra_costs|default:0|unlocalize }}
+  },
   {% endfor %}
 };
-let unitPrice=0;
-function calcCost(w,h,m,ex){
-  const hrs=parseFloat(h)+parseFloat(m)/60,ww=parseFloat(w),xx=parseFloat(ex)||0;
-  if(ww<=0&&hrs<=0)return null;
-  const base=0.02*ww+0.018*hrs+0.025*hrs,cost=base*1.15+xx;
-  return{cost:cost.toFixed(2),x25:(cost*2.5).toFixed(2),x3:(cost*3).toFixed(2)};
+
+// Referencias a elementos del DOM
+const nameInput = document.getElementById('id_smart_product_name');
+const qtyInput = document.getElementById('id_quantity');
+const weightInput = document.getElementById('id_weight_grams');
+const hoursInput = document.getElementById('id_print_time_hours');
+const minsInput = document.getElementById('id_print_time_minutes');
+const extraInput = document.getElementById('id_extra_costs');
+
+const unitCostInput = document.getElementById('id_unit_cost');
+const totalCostInput = document.getElementById('id_total_cost');
+
+const unitPriceInput = document.getElementById('id_unit_price');
+const totalPriceInput = document.getElementById('id_price');
+
+const liveUnitCost = document.getElementById('live-unit-cost');
+const liveTotalCost = document.getElementById('live-total-cost');
+const badgeSource = document.getElementById('badge-source');
+
+const valSuggX25 = document.getElementById('val-sugg-x25');
+const valSuggX30 = document.getElementById('val-sugg-x30');
+const valSuggX40 = document.getElementById('val-sugg-x40');
+
+const btnSuggX25 = document.getElementById('btn-sugg-x25');
+const btnSuggX30 = document.getElementById('btn-sugg-x30');
+const btnSuggX40 = document.getElementById('btn-sugg-x40');
+
+const previewTotalSale = document.getElementById('preview-total-sale');
+const previewTotalCost = document.getElementById('preview-total-cost');
+const previewProfit = document.getElementById('preview-profit');
+const previewMargin = document.getElementById('preview-margin');
+
+// Función de cálculo de coste de producción exacto
+function calculateCostValues(w, h, m, extra) {
+  const totalHours = (parseFloat(h) || 0) + ((parseFloat(m) || 0) / 60);
+  const weight = parseFloat(w) || 0;
+  const extraVal = parseFloat(extra) || 0;
+
+  if (weight <= 0 && totalHours <= 0) {
+    return {
+      unitCost: extraVal,
+      suggX25: extraVal * 2.5,
+      suggX30: extraVal * 3.0,
+      suggX40: extraVal * 4.0
+    };
+  }
+
+  const costFilament = 0.02 * weight;
+  const costEnergy = 0.15 * 0.12 * totalHours;
+  const costWear = 0.025 * totalHours;
+
+  const costSubtotal = costFilament + costEnergy + costWear;
+  const errorMargin = costSubtotal * 0.15;
+  const baseVar = costFilament + costEnergy;
+  const fixedCosts = costWear + errorMargin + extraVal;
+
+  const unitCost = costSubtotal + errorMargin + extraVal;
+
+  const suggX25 = (baseVar * 2.5) + fixedCosts;
+  const suggX30 = (baseVar * 3.0) + fixedCosts;
+  const suggX40 = (baseVar * 4.0) + fixedCosts;
+
+  return {
+    unitCost: Math.round(unitCost * 100) / 100,
+    suggX25: Math.round(suggX25 * 100) / 100,
+    suggX30: Math.round(suggX30 * 100) / 100,
+    suggX40: Math.round(suggX40 * 100) / 100
+  };
 }
-function updatePreview(){
-  const qty=parseInt(document.getElementById('id_quantity').value)||1,tot=(unitPrice*qty).toFixed(2);
-  document.getElementById('preview-qty').textContent=qty;
-  document.getElementById('unit-price').textContent=unitPrice.toFixed(2);
-  document.getElementById('total-price').textContent=tot;
-  document.getElementById('id_price').value=tot;
+
+// Actualizar panel de costes y sugerencias
+function refreshCostCalculations() {
+  const w = weightInput ? weightInput.value : 0;
+  const h = hoursInput ? hoursInput.value : 0;
+  const m = minsInput ? minsInput.value : 0;
+  const extra = extraInput ? extraInput.value : 0;
+  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+
+  const res = calculateCostValues(w, h, m, extra);
+  const totalCost = Math.round((res.unitCost * qty) * 100) / 100;
+
+  if (liveUnitCost) liveUnitCost.textContent = res.unitCost.toFixed(2);
+  if (liveTotalCost) liveTotalCost.textContent = totalCost.toFixed(2);
+
+  if (unitCostInput) unitCostInput.value = res.unitCost.toFixed(2);
+  if (totalCostInput) totalCostInput.value = totalCost.toFixed(2);
+
+  if (valSuggX25) valSuggX25.textContent = res.suggX25.toFixed(2);
+  if (valSuggX30) valSuggX30.textContent = res.suggX30.toFixed(2);
+  if (valSuggX40) valSuggX40.textContent = res.suggX40.toFixed(2);
+
+  refreshProfitPreview();
 }
-function onSelect(name){
-  const p=productMap[name.trim()];
-  if(p){
-    unitPrice=p.price;
-    document.getElementById('price-preview').classList.remove('hidden');
-    updatePreview();
-    document.getElementById('oc-product-name').textContent=name.trim();
-    document.getElementById('oc-weight').value=p.weight||'';
-    document.getElementById('oc-hours').value=p.hours||'';
-    document.getElementById('oc-mins').value=p.mins||'';
-    document.getElementById('oc-extra').value=p.extra||'';
-    document.getElementById('oc-pvp').textContent=p.price.toFixed(2);
-    const r=calcCost(p.weight,p.hours,p.mins,p.extra);
-    if(r){document.getElementById('oc-cost').textContent=r.cost;document.getElementById('oc-x25').textContent=r.x25;document.getElementById('oc-x3').textContent=r.x3;}
-    document.getElementById('order-calc').classList.remove('hidden');
-  }else{
-    document.getElementById('price-preview').classList.add('hidden');
-    document.getElementById('order-calc').classList.add('hidden');
-    unitPrice=0;
+
+// Actualizar panel de rentabilidad y total cobrado
+function refreshProfitPreview() {
+  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+  const totalSale = parseFloat(totalPriceInput ? totalPriceInput.value : 0) || 0;
+  const totalCost = parseFloat(totalCostInput ? totalCostInput.value : 0) || 0;
+
+  const profit = totalSale - totalCost;
+  const marginPercent = totalSale > 0 ? ((profit / totalSale) * 100).toFixed(1) : '0';
+
+  if (previewTotalSale) previewTotalSale.textContent = totalSale.toFixed(2);
+  if (previewTotalCost) previewTotalCost.textContent = totalCost.toFixed(2);
+  if (previewProfit) {
+    previewProfit.textContent = profit.toFixed(2);
+    if (profit < 0) {
+      previewProfit.className = 'text-2xl font-black text-red-500';
+    } else {
+      previewProfit.className = 'text-2xl font-black text-emerald-600 dark:text-emerald-400';
+    }
+  }
+  if (previewMargin) previewMargin.textContent = marginPercent;
+}
+
+// Cuando cambia el precio unitario -> calcular precio total
+function onUnitPriceChange() {
+  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+  const uPrice = parseFloat(unitPriceInput.value) || 0;
+  const total = Math.round((uPrice * qty) * 100) / 100;
+  if (totalPriceInput) totalPriceInput.value = total.toFixed(2);
+  refreshProfitPreview();
+}
+
+// Cuando cambia el precio total cobrado -> calcular precio unitario
+function onTotalPriceChange() {
+  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+  const total = parseFloat(totalPriceInput.value) || 0;
+  if (qty > 0 && unitPriceInput) {
+    const uPrice = Math.round((total / qty) * 100) / 100;
+    unitPriceInput.value = uPrice.toFixed(2);
+  }
+  refreshProfitPreview();
+}
+
+// Cuando cambia la cantidad
+function onQtyChange() {
+  const qty = parseInt(qtyInput.value) || 1;
+  const uPrice = parseFloat(unitPriceInput.value) || 0;
+  if (uPrice > 0) {
+    const total = Math.round((uPrice * qty) * 100) / 100;
+    if (totalPriceInput) totalPriceInput.value = total.toFixed(2);
+  }
+  refreshCostCalculations();
+}
+
+// Cuando se selecciona un producto del catálogo
+function onProductSelect(name) {
+  const trimmed = name.trim();
+  const p = productMap[trimmed];
+
+  if (p) {
+    if (badgeSource) {
+      badgeSource.textContent = 'Catálogo';
+      badgeSource.className = 'text-[11px] px-2 py-0.5 rounded bg-primary/20 text-primary font-bold';
+    }
+
+    if (weightInput) weightInput.value = p.weight || '';
+    if (hoursInput) hoursInput.value = p.hours || '';
+    if (minsInput) minsInput.value = p.mins || '';
+    if (extraInput) extraInput.value = p.extra || '';
+
+    const effectivePrice = p.salePrice !== null ? p.salePrice : p.price;
+    if (unitPriceInput) unitPriceInput.value = effectivePrice.toFixed(2);
+
+    const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+    if (totalPriceInput) totalPriceInput.value = (effectivePrice * qty).toFixed(2);
+
+    refreshCostCalculations();
+  } else {
+    if (badgeSource) {
+      badgeSource.textContent = 'Personalizado';
+      badgeSource.className = 'text-[11px] px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
+    }
   }
 }
-let dt;
-const ni=document.getElementById('id_smart_product_name');
-ni.addEventListener('input',function(){clearTimeout(dt);dt=setTimeout(()=>onSelect(this.value),300);});
-ni.addEventListener('change',function(){clearTimeout(dt);onSelect(this.value);});
-document.getElementById('btn-today').addEventListener('click',function(){document.getElementById('id_order_date').value=new Date().toISOString().split('T')[0];});
-document.getElementById('id_quantity').addEventListener('input',function(){if(unitPrice>0)updatePreview();});
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Hoy btn
+  const btnToday = document.getElementById('btn-today');
+  if (btnToday) {
+    btnToday.addEventListener('click', function() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('id_order_date');
+      if (dateInput) dateInput.value = today;
+    });
+  }
+
+  // Escucha cambios en los campos de fabricación
+  [weightInput, hoursInput, minsInput, extraInput].forEach(el => {
+    if (el) el.addEventListener('input', refreshCostCalculations);
+  });
+
+  // Escucha cambios en cantidad y precios
+  if (qtyInput) qtyInput.addEventListener('input', onQtyChange);
+  if (unitPriceInput) unitPriceInput.addEventListener('input', onUnitPriceChange);
+  if (totalPriceInput) totalPriceInput.addEventListener('input', onTotalPriceChange);
+
+  // Botones de sugerencias de precio
+  if (btnSuggX25) {
+    btnSuggX25.addEventListener('click', function() {
+      if (valSuggX25 && unitPriceInput) {
+        unitPriceInput.value = valSuggX25.textContent;
+        onUnitPriceChange();
+      }
+    });
+  }
+  if (btnSuggX30) {
+    btnSuggX30.addEventListener('click', function() {
+      if (valSuggX30 && unitPriceInput) {
+        unitPriceInput.value = valSuggX30.textContent;
+        onUnitPriceChange();
+      }
+    });
+  }
+  if (btnSuggX40) {
+    btnSuggX40.addEventListener('click', function() {
+      if (valSuggX40 && unitPriceInput) {
+        unitPriceInput.value = valSuggX40.textContent;
+        onUnitPriceChange();
+      }
+    });
+  }
+
+  // Escucha del selector de producto
+  let debounceTimeout;
+  if (nameInput) {
+    nameInput.addEventListener('input', function() {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => onProductSelect(this.value), 200);
+    });
+    nameInput.addEventListener('change', function() {
+      clearTimeout(debounceTimeout);
+      onProductSelect(this.value);
+    });
+
+    // Si ya tiene valor al cargar
+    if (nameInput.value) {
+      onProductSelect(nameInput.value);
+    }
+  }
+
+  // Si la fecha está vacía, poner hoy por defecto
+  const dateInput = document.getElementById('id_order_date');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+
+  // Inicializar cálculos
+  refreshCostCalculations();
+});
 </script>
 {% endblock %}

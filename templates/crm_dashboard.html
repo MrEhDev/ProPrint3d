@@ -241,16 +241,27 @@
                             {{ order.quantity }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">
-                            {{ order.description }}
-                            {% if order.product %}
-                            <a href="{% url 'product_detail' order.product.slug %}" class="text-xs text-primary ml-1 block" target="_blank">Ver ficha</a>
+                            <div class="flex items-center gap-1.5">
+                                <span>{{ order.description }}</span>
+                                {% if order.product %}
+                                <a href="{% url 'product_detail' order.product.slug %}" class="text-xs text-primary hover:underline ml-1" title="Ver ficha en catálogo" target="_blank">🔗</a>
+                                {% endif %}
+                            </div>
+                            {% if order.weight_grams or order.print_time_hours %}
+                            <div class="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                                {% if order.weight_grams %}<span>⚖️ {{ order.weight_grams }}g</span>{% endif %}
+                                {% if order.print_time_hours %}<span>⏱️ {{ order.print_time_hours }}h{% if order.print_time_minutes %} {{ order.print_time_minutes }}m{% endif %}</span>{% endif %}
+                            </div>
                             {% endif %}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                             {{ order.client_name }}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right font-bold text-gray-900 dark:text-white">
-                            €{{ order.price }}
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                            <span class="font-bold text-gray-900 dark:text-white">€{{ order.price }}</span>
+                            {% if order.quantity > 1 and order.unit_price %}
+                            <span class="block text-[11px] text-gray-400 dark:text-gray-500 font-normal">€{{ order.unit_price }}/ud</span>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-right font-bold text-green-600 dark:text-green-400">
                             €{{ order.profit }}
@@ -260,6 +271,9 @@
                                 <span>€</span>
                                 <input type="number" step="0.01" onchange="updateOrderCost({{ order.id }}, this.value)" value="{{ order.total_cost|stringformat:"s" }}" class="w-16 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1 py-1 ml-1 text-right">
                             </div>
+                            {% if order.quantity > 1 and order.unit_cost %}
+                            <span class="block text-[11px] text-gray-400 dark:text-gray-500 font-normal text-right">€{{ order.unit_cost }}/ud</span>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
                             <label class="flex items-center justify-center space-x-2">

@@ -323,8 +323,18 @@ class Order(models.Model):
     
     client_name = models.CharField(max_length=150, help_text="Nombre de la Persona")
     
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Precio Final Cobrado (€)")
+    # Métricas de fabricación y costes por unidad
+    weight_grams = models.FloatField(null=True, blank=True, help_text="Peso estimado en gramos por unidad")
+    print_time_hours = models.FloatField(null=True, blank=True, help_text="Horas de impresión por unidad")
+    print_time_minutes = models.IntegerField(null=True, blank=True, help_text="Minutos extra de impresión por unidad")
+    extra_costs = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00, help_text="Otros costes por unidad (€)")
+    
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00, help_text="Coste Unitario Producción (€)")
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Coste Total Producción (€)")
+    
+    # Precios cobrados
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Precio Unitario Cobrado (€)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Precio Final Cobrado (€)")
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pendiente')
     deadline = models.DateField(null=True, blank=True, help_text="Fecha límite")
@@ -336,30 +346,89 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def calculate_unit_cost(self):
+        """Calcula el coste unitario de producción según peso, tiempo y extras."""
+        w = float(self.weight_grams or 0)
+        h = float(self.print_time_hours or 0)
+        m = float(self.print_time_minutes or 0)
+        extra = float(self.extra_costs or 0)
+        
+        total_hours = h + (m / 60)
+        if w > 0 and total_hours > 0:
+            cost_filament = 0.02 * w
+            cost_energy = 0.15 * 0.12 * total_hours
+            cost_wear = 0.025 * total_hours
+            cost_subtotal = cost_filament + cost_energy + cost_wear
+            error_margin = cost_subtotal * 0.15
+            return round(cost_subtotal + error_margin + extra, 2)
+        elif self.product:
+            return float(self.product.calculate_production_cost())
+        return 0.0
+
     def save(self, *args, **kwargs):
+        import decimal
+        qty = decimal.Decimal(str(self.quantity or 1))
+        
+        if self.unit_price is not None:
+            self.unit_price = decimal.Decimal(str(self.unit_price))
+        if self.price is not None:
+            self.price = decimal.Decimal(str(self.price))
+        if self.unit_cost is not None:
+            self.unit_cost = decimal.Decimal(str(self.unit_cost))
+        if self.total_cost is not None:
+            self.total_cost = decimal.Decimal(str(self.total_cost))
+        if self.extra_costs is not None:
+            self.extra_costs = decimal.Decimal(str(self.extra_costs))
+        
         # Auto-completar descripción si hay producto y no hay descripción manual
         if self.product and not self.description:
             self.description = self.product.title
             
-        # Auto-completar precio si no se ha introducido y hay producto
-        if self.product and (self.price is None or self.price == 0):
-            self.price = self.product.price * self.quantity
+        # Si hay producto y los datos de fabricación están vacíos, rellenarlos desde el producto
+        if self.product:
+            if self.weight_grams is None:
+                self.weight_grams = self.product.weight_grams
+            if self.print_time_hours is None:
+                self.print_time_hours = self.product.print_time_hours
+            if self.print_time_minutes is None:
+                self.print_time_minutes = self.product.print_time_minutes
+            if self.extra_costs is None or self.extra_costs == 0:
+                self.extra_costs = self.product.extra_costs or decimal.Decimal('0.00')
+
+        # Calcular coste unitario
+        calc_u_cost = self.calculate_unit_cost()
+        if calc_u_cost > 0:
+            self.unit_cost = decimal.Decimal(str(calc_u_cost))
+        elif self.unit_cost is None:
+            self.unit_cost = decimal.Decimal('0.00')
             
-        # Auto-completar coste de producción si está vacío y hay producto
-        if self.product and (self.total_cost is None or self.total_cost == 0):
-            import decimal
-            # Convert float cost to decimal
-            cost_per_unit = self.product.calculate_production_cost()
-            self.total_cost = decimal.Decimal(str(cost_per_unit)) * self.quantity
+        # Calcular coste total si está vacío o es 0
+        if (self.total_cost is None or self.total_cost == 0) and self.unit_cost:
+            self.total_cost = self.unit_cost * qty
+
+        # Calcular precio unitario y total
+        if self.unit_price is not None and self.unit_price > 0:
+            if self.price is None or self.price == 0:
+                self.price = self.unit_price * qty
+        elif self.price is not None and self.price > 0:
+            if self.unit_price is None or self.unit_price == 0:
+                self.unit_price = round(self.price / qty, 2)
+        elif self.product:
+            product_p = self.product.sale_price if (self.product.is_on_sale and self.product.sale_price) else self.product.price
+            self.unit_price = product_p
+            self.price = product_p * qty
             
         super().save(*args, **kwargs)
 
     @property
     def profit(self):
         """Calcula la ganancia real descontando el coste de producción."""
-        if self.price and self.total_cost is not None:
-            return self.price - self.total_cost
-        return 0
+        import decimal
+        if self.price is not None and self.total_cost is not None:
+            p = decimal.Decimal(str(self.price))
+            c = decimal.Decimal(str(self.total_cost))
+            return p - c
+        return decimal.Decimal('0.00')
 
     def __str__(self):
         return f"Pedido #{self.id} - {self.description} ({self.client_name})"

@@ -453,19 +453,43 @@ class SmartOrderForm(forms.ModelForm):
         label="Producto o Descripción Libre",
         required=True,
         help_text="Selecciona del catálogo o escribe un nombre nuevo.",
-        widget=forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary', 'list': 'products-datalist'})
+        widget=forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary', 'list': 'products-datalist', 'placeholder': 'Escribe o selecciona del catálogo...'})
     )
 
     class Meta:
         model = Order
-        fields = ['client_name', 'order_date', 'status', 'quantity', 'price', 'platform', 'shipping']
+        fields = [
+            'client_name', 'order_date', 'deadline', 'status', 'quantity', 
+            'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs',
+            'unit_cost', 'total_cost', 'unit_price', 'price',
+            'platform', 'shipping', 'notes'
+        ]
         widgets = {
             'order_date': forms.DateInput(attrs={'type': 'date'}),
+            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'weight_grams': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
+            'print_time_hours': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
+            'print_time_minutes': forms.NumberInput(attrs={'step': '1', 'min': '0', 'max': '59', 'placeholder': '0'}),
+            'extra_costs': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'unit_cost': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'total_cost': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'unit_price': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'price': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'notes': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Color, material, detalles especiales...'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['price'].required = False
+        self.fields['unit_price'].required = False
+        self.fields['weight_grams'].required = False
+        self.fields['print_time_hours'].required = False
+        self.fields['print_time_minutes'].required = False
+        self.fields['extra_costs'].required = False
+        self.fields['unit_cost'].required = False
+        self.fields['total_cost'].required = False
+        self.fields['deadline'].required = False
+        self.fields['notes'].required = False
         
         # Add Tailwind classes dynamically
         for field in self.fields.values():
@@ -496,7 +520,7 @@ def order_create_view(request):
     
     products = Product.objects.filter(is_active=True).values_list('title', flat=True)
     products_with_id = Product.objects.filter(is_active=True).values(
-        'id', 'title', 'price', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs'
+        'id', 'title', 'price', 'sale_price', 'is_on_sale', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs'
     )
     return render(request, 'order_form.html', {'form': form, 'products': products, 'products_with_id': products_with_id})
 

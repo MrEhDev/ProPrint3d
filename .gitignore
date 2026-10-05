@@ -21,6 +21,8 @@ staticfiles/
 .vscode/
 .idea/
 
-# Archivos temporales que hemos ido creando
+# Scripts locales y temporales
+*.sh
+start_local.sh
 proprint3d_deploy.zip
 scratch/
