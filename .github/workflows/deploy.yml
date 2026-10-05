@@ -1,0 +1,56 @@
+﻿name: Deploy to DigitalOcean VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH to DigitalOcean VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DO_SSH_HOST }}
+          username: ${{ secrets.DO_SSH_USER }}
+          key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.DO_SSH_PORT || 22 }}
+          script: |
+            set -e
+            echo "🚀 Iniciando despliegue en VPS..."
+
+            # Ruta del proyecto en el VPS
+            PROJECT_DIR="${{ secrets.DO_PROJECT_DIR || '/var/www/proprint3d' }}"
+            cd $PROJECT_DIR
+
+            # Descargar últimos cambios
+            echo "📥 Obteniendo cambios de git..."
+            git pull origin main
+
+            # Activar entorno virtual
+            echo "🐍 Activando entorno virtual..."
+            source venv/bin/activate
+
+            # Instalar o actualizar dependencias
+            echo "📦 Instalando dependencias..."
+            pip install -r requirements.txt
+
+            # Aplicar migraciones
+            echo "🗄️ Aplicando migraciones de base de datos..."
+            python manage.py migrate --noinput
+
+            # Recolectar archivos estáticos
+            echo "🎨 Recolectando archivos estáticos..."
+            python manage.py collectstatic --noinput
+
+            # Reiniciar servicios (Gunicorn)
+            echo "🔄 Reiniciando servicio Gunicorn..."
+            sudo systemctl restart gunicorn
+
+            echo "✅ ¡Despliegue completado con éxito!"
