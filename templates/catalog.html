@@ -22,34 +22,45 @@
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Barra de Búsqueda y Filtros -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-10 space-y-4 md:space-y-0">
-        <!-- Filtro por Categorías -->
-        <div class="flex space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-            <a href="{% url 'catalog' %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if not category_slug %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+    <!-- Barra de Búsqueda y Filtros en Dos Alturas -->
+    <div class="mb-10 space-y-6">
+        <!-- Búsqueda (Fila Superior) -->
+        <div class="flex justify-center">
+            <form method="GET" action="{% url 'catalog' %}" class="w-full max-w-2xl relative">
+                {% if category_slug %}
+                    <input type="hidden" name="category" value="{{ category_slug }}">
+                {% endif %}
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar piezas, accesorios, modelos 3D..." 
+                       class="w-full pl-12 pr-12 py-3.5 rounded-2xl bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-gray-900 dark:text-gray-100 placeholder-gray-400 shadow-sm transition-all text-base">
+                <div class="absolute left-4 top-3.5 text-gray-400">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                {% if search_query %}
+                <a href="{% url 'catalog' %}{% if category_slug %}?category={{ category_slug }}{% endif %}" 
+                   class="absolute right-3.5 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg transition-colors" title="Limpiar búsqueda">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Filtro por Categorías (Fila Inferior - Ancho Completo) -->
+        <div class="flex items-center justify-start md:justify-center gap-2.5 overflow-x-auto pb-2 scrollbar-none flex-wrap">
+            <a href="{% url 'catalog' %}{% if search_query %}?q={{ search_query }}{% endif %}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap {% if not category_slug %}bg-primary text-white shadow-md shadow-primary/30 scale-[1.02]{% else %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
                 Todos
             </a>
-            <a href="?category=ofertas{% if search_query %}&q={{ search_query }}{% endif %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if category_slug == 'ofertas' %}bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md{% else %}bg-gray-200 text-orange-600 dark:bg-gray-800 dark:text-orange-400 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+            <a href="?category=ofertas{% if search_query %}&q={{ search_query }}{% endif %}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap {% if category_slug == 'ofertas' %}bg-gradient-to-r from-red-500 to-amber-500 text-white shadow-md shadow-red-500/30 scale-[1.02]{% else %}bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/60 dark:border-amber-800/40{% endif %}">
                 🔥 En Oferta
             </a>
             {% for cat in categories %}
-            <a href="?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if category_slug == cat.slug %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700{% endif %}">
+            <a href="?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap {% if category_slug == cat.slug %}bg-primary text-white shadow-md shadow-primary/30 scale-[1.02]{% else %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %}">
                 {{ cat.name }}
             </a>
             {% endfor %}
         </div>
-        
-        <!-- Búsqueda -->
-        <form method="GET" action="{% url 'catalog' %}" class="w-full md:w-1/3 relative">
-            {% if category_slug %}
-                <input type="hidden" name="category" value="{{ category_slug }}">
-            {% endif %}
-            <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar piezas..." 
-                   class="w-full pl-10 pr-4 py-2 rounded-full bg-white dark:bg-dark border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-shadow shadow-sm">
-            <div class="absolute left-3 top-2.5 text-gray-400">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </div>
-        </form>
     </div>
 
     <!-- Grid de Productos -->
@@ -77,6 +88,11 @@
                 {% if product.is_on_sale %}
                 <div class="absolute top-3 left-3 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md uppercase tracking-wider transform -rotate-2">
                     ¡Oferta!
+                </div>
+                {% endif %}
+                {% if request.user.is_staff and product.model_file %}
+                <div class="absolute bottom-3 right-3 bg-slate-900/90 text-cyan-400 border border-cyan-500/50 text-[10px] font-bold px-2 py-0.5 rounded shadow backdrop-blur-sm" title="Archivo 3D adjunto">
+                    🔒 {{ product.model_file_extension|upper|default:"3D" }}
                 </div>
                 {% endif %}
             </div>

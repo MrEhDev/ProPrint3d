@@ -224,26 +224,23 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
-            <dd class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
+            <dd id="stat-total-sales" class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
         </div>
         <div
             class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-green-500"></div>
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
-            <dd class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}
-            </dd>
+            <dd id="stat-total-profit" class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
         </div>
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.
-            </dt>
-            <dd class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
+            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.</dt>
+            <dd id="stat-total-costs" class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
         </div>
         <div
             class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-cyan-500"></div>
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media
-                Ganancia/Pedido</dt>
-            <dd class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
+            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media Ganancia/Pedido</dt>
+            <dd id="stat-avg-profit" class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
         </div>
     </div> <!-- Cabecera de Sección y Buscador sobre la Tabla Principal -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
@@ -319,7 +316,10 @@
                 </thead>
                 <tbody class="bg-white dark:bg-dark divide-y divide-gray-200 dark:divide-gray-800" id="orders-tbody">
                     {% for order in orders %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors order-row">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors order-row"
+                        data-price="{{ order.price|default:0|unlocalize }}"
+                        data-profit="{{ order.profit|default:0|unlocalize }}"
+                        data-cost="{{ order.total_cost|default:0|unlocalize }}">
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 font-medium">
                             {{ order.order_date|date:"d/m/Y" }}
                         </td>
@@ -585,6 +585,10 @@
     // ==========================================
     // FILTRADO EN VIVO SOBRE LA TABLA (SIN RECARGA)
     // ==========================================
+    function formatStatCurrency(val) {
+        return '€' + Number(val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     function filterTableLive(term) {
         const filter = term.toLowerCase().trim();
         const rows = document.querySelectorAll('.order-row');
@@ -592,7 +596,15 @@
         const noResultsRow = document.getElementById('no-search-results-row');
         const countSpan = document.getElementById('visible-orders-count');
 
+        const statSales = document.getElementById('stat-total-sales');
+        const statProfit = document.getElementById('stat-total-profit');
+        const statCosts = document.getElementById('stat-total-costs');
+        const statAvgProfit = document.getElementById('stat-avg-profit');
+
         let visibleCount = 0;
+        let sumSales = 0;
+        let sumProfit = 0;
+        let sumCosts = 0;
 
         if (clearBtn) {
             if (filter.length > 0) {
@@ -609,6 +621,14 @@
             if (desc.includes(filter) || client.includes(filter)) {
                 row.style.display = '';
                 visibleCount++;
+
+                const p = parseFloat(row.dataset.price) || 0;
+                const pr = parseFloat(row.dataset.profit) || 0;
+                const c = parseFloat(row.dataset.cost) || 0;
+
+                sumSales += p;
+                sumProfit += pr;
+                sumCosts += c;
             } else {
                 row.style.display = 'none';
             }
@@ -625,6 +645,13 @@
         if (countSpan) {
             countSpan.textContent = visibleCount;
         }
+
+        const avgProfit = visibleCount > 0 ? (sumProfit / visibleCount) : 0;
+
+        if (statSales) statSales.textContent = formatStatCurrency(sumSales);
+        if (statProfit) statProfit.textContent = formatStatCurrency(sumProfit);
+        if (statCosts) statCosts.textContent = formatStatCurrency(sumCosts);
+        if (statAvgProfit) statAvgProfit.textContent = formatStatCurrency(avgProfit);
     }
 
     function clearTableSearchLive() {

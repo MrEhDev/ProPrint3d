@@ -14,6 +14,7 @@ urlpatterns = [
     
     # Detalle de un producto (slug)
     path('product/<slug:slug>/', views.product_detail_view, name='product_detail'),
+    path('product/<slug:slug>/download-model/', views.download_product_model_file, name='download_product_model'),
     
     # Editar un producto (slug)
     path('product/<slug:slug>/edit/', views.product_edit_view, name='product_edit'),

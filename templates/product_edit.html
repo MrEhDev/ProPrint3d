@@ -101,6 +101,26 @@
             </script>
 
             <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+                    <span>Archivo 3D (.STL, .3MF, .STEP, .ZIP)</span>
+                    <span class="text-xs text-cyan-500 font-bold">🔒 Solo Admins</span>
+                </label>
+                {% if product.model_file %}
+                <div class="mb-2 flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-2 py-1 bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300 rounded uppercase">{{ product.model_file_extension|default:"3D" }}</span>
+                        <span class="text-sm text-gray-800 dark:text-gray-200 font-medium truncate max-w-xs">{{ product.model_file_name }}</span>
+                    </div>
+                    <a href="{% url 'download_product_model' product.slug %}" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+                        Descargar archivo actual ⬇️
+                    </a>
+                </div>
+                {% endif %}
+                {{ form.model_file }}
+                <p class="text-xs text-gray-500 mt-1">Sube un nuevo archivo para adjuntar o reemplazar el modelo 3D actual.</p>
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
                 {{ form.description }}
             </div>

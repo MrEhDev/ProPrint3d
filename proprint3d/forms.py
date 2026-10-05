@@ -84,7 +84,7 @@ class ProductFromCalcForm(forms.ModelForm):
     
     class Meta:
         model = Product
-        fields = ['title', 'category', 'new_category', 'description', 'price', 'is_on_sale', 'sale_price', 'is_active', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs', 'dimensions', 'makerworld_url', 'main_image']
+        fields = ['title', 'category', 'new_category', 'description', 'price', 'is_on_sale', 'sale_price', 'is_active', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs', 'dimensions', 'makerworld_url', 'main_image', 'model_file']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'}),
             'category': forms.Select(attrs={'class': 'form-select w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False}),
@@ -100,6 +100,7 @@ class ProductFromCalcForm(forms.ModelForm):
             'dimensions': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False}),
             'makerworld_url': forms.URLInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False}),
             'main_image': forms.FileInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False}),
+            'model_file': forms.FileInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False, 'accept': '.stl,.3mf,.step,.stp,.zip,.rar,.7z'}),
         }
 
 class ScraperForm(forms.Form):

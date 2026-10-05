@@ -165,11 +165,19 @@ def admin_dashboard_view(request):
             scraped_data = scrape_makerworld(url)
             
             if scraped_data.get('success'):
-                product_form = ProductFromCalcForm(initial={
+                initial_data = {
                     'title': scraped_data['title'],
                     'description': scraped_data['description'],
                     'makerworld_url': url
-                })
+                }
+                if scraped_data.get('weight_grams'):
+                    initial_data['weight_grams'] = scraped_data['weight_grams']
+                if scraped_data.get('print_time_hours') is not None:
+                    initial_data['print_time_hours'] = scraped_data['print_time_hours']
+                if scraped_data.get('print_time_minutes') is not None:
+                    initial_data['print_time_minutes'] = scraped_data['print_time_minutes']
+                    
+                product_form = ProductFromCalcForm(initial=initial_data)
                 
         # Acción 3: Guardar nuevo Producto desde el Dashboard
         elif 'save_product' in request.POST:
@@ -716,4 +724,25 @@ def update_cart_view(request, item_id):
             else:
                 item.delete()
     return redirect('cart')
+
+# =====================================================================
+# VISTA: download_product_model_file
+# Propósito: Descarga segura de archivos 3D (.stl, .3mf) para administradores.
+# =====================================================================
+@staff_member_required
+def download_product_model_file(request, slug):
+    """
+    Permite descargar el archivo STL/3MF adjunto a un producto.
+    Acceso restringido exclusivamente a administradores y staff.
+    """
+    from django.http import FileResponse, Http404
+    product = get_object_or_404(Product, slug=slug)
+    if not product.model_file:
+        raise Http404("Este producto no dispone de archivo 3D adjunto.")
+    
+    return FileResponse(
+        product.model_file.open('rb'),
+        as_attachment=True,
+        filename=product.model_file_name
+    )
 

@@ -92,9 +92,32 @@ class Product(models.Model):
     # Metadatos externos
     makerworld_url = models.URLField(blank=True, null=True, help_text="Enlace original si proviene de MakerWorld")
     
+    # Archivo 3D privado (STL, 3MF, STEP, etc) accesible solo por administradores
+    model_file = models.FileField(
+        upload_to='models_3d/', 
+        blank=True, 
+        null=True, 
+        help_text="Archivo 3D (.stl, .3mf, .step, .zip) accesible solo por administradores"
+    )
+
     # Estados y auditoría
     is_active = models.BooleanField(default=True, help_text="¿Visible en el catálogo?")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def model_file_name(self):
+        if self.model_file:
+            import os
+            return os.path.basename(self.model_file.name)
+        return None
+
+    @property
+    def model_file_extension(self):
+        if self.model_file:
+            import os
+            _, ext = os.path.splitext(self.model_file.name)
+            return ext.lower().replace('.', '')
+        return ''
 
     def save(self, *args, **kwargs):
         """
