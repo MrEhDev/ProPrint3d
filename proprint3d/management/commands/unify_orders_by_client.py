@@ -101,11 +101,15 @@ class Command(BaseCommand):
                 client_display = primary.client_name.strip()
                 self.stdout.write(f"\n👉 Cliente: {self.style.SUCCESS(client_display)} ({len(orders)} pedidos -> consolidando en Pedido #{primary.id})")
 
+                # Lista de todas las piezas que compondrán el pedido consolidado
+                all_simulated_items = list(primary.items.all())
+
                 # Fusionar piezas y atributos de los pedidos secundarios en el primario
                 for sec in secondary_orders:
                     sec_items = list(sec.items.all())
                     for itm in sec_items:
                         total_pieces_unified += 1
+                        all_simulated_items.append(itm)
                         self.stdout.write(f"   • Pieza transferida: '{itm.description}' (x{itm.quantity}, €{itm.price}) [Estado: {itm.status}] desde Pedido #{sec.id}")
                         if not dry_run:
                             itm.order = primary
@@ -159,11 +163,7 @@ class Command(BaseCommand):
                     if not dry_run:
                         sec.delete()
 
-                # Calcular piezas, totales y estado consolidado (tanto para simulación como real)
-                all_simulated_items = list(primary.items.all())
-                for sec in secondary_orders:
-                    all_simulated_items.extend(list(sec.items.all()))
-
+                # Calcular totales y estado consolidado (tanto para simulación como real)
                 total_sim_price = sum((i.price or decimal.Decimal('0.00')) for i in all_simulated_items)
                 total_sim_qty = sum((i.quantity or 1) for i in all_simulated_items)
                 item_statuses = [i.status for i in all_simulated_items]
