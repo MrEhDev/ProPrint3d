@@ -265,9 +265,20 @@
                                         {{ group.order.client_name }}
                                     </span>
                                     {% if group.order.notes %}
-                                    <span
-                                        class="cursor-help text-xs text-amber-500 hover:text-amber-600 select-none flex-shrink-0"
-                                        title="Nota del pedido: {{ group.order.notes }}">📝</span>
+                                    <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
+                                        📝
+                                        <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
+                                            <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                                    <span>📝</span> Notas del Pedido
+                                                </span>
+                                                <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
+                                                    {{ group.order.notes }}
+                                                </span>
+                                            </span>
+                                            <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
+                                        </span>
+                                    </span>
                                     {% endif %}
                                     {% if group.order.has_vat %}
                                     <span
@@ -338,18 +349,18 @@
                                             x{{ item.quantity }}
                                         </span>
                                         {% if item.display_notes %}
-                                        <span
-                                            class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0"
-                                            title="{{ item.display_notes }}" onclick="event.stopPropagation();">
+                                        <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                             📝
-                                            <span
-                                                class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[140px] max-w-[240px]">
-                                                <span
-                                                    class="bg-gray-900 text-white text-[11px] font-medium rounded-md px-2.5 py-1.5 shadow-xl border border-gray-700/60 whitespace-pre-wrap break-words text-center leading-tight">
-                                                    {{ item.display_notes }}
+                                            <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
+                                                <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                                        <span>📝</span> Notas de la Pieza
+                                                    </span>
+                                                    <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
+                                                        {{ item.display_notes }}
+                                                    </span>
                                                 </span>
-                                                <span
-                                                    class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/60 rotate-45"></span>
+                                                <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                             </span>
                                         </span>
                                         {% endif %}
@@ -464,7 +475,7 @@
     </div>
 
     <!-- Cabecera de Sección y Buscador sobre la Tabla Principal -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
+    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📦</span> Desglose de Pedidos (<span id="visible-orders-count">{{ orders.count }}</span>)
@@ -473,23 +484,33 @@
                 rentabilidad y acordeón desplegable de piezas.</p>
         </div>
 
-        <!-- Buscador exclusivo sobre la Tabla Principal -->
-        <div class="w-full sm:w-80 md:w-96">
-            <div class="relative">
-                <input type="text" id="table-search-input" placeholder="🔍 Buscar pedido, cliente o pieza..."
-                    oninput="filterTableLive(this.value)"
-                    class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+        <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Botón Ocultar / Mostrar Cobrados -->
+            <button type="button" id="btn-toggle-hide-paid" onclick="toggleHidePaidOrders()"
+                class="px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
+                title="Ocultar o mostrar pedidos que ya están en estado Cobrado">
+                <span id="hide-paid-icon">👁️</span>
+                <span id="hide-paid-label">Ocultar Cobrados</span>
+            </button>
+
+            <!-- Buscador exclusivo sobre la Tabla Principal -->
+            <div class="w-full sm:w-72 md:w-80">
+                <div class="relative">
+                    <input type="text" id="table-search-input" placeholder="🔍 Buscar pedido, cliente o pieza..."
+                        oninput="filterTableLive(this.value)"
+                        class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <button type="button" id="btn-clear-table-search" onclick="clearTableSearchLive()"
+                        class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                        title="Limpiar búsqueda">
+                        ✕
+                    </button>
                 </div>
-                <button type="button" id="btn-clear-table-search" onclick="clearTableSearchLive()"
-                    class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
-                    title="Limpiar búsqueda">
-                    ✕
-                </button>
             </div>
         </div>
     </div>
@@ -501,36 +522,62 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left">
                 <thead class="bg-gray-50 dark:bg-gray-800/60">
                     <tr>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">
+                        <th scope="col" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">
                         </th>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Pedido / Cliente</th>
-                        <th scope="col"
-                            class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Fechas</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Estado</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Fabricación</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Coste Prod.</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Total Venta</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">
-                            Rentabilidad</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Cobros</th>
-                        <th scope="col"
-                            class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Logística</th>
+                        <th scope="col" onclick="sortTableBy('id')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Número de Pedido o Cliente">
+                            <div class="flex items-center gap-1.5">
+                                <span>Pedido / Cliente</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-id">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('date')" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Fecha">
+                            <div class="flex items-center gap-1.5">
+                                <span>Fechas</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-date">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('status')" class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Estado">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <span>Estado</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-status">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('items')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cantidad de Piezas">
+                            <div class="flex items-center gap-1.5">
+                                <span>Fabricación</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-items">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('cost')" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Coste de Producción">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <span>Coste Prod.</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-cost">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('price')" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Total Venta">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <span>Total Venta</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-price">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('profit')" class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Rentabilidad Neta">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <span>Rentabilidad</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-profit">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('deposit')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cobros">
+                            <div class="flex items-center gap-1.5">
+                                <span>Cobros</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-deposit">↕</span>
+                            </div>
+                        </th>
+                        <th scope="col" onclick="sortTableBy('logistics')" class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Logística">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <span>Logística</span>
+                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-logistics">↕</span>
+                            </div>
+                        </th>
                         <th scope="col" class="relative px-3 py-3"><span class="sr-only">Acciones</span></th>
                     </tr>
                 </thead>
@@ -539,9 +586,16 @@
                     <!-- Fila Principal del Pedido -->
                     <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors order-row cursor-pointer group"
                         id="order-row-{{ order.id }}" onclick="toggleOrderAccordion({{ order.id }})"
-                        data-order-id="{{ order.id }}" data-price="{{ order.price|default:0|unlocalize }}"
-                        data-profit="{{ order.profit|default:0|unlocalize }}"
+                        data-order-id="{{ order.id }}"
+                        data-client-name="{{ order.client_name|escapejs }}"
+                        data-date="{{ order.order_date|date:'Y-m-d' }}"
+                        data-status="{{ order.status }}"
+                        data-items-count="{{ order.total_items_count|default:0 }}"
                         data-cost="{{ order.total_cost|default:0|unlocalize }}"
+                        data-price="{{ order.price|default:0|unlocalize }}"
+                        data-profit="{{ order.profit|default:0|unlocalize }}"
+                        data-deposit="{{ order.deposit_amount|default:0|unlocalize }}"
+                        data-logistics="{{ order.platform|default:''|escapejs }} {{ order.shipping|default:''|escapejs }}"
                         data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
 
                         <!-- Icono toggle acordeón -->
@@ -745,18 +799,18 @@
                                                                 class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                                                 <span>{{ item.description }}</span>
                                                                 {% if item.display_notes %}
-                                                                <span
-                                                                    class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0"
-                                                                    title="{{ item.display_notes }}">
+                                                                <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                                                     📝
-                                                                    <span
-                                                                        class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[140px] max-w-[260px]">
-                                                                        <span
-                                                                            class="bg-gray-900 text-white text-[11px] font-medium rounded-md px-2.5 py-1.5 shadow-xl border border-gray-700/60 whitespace-pre-wrap break-words text-center leading-tight">
-                                                                            {{ item.display_notes }}
+                                                                    <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
+                                                                        <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                                            <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                                                                <span>📝</span> Notas de la Pieza
+                                                                            </span>
+                                                                            <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
+                                                                                {{ item.display_notes }}
+                                                                            </span>
                                                                         </span>
-                                                                        <span
-                                                                            class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/60 rotate-45"></span>
+                                                                        <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                                                     </span>
                                                                 </span>
                                                                 {% endif %}
@@ -1633,6 +1687,129 @@
         return '€' + Number(val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // Control de Ocultar / Mostrar Pedidos Cobrados
+    let hidePaidOrders = false;
+
+    function toggleHidePaidOrders() {
+        hidePaidOrders = !hidePaidOrders;
+        localStorage.setItem('crm_hide_paid_orders', hidePaidOrders ? '1' : '0');
+        updateHidePaidButtonUI();
+        const searchInput = document.getElementById('table-search-input');
+        filterTableLive(searchInput ? searchInput.value : '');
+    }
+
+    function updateHidePaidButtonUI() {
+        const btn = document.getElementById('btn-toggle-hide-paid');
+        const icon = document.getElementById('hide-paid-icon');
+        const label = document.getElementById('hide-paid-label');
+        if (!btn || !icon || !label) return;
+
+        if (hidePaidOrders) {
+            btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700/60 ring-2 ring-emerald-500/20";
+            icon.textContent = '🚫';
+            label.textContent = 'Cobrados Ocultos';
+            btn.title = "Clic para volver a mostrar los pedidos cobrados";
+        } else {
+            btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600";
+            icon.textContent = '👁️';
+            label.textContent = 'Ocultar Cobrados';
+            btn.title = "Clic para ocultar los pedidos que ya están cobrados";
+        }
+    }
+
+    // Ordenación de Columnas en Tabla Desglose
+    let currentSortColumn = null;
+    let currentSortDirection = 'asc';
+
+    const statusPriority = {
+        'Presupuestado': 1,
+        'En proceso': 2,
+        'Realizado': 3,
+        'Enviado': 4,
+        'Entregado': 5,
+        'Cobrado': 6,
+        'Cancelado': 7
+    };
+
+    function sortTableBy(colKey) {
+        if (currentSortColumn === colKey) {
+            currentSortDirection = (currentSortDirection === 'asc') ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = colKey;
+            // Para importes numéricos y fechas iniciar descendente por usabilidad
+            currentSortDirection = (colKey === 'client' || colKey === 'status' || colKey === 'logistics') ? 'asc' : 'desc';
+        }
+
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.textContent = '↕';
+            icon.classList.remove('text-primary', 'font-black');
+            icon.classList.add('text-gray-400');
+        });
+
+        const activeIcon = document.getElementById(`sort-icon-${colKey}`);
+        if (activeIcon) {
+            activeIcon.textContent = currentSortDirection === 'asc' ? '▲' : '▼';
+            activeIcon.classList.remove('text-gray-400');
+            activeIcon.classList.add('text-primary', 'font-black');
+        }
+
+        const tbody = document.getElementById('orders-tbody');
+        const orderRows = Array.from(tbody.querySelectorAll('.order-row'));
+
+        const pairs = orderRows.map(row => {
+            const orderId = row.dataset.orderId;
+            const accordionRow = document.getElementById(`order-accordion-${orderId}`);
+            return { row, accordionRow };
+        });
+
+        pairs.sort((a, b) => {
+            let valA, valB;
+            if (colKey === 'id') {
+                valA = parseInt(a.row.dataset.orderId) || 0;
+                valB = parseInt(b.row.dataset.orderId) || 0;
+            } else if (colKey === 'client') {
+                valA = (a.row.dataset.clientName || '').toLowerCase();
+                valB = (b.row.dataset.clientName || '').toLowerCase();
+            } else if (colKey === 'date') {
+                valA = a.row.dataset.date || '';
+                valB = b.row.dataset.date || '';
+            } else if (colKey === 'status') {
+                valA = statusPriority[a.row.dataset.status] || 99;
+                valB = statusPriority[b.row.dataset.status] || 99;
+            } else if (colKey === 'items') {
+                valA = parseInt(a.row.dataset.itemsCount) || 0;
+                valB = parseInt(b.row.dataset.itemsCount) || 0;
+            } else if (colKey === 'cost') {
+                valA = parseFloat(a.row.dataset.cost) || 0;
+                valB = parseFloat(b.row.dataset.cost) || 0;
+            } else if (colKey === 'price') {
+                valA = parseFloat(a.row.dataset.price) || 0;
+                valB = parseFloat(b.row.dataset.price) || 0;
+            } else if (colKey === 'profit') {
+                valA = parseFloat(a.row.dataset.profit) || 0;
+                valB = parseFloat(b.row.dataset.profit) || 0;
+            } else if (colKey === 'deposit') {
+                valA = parseFloat(a.row.dataset.deposit) || 0;
+                valB = parseFloat(b.row.dataset.deposit) || 0;
+            } else if (colKey === 'logistics') {
+                valA = (a.row.dataset.logistics || '').toLowerCase();
+                valB = (b.row.dataset.logistics || '').toLowerCase();
+            }
+
+            let cmp = 0;
+            if (valA < valB) cmp = -1;
+            if (valA > valB) cmp = 1;
+            return currentSortDirection === 'asc' ? cmp : -cmp;
+        });
+
+        const noResultsRow = document.getElementById('no-search-results-row');
+        pairs.forEach(pair => {
+            tbody.appendChild(pair.row);
+            if (pair.accordionRow) tbody.appendChild(pair.accordionRow);
+        });
+        if (noResultsRow) tbody.appendChild(noResultsRow);
+    }
+
     function filterTableLive(term) {
         const filter = term.toLowerCase().trim();
         const rows = document.querySelectorAll('.order-row');
@@ -1662,8 +1839,12 @@
             const searchText = (row.dataset.searchText || '').toLowerCase();
             const orderId = row.dataset.orderId;
             const accordionRow = document.getElementById(`order-accordion-${orderId}`);
+            const status = row.dataset.status || '';
 
-            if (!filter || searchText.includes(filter)) {
+            const matchesSearch = !filter || searchText.includes(filter);
+            const matchesPaidFilter = !hidePaidOrders || status !== 'Cobrado';
+
+            if (matchesSearch && matchesPaidFilter) {
                 row.style.display = '';
                 visibleCount++;
 
