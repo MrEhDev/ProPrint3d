@@ -19,6 +19,30 @@
         position: relative;
     }
 
+        /* Anchos responsivos de columnas Kanban: 3 en pantalla completa, 2 en pantalla dividida */
+    .kanban-board {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        padding-bottom: 1rem;
+    }
+    .kanban-col {
+        flex: 0 0 85vw;
+        max-width: 340px;
+    }
+    @media (min-width: 640px) {
+        .kanban-col {
+            flex: 0 0 calc((100% - 1rem) / 2);
+            max-width: none;
+        }
+    }
+    @media (min-width: 1024px) {
+        .kanban-col {
+            flex: 0 0 calc((100% - 2rem) / 3);
+            max-width: none;
+        }
+    }
+
     /* Estilos de compresión para tarjetas Kanban */
     .kanban-card-collapsible {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -157,10 +181,10 @@
                 estado</span>
         </div>
 
-        <div class="flex overflow-x-auto space-x-4 pb-4 kanban-board">
+        <div class="flex overflow-x-auto gap-4 pb-4 kanban-board">
             {% for status_name, group_orders in kanban_columns.items %}
             <!-- Columna Kanban: {{ status_name }} -->
-            <div class="flex-none w-80 bg-gray-50/90 dark:bg-gray-800/40 rounded-xl p-3.5 kanban-col border border-gray-200/80 dark:border-gray-700/60 shadow-sm
+            <div class="flex-none bg-gray-50/90 dark:bg-gray-800/40 rounded-xl p-3.5 kanban-col border border-gray-200/80 dark:border-gray-700/60 shadow-sm
                 {% if status_name == 'Presupuestado' %}border-t-4 border-t-indigo-500
                 {% elif status_name == 'En proceso' %}border-t-4 border-t-amber-500
                 {% elif status_name == 'Realizado' %}border-t-4 border-t-teal-500
