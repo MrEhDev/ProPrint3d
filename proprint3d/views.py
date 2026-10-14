@@ -463,6 +463,23 @@ def crm_dashboard_view(request):
     if orders_for_stats.count() > 0:
         avg_profit = total_profit / orders_for_stats.count()
         
+    products_qs = Product.objects.filter(is_active=True).select_related('category')
+    products_with_id = []
+    for p in products_qs:
+        products_with_id.append({
+            'id': p.id,
+            'title': p.title,
+            'price': float(p.price),
+            'sale_price': float(p.sale_price) if p.sale_price else None,
+            'is_on_sale': p.is_on_sale,
+            'weight_grams': p.weight_grams or 0.0,
+            'print_time_hours': p.print_time_hours or 0.0,
+            'print_time_minutes': p.print_time_minutes or 0,
+            'extra_costs': float(p.extra_costs or 0.0),
+            'image_url': p.main_image.url if p.main_image else None,
+            'category_name': p.category.name if p.category else 'Catálogo'
+        })
+
     context = {
         'orders': orders,
         'kanban_columns': kanban_columns,
@@ -476,7 +493,11 @@ def crm_dashboard_view(request):
         'total_profit': total_profit,
         'avg_profit': avg_profit,
         'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
-        'status_choices': [c[0] for c in Order.STATUS_CHOICES]
+        'status_choices': [c[0] for c in Order.STATUS_CHOICES],
+        'platform_choices': Order.PLATFORM_CHOICES,
+        'shipping_choices': Order.SHIPPING_CHOICES,
+        'products_with_id': products_with_id,
+        'products_json': json.dumps(products_with_id, default=str),
     }
     
     return render(request, 'crm_dashboard.html', context)
@@ -643,6 +664,135 @@ def update_order_payment_api(request, order_id):
             })
         except Order.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Pedido no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+@staff_member_required
+def update_order_full_api(request, order_id):
+    """
+    Actualiza completamente un pedido y su desglose de piezas (añadir, editar o eliminar piezas).
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order = get_object_or_404(Order, id=order_id)
+            
+            # 1. Cabecera del pedido
+            if 'client_name' in data and data['client_name'].strip():
+                order.client_name = data['client_name'].strip()
+            if 'order_date' in data and data['order_date']:
+                order.order_date = datetime.date.fromisoformat(data['order_date'])
+            if 'deadline' in data:
+                order.deadline = datetime.date.fromisoformat(data['deadline']) if data['deadline'] else None
+            if 'platform' in data:
+                order.platform = data['platform']
+            if 'shipping' in data:
+                order.shipping = data['shipping']
+            if 'notes' in data:
+                order.notes = data['notes']
+            if 'status' in data and data['status'] in dict(Order.STATUS_CHOICES):
+                order.status = data['status']
+                order.update_status_dates(order.status)
+                
+            # 2. Piezas del pedido
+            pieces = data.get('pieces', [])
+            if not pieces:
+                return JsonResponse({'success': False, 'error': 'El pedido debe contener al menos una pieza.'}, status=400)
+                
+            existing_items_map = {item.id: item for item in order.items.all()}
+            retained_ids = set()
+            
+            for p in pieces:
+                pid = p.get('id')
+                product_id = p.get('product_id')
+                product = Product.objects.filter(id=product_id).first() if product_id else None
+                desc = p.get('description', '').strip() or (product.title if product else 'Pieza a medida')
+                qty = int(p.get('quantity') or 1)
+                w = float(p.get('weight_grams') or 0.0)
+                h = float(p.get('print_time_hours') or 0.0)
+                m = int(p.get('print_time_minutes') or 0)
+                extra = decimal.Decimal(str(p.get('extra_costs') or 0.00).replace(',', '.'))
+                u_cost = decimal.Decimal(str(p.get('unit_cost') or 0.00).replace(',', '.'))
+                t_cost = decimal.Decimal(str(p.get('total_cost') or 0.00).replace(',', '.'))
+                u_price = decimal.Decimal(str(p.get('unit_price') or 0.00).replace(',', '.'))
+                t_price = decimal.Decimal(str(p.get('price') or 0.00).replace(',', '.'))
+                status_piece = p.get('status') or order.status
+                
+                if pid and int(pid) in existing_items_map:
+                    itm = existing_items_map[int(pid)]
+                    itm.product = product
+                    itm.description = desc
+                    itm.quantity = qty
+                    itm.weight_grams = w
+                    itm.print_time_hours = h
+                    itm.print_time_minutes = m
+                    itm.extra_costs = extra
+                    itm.unit_cost = u_cost
+                    itm.total_cost = t_cost
+                    itm.unit_price = u_price
+                    itm.price = t_price
+                    itm.status = status_piece
+                    itm.save()
+                    retained_ids.add(itm.id)
+                else:
+                    new_itm = OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        description=desc,
+                        quantity=qty,
+                        weight_grams=w,
+                        print_time_hours=h,
+                        print_time_minutes=m,
+                        extra_costs=extra,
+                        unit_cost=u_cost,
+                        total_cost=t_cost,
+                        unit_price=u_price,
+                        price=t_price,
+                        status=status_piece
+                    )
+                    retained_ids.add(new_itm.id)
+                    
+            # Eliminar piezas que se hayan borrado desde el modal
+            to_delete = set(existing_items_map.keys()) - retained_ids
+            if to_delete:
+                OrderItem.objects.filter(id__in=to_delete, order=order).delete()
+                
+            # 3. Recalcular totales desde las piezas
+            order.update_totals_from_items()
+            
+            # Ajustar estado consolidado del pedido según sus piezas
+            all_piece_statuses = list(order.items.values_list('status', flat=True))
+            if all(s == 'Cobrado' for s in all_piece_statuses):
+                order.status = 'Cobrado'
+            elif all(s in ['Cobrado', 'Entregado'] for s in all_piece_statuses):
+                order.status = 'Entregado'
+            elif all(s in ['Cobrado', 'Entregado', 'Enviado'] for s in all_piece_statuses):
+                order.status = 'Enviado'
+            elif all(s in ['Cobrado', 'Entregado', 'Enviado', 'Realizado'] for s in all_piece_statuses):
+                order.status = 'Realizado'
+            elif any(s in ['En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'] for s in all_piece_statuses):
+                if order.status == 'Presupuestado':
+                    order.status = 'En proceso'
+                    
+            order.update_status_dates(order.status)
+            order.save()
+            
+            return JsonResponse({'success': True, 'order_id': order.id})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+@staff_member_required
+def delete_order_api(request, order_id):
+    """
+    Elimina permanentemente un pedido y todas sus piezas asociadas.
+    """
+    if request.method == 'POST':
+        try:
+            order = get_object_or_404(Order, id=order_id)
+            order.delete()
+            return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

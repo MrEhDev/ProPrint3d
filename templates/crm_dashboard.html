@@ -152,7 +152,7 @@
                     {% for group in group_orders %}
                     <!-- Tarjeta de Pedido / Agrupación en columna -->
                     <div class="bg-white dark:bg-dark rounded-xl p-3.5 transition-all kanban-card relative
-                        {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                        {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                             border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md
                         {% else %}
                             border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md
@@ -188,7 +188,11 @@
 
                             <!-- Badge de Estado / Completado -->
                             <div>
-                                {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                                {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
+                                    💰 Cobrado
+                                </span>
+                                {% elif status_name == 'Realizado' and group.are_all_items_realizado %}
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
                                     ✅ Completo
                                 </span>
@@ -200,7 +204,7 @@
                             </div>
                         </div>
 
-                        <!-- Badge de Cobros / Señal (Clicable) -->
+                        <!-- Badge de Señal / Adelanto pendiente de cobro completo -->
                         {% if group.order.deposit_amount > 0 and group.order.status != 'Cobrado' %}
                         <div class="mb-2">
                             <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
@@ -210,33 +214,23 @@
                                 <span class="text-[9px] text-amber-600 dark:text-amber-400">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
                             </button>
                         </div>
-                        {% elif group.order.status == 'Cobrado' %}
-                        <div class="mb-2">
-                            <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
-                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition"
-                                title="Pedido cobrado. Clic para ver detalles">
-                                <span>💰 {{ group.order.payment_summary_text }}</span>
-                                <span class="text-[9px] text-emerald-600 dark:text-emerald-400">Cobrado</span>
-                            </button>
-                        </div>
                         {% endif %}
 
                         <!-- Piezas en esta columna (Arrastrables individualmente) -->
                         <div class="space-y-1.5 my-2.5">
                             {% for item in group.items %}
                             <div class="p-2 rounded-lg bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
-                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}" data-order-id="{{ group.order.id }}" title="Arrastra esta pieza individual a otra columna">
+                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}" data-order-id="{{ group.order.id }}" title="{{ item.description }}">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="text-xs text-gray-400 select-none">⠿</span>
-                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate" title="{{ item.description }}">
                                             {{ item.description }}
                                         </span>
-                                        <span class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">
+                                        <span class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
                                     </div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 pl-3.5 mt-0.5">
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 mt-0.5">
                                         {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
                                         {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
                                     </div>
@@ -260,7 +254,7 @@
                         <!-- Pie de la Tarjeta: Total, Rentabilidad y Accesos directos -->
                         <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
                             <div>
-                                {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                                {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                                 <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total Pedido</span>
                                 <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
                                 {% else %}
@@ -280,8 +274,8 @@
                                     title="Gestionar Cobro o Paga y Señal">
                                     💳
                                 </button>
-                                <a href="{% url 'admin:proprint3d_order_change' group.order.id %}"
-                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1" title="Editar pedido en admin">✏️</a>
+                                <button type="button" onclick="event.stopPropagation(); openEditOrderModal({{ group.order.id }})"
+                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1" title="Editar pedido y piezas">✏️</button>
                             </div>
                         </div>
                     </div>
@@ -491,8 +485,8 @@
 
                         <!-- Acciones -->
                         <td class="px-3 py-3 whitespace-nowrap text-right text-xs" onclick="event.stopPropagation()">
-                            <a href="{% url 'admin:proprint3d_order_change' order.id %}"
-                                class="text-gray-400 hover:text-primary transition-colors text-sm" title="Editar en Django Admin">✏️</a>
+                            <button type="button" onclick="openEditOrderModal({{ order.id }})"
+                                class="text-gray-400 hover:text-primary transition-colors text-sm p-1" title="Editar pedido y piezas">✏️</button>
                         </td>
                     </tr>
 
@@ -504,9 +498,16 @@
                                     <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                         <span>🧩</span> Piezas incluidas en el Pedido #{{ order.id }} ({{ order.items.count }} referencias)
                                     </h4>
-                                    <span class="text-[11px] text-gray-500">
-                                        Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{ order.total_items_count }} uds</strong> · Coste prod: <strong class="text-red-500">€{{ order.total_cost }}</strong> · Total venta: <strong class="text-primary">€{{ order.price }}</strong>
-                                    </span>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" onclick="event.stopPropagation(); openEditOrderModal({{ order.id }})"
+                                            class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 hover:bg-primary text-primary hover:text-white dark:bg-primary/20 dark:hover:bg-primary dark:text-cyan-300 dark:hover:text-white transition flex items-center gap-1.5"
+                                            title="Editar este pedido y gestionar piezas">
+                                            <span>✏️</span> Editar Pedido
+                                        </button>
+                                        <span class="text-[11px] text-gray-500">
+                                            Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{ order.total_items_count }} uds</strong> · Coste prod: <strong class="text-red-500">€{{ order.total_cost }}</strong> · Total venta: <strong class="text-primary">€{{ order.price }}</strong>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div class="overflow-x-auto">
@@ -723,7 +724,198 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL DE EDICIÓN DE PEDIDO Y PIEZAS (WEB-STYLE) -->
+<!-- ========================================== -->
+<div id="edit-order-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm hidden overflow-y-auto">
+    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative my-8 max-h-[92vh] flex flex-col">
+        <!-- Encabezado Modal -->
+        <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>✏️</span> Editar Pedido <span id="edit-modal-order-id-label" class="text-primary font-black">#0</span>
+                </h3>
+                <span id="edit-modal-client-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                    Cliente
+                </span>
+                <span id="edit-modal-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                    Estado
+                </span>
+            </div>
+            <button type="button" onclick="closeEditOrderModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl font-bold p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                &times;
+            </button>
+        </div>
+
+        <!-- Contenido desplazable del modal -->
+        <div class="overflow-y-auto flex-1 pr-1 sm:pr-2 py-4 space-y-6">
+            <!-- 1. Datos Generales del Pedido -->
+            <div class="bg-gray-50 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/70 dark:border-gray-800">
+                <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <span>📋</span> 1. Información General del Pedido
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente *</label>
+                        <input type="text" id="edit-order-client-name" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha del Pedido *</label>
+                        <input type="date" id="edit-order-date" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite / Entrega</label>
+                        <input type="date" id="edit-order-deadline" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado General</label>
+                        <select id="edit-order-status" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            {% for st in status_choices %}
+                            <option value="{{ st }}">{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
+                        <select id="edit-order-platform" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option value="">Selecciona plataforma...</option>
+                            {% for code, label in platform_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de Envío</label>
+                        <select id="edit-order-shipping" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option value="">Selecciona envío...</option>
+                            {% for code, label in shipping_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas o Instrucciones</label>
+                        <textarea id="edit-order-notes" rows="2" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Detalles de personalización, colores, requisitos..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Piezas del Pedido -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <span>🧩</span> 2. Piezas del Pedido
+                        </h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400">Añade, modifica o elimina piezas. Los costes, precio y rentabilidad se recalculan en tiempo real.</p>
+                    </div>
+                    <button type="button" onclick="addNewEditPieceRow()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-secondary text-white shadow transition flex items-center gap-1.5">
+                        <span>➕</span> Añadir Pieza
+                    </button>
+                </div>
+
+                <!-- Lista de piezas -->
+                <div id="edit-pieces-container" class="space-y-3">
+                    <!-- Renderizado dinámicamente -->
+                </div>
+            </div>
+
+            <!-- 3. Barra Resumen en Tiempo Real -->
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800">
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-center">
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Piezas</p>
+                        <p id="edit-summary-items" class="text-base font-black text-gray-900 dark:text-white">0 uds</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Peso Total</p>
+                        <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400">0 g</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Tiempo Fab.</p>
+                        <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400">0h 0m</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Coste Fab.</p>
+                        <p id="edit-summary-cost" class="text-base font-black text-red-500">€0.00</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Total Pedido</p>
+                        <p id="edit-summary-price" class="text-lg font-black text-primary">€0.00</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
+                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Beneficio</p>
+                        <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400">€0.00</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
+                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Margen</p>
+                        <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pie y Botones de Acción -->
+        <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+            <button type="button" onclick="deleteCurrentEditOrder()" class="text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition flex items-center gap-1.5 w-full sm:w-auto justify-center">
+                <span>🗑️</span> Eliminar Pedido
+            </button>
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                <button type="button" onclick="closeEditOrderModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-save-order-full" onclick="submitEditOrderModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white shadow-md transition flex items-center justify-center gap-2">
+                    <span>💾</span> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Catálogo de productos para el autocompletado en el modal de edición
+    const catalogProducts = {{ products_json|safe }};
+
+    // Datos estructurados completos de todos los pedidos y sus piezas para el modal de edición
+    const allOrdersData = {
+        {% for order in orders %}
+        "{{ order.id }}": {
+            id: {{ order.id }},
+            clientName: "{{ order.client_name|escapejs }}",
+            orderDate: "{{ order.order_date|date:'Y-m-d' }}",
+            deadline: "{{ order.deadline|date:'Y-m-d'|default:'' }}",
+            status: "{{ order.status|escapejs }}",
+            platform: "{{ order.platform|default:''|escapejs }}",
+            shipping: "{{ order.shipping|default:''|escapejs }}",
+            notes: "{{ order.notes|default:''|escapejs }}",
+            price: {{ order.price|default:0|unlocalize }},
+            totalCost: {{ order.total_cost|default:0|unlocalize }},
+            profit: {{ order.profit|default:0|unlocalize }},
+            items: [
+                {% for item in order.items.all %}
+                {
+                    id: {{ item.id }},
+                    productId: {% if item.product %}{{ item.product.id }}{% else %}null{% endif %},
+                    description: "{{ item.description|escapejs }}",
+                    imageUrl: {% if item.product and item.product.main_image %}"{{ item.product.main_image.url }}"{% else %}null{% endif %},
+                    quantity: {{ item.quantity|default:1 }},
+                    weight: {{ item.weight_grams|default:0|unlocalize }},
+                    hours: {{ item.print_time_hours|default:0|unlocalize }},
+                    mins: {{ item.print_time_minutes|default:0 }},
+                    extra: {{ item.extra_costs|default:0|unlocalize }},
+                    unitCost: {{ item.unit_cost|default:0|unlocalize }},
+                    totalCost: {{ item.total_cost|default:0|unlocalize }},
+                    unitPrice: {{ item.unit_price|default:0|unlocalize }},
+                    totalPrice: {{ item.price|default:0|unlocalize }},
+                    status: "{{ item.status|default:order.status|escapejs }}"
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
     // Diccionario con los datos de cobro de cada pedido
     const ordersPaymentData = {
         {% for order in orders %}
@@ -1191,6 +1383,633 @@
         localStorage.removeItem('crm_filter_month_to');
         window.location.href = window.location.pathname;
     }
+
+    // ==========================================
+    // MODAL DE EDICIÓN DE PEDIDO Y PIEZAS (WEB-STYLE)
+    // ==========================================
+    let currentEditOrderId = null;
+    let editModalPieces = [];
+
+    const orderStatuses = [
+        'Presupuestado',
+        'Diseño',
+        'Imprimiendo',
+        'En proceso',
+        'Realizado',
+        'Enviado',
+        'Entregado',
+        'Cobrado'
+    ];
+
+    function statusOptionsHtml(currentStatus) {
+        return orderStatuses.map(s => `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`).join('');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // Fórmula de costes idéntica al formulario de nuevo pedido
+    function calculateUnitCost(w, h, m, extra) {
+        const totalHours = (parseFloat(h) || 0) + ((parseFloat(m) || 0) / 60);
+        const weight = parseFloat(w) || 0;
+        const extraVal = parseFloat(extra) || 0;
+
+        if (weight <= 0 && totalHours <= 0) {
+            return {
+                unitCost: extraVal,
+                suggX25: extraVal * 2.5,
+                suggX30: extraVal * 3.0,
+                suggX40: extraVal * 4.0
+            };
+        }
+
+        const costFilament = 0.02 * weight;
+        const costEnergy = 0.15 * 0.12 * totalHours;
+        const costWear = 0.025 * totalHours;
+
+        const costSubtotal = costFilament + costEnergy + costWear;
+        const errorMargin = costSubtotal * 0.15;
+        const baseVar = costFilament + costEnergy;
+        const fixedCosts = costWear + errorMargin + extraVal;
+
+        const unitCost = costSubtotal + errorMargin + extraVal;
+
+        const suggX25 = (baseVar * 2.5) + fixedCosts;
+        const suggX30 = (baseVar * 3.0) + fixedCosts;
+        const suggX40 = (baseVar * 4.0) + fixedCosts;
+
+        return {
+            unitCost: Math.round(unitCost * 100) / 100,
+            suggX25: Math.round(suggX25 * 100) / 100,
+            suggX30: Math.round(suggX30 * 100) / 100,
+            suggX40: Math.round(suggX40 * 100) / 100
+        };
+    }
+
+    function openEditOrderModal(orderId) {
+        const order = allOrdersData[orderId];
+        if (!order) {
+            alert('No se encontraron los datos del pedido #' + orderId);
+            return;
+        }
+
+        currentEditOrderId = orderId;
+
+        // Encabezado
+        const lblId = document.getElementById('edit-modal-order-id-label');
+        const bClient = document.getElementById('edit-modal-client-badge');
+        const bStatus = document.getElementById('edit-modal-status-badge');
+        if (lblId) lblId.textContent = `#${orderId}`;
+        if (bClient) bClient.textContent = order.clientName;
+        if (bStatus) bStatus.textContent = order.status;
+
+        // Formulario
+        document.getElementById('edit-order-client-name').value = order.clientName || '';
+        document.getElementById('edit-order-date').value = order.orderDate || '';
+        document.getElementById('edit-order-deadline').value = order.deadline || '';
+        document.getElementById('edit-order-status').value = order.status || 'Presupuestado';
+        document.getElementById('edit-order-platform').value = order.platform || '';
+        document.getElementById('edit-order-shipping').value = order.shipping || '';
+        document.getElementById('edit-order-notes').value = order.notes || '';
+
+        // Copia profunda de piezas
+        if (order.items && order.items.length > 0) {
+            editModalPieces = JSON.parse(JSON.stringify(order.items));
+        } else {
+            editModalPieces = [{
+                id: null,
+                productId: null,
+                description: 'Pieza a medida',
+                imageUrl: null,
+                quantity: 1,
+                weight: 0,
+                hours: 0,
+                mins: 0,
+                extra: 0,
+                unitCost: 0,
+                totalCost: 0,
+                unitPrice: order.price || 0,
+                totalPrice: order.price || 0,
+                status: order.status || 'Presupuestado'
+            }];
+        }
+
+        renderEditPieces();
+
+        const modal = document.getElementById('edit-order-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEditOrderModal() {
+        const modal = document.getElementById('edit-order-modal');
+        if (modal) modal.classList.add('hidden');
+        currentEditOrderId = null;
+        editModalPieces = [];
+    }
+
+    function renderEditPieces() {
+        const container = document.getElementById('edit-pieces-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        editModalPieces.forEach((piece, index) => {
+            const costData = calculateUnitCost(piece.weight, piece.hours, piece.mins, piece.extra);
+            piece.unitCost = costData.unitCost;
+            piece.totalCost = Math.round((piece.unitCost * (piece.quantity || 1)) * 100) / 100;
+            const profit = Math.round(((piece.totalPrice || 0) - piece.totalCost) * 100) / 100;
+            const margin = (piece.totalPrice || 0) > 0 ? ((profit / piece.totalPrice) * 100).toFixed(0) : '0';
+
+            const card = document.createElement('div');
+            card.className = 'edit-piece-row bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 rounded-xl p-3.5 relative shadow-sm transition';
+            card.dataset.index = index;
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-2 min-w-0">
+                        ${piece.imageUrl ? `
+                            <img src="${piece.imageUrl}" alt="" class="w-7 h-7 rounded-lg object-cover border border-cyan-400/50 flex-shrink-0">
+                        ` : `
+                            <span class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs flex-shrink-0">🧩</span>
+                        `}
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200">Pieza #${index + 1}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${piece.productId ? 'bg-primary/20 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}">
+                            ${piece.productId ? 'Catálogo' : 'A medida'}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 text-[11px]">
+                            <span class="text-gray-400">Estado:</span>
+                            <select onchange="onEditPieceStatusChange(${index}, this.value)" class="text-[11px] font-bold p-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                                ${statusOptionsHtml(piece.status || document.getElementById('edit-order-status').value || 'Presupuestado')}
+                            </select>
+                        </div>
+                        <button type="button" onclick="removeEditPiece(${index})" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 transition text-sm" title="Eliminar pieza">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Buscador / Catálogo -->
+                <div class="mb-3 relative edit-autocomplete-wrap">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">Descripción / Producto *</label>
+                    <div class="relative">
+                        <input type="text" value="${escapeHtml(piece.description || '')}"
+                            placeholder="Escribe para buscar en catálogo o un encargo a medida..."
+                            oninput="handleEditAutocomplete(this, ${index})"
+                            autocomplete="off"
+                            class="w-full text-xs p-2 pr-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <span class="absolute right-2.5 top-2.5 text-xs text-gray-400 pointer-events-none">🔍</span>
+                    </div>
+                    <div id="edit-autocomplete-${index}" class="edit-autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1 z-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
+                    </div>
+                </div>
+
+                <!-- Métricas de Fabricación -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 bg-gray-50/70 dark:bg-gray-900/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Peso (g)</label>
+                        <input type="number" step="0.1" min="0" value="${piece.weight || 0}"
+                            oninput="onEditPieceFieldChange(${index}, 'weight', this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Horas Impresión</label>
+                        <input type="number" step="0.1" min="0" value="${piece.hours || 0}"
+                            oninput="onEditPieceFieldChange(${index}, 'hours', this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Minutos Impresión</label>
+                        <input type="number" step="1" min="0" max="59" value="${piece.mins || 0}"
+                            oninput="onEditPieceFieldChange(${index}, 'mins', this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Costes Extras (€)</label>
+                        <input type="number" step="0.01" min="0" value="${piece.extra || 0}"
+                            oninput="onEditPieceFieldChange(${index}, 'extra', this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- Cantidad, Precio y Rentabilidad -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Cantidad *</label>
+                        <input type="number" min="1" step="1" value="${piece.quantity || 1}"
+                            oninput="onEditPieceQtyChange(${index}, this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Precio Unitario (€)</label>
+                        <input type="number" step="0.01" min="0" value="${piece.unitPrice || 0}"
+                            oninput="onEditPieceUnitPriceChange(${index}, this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold edit-piece-uprice">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Total Pieza (€) *</label>
+                        <input type="number" step="0.01" min="0" value="${piece.totalPrice || 0}"
+                            oninput="onEditPieceTotalPriceChange(${index}, this.value)"
+                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-black edit-piece-tprice">
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700/60 p-2 rounded-lg flex items-center justify-between text-xs">
+                        <div>
+                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Ganancia</span>
+                            <span class="piece-profit-val font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">€${profit.toFixed(2)}</span>
+                        </div>
+                        <span class="piece-margin-badge px-1.5 py-0.5 rounded text-[10px] font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
+                            ${margin}%
+                        </span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        recalcEditModalTotals();
+    }
+
+    function addNewEditPieceRow(data = null) {
+        const generalStatus = document.getElementById('edit-order-status') ? document.getElementById('edit-order-status').value : 'Presupuestado';
+        const newPiece = data || {
+            id: null,
+            productId: null,
+            description: '',
+            imageUrl: null,
+            quantity: 1,
+            weight: 0,
+            hours: 0,
+            mins: 0,
+            extra: 0,
+            unitCost: 0,
+            totalCost: 0,
+            unitPrice: 0,
+            totalPrice: 0,
+            status: generalStatus
+        };
+        editModalPieces.push(newPiece);
+        renderEditPieces();
+    }
+
+    function removeEditPiece(index) {
+        if (editModalPieces.length <= 1) {
+            alert('El pedido debe tener al menos una pieza. Si deseas descartar el pedido completo, pulsa en "Eliminar Pedido".');
+            return;
+        }
+        editModalPieces.splice(index, 1);
+        renderEditPieces();
+    }
+
+    function onEditPieceFieldChange(index, field, val) {
+        if (!editModalPieces[index]) return;
+        editModalPieces[index][field] = parseFloat(val) || 0;
+
+        const costData = calculateUnitCost(
+            editModalPieces[index].weight,
+            editModalPieces[index].hours,
+            editModalPieces[index].mins,
+            editModalPieces[index].extra
+        );
+        editModalPieces[index].unitCost = costData.unitCost;
+        editModalPieces[index].totalCost = Math.round((costData.unitCost * (editModalPieces[index].quantity || 1)) * 100) / 100;
+
+        updatePieceRowMetrics(index);
+        recalcEditModalTotals();
+    }
+
+    function onEditPieceQtyChange(index, val) {
+        if (!editModalPieces[index]) return;
+        const qty = parseInt(val) || 1;
+        editModalPieces[index].quantity = qty;
+
+        const uPrice = parseFloat(editModalPieces[index].unitPrice) || 0;
+        editModalPieces[index].totalPrice = Math.round((uPrice * qty) * 100) / 100;
+        editModalPieces[index].totalCost = Math.round(((editModalPieces[index].unitCost || 0) * qty) * 100) / 100;
+
+        const rowEl = document.querySelector(`.edit-piece-row[data-index="${index}"]`);
+        if (rowEl) {
+            const tpriceInput = rowEl.querySelector('.edit-piece-tprice');
+            if (tpriceInput) tpriceInput.value = editModalPieces[index].totalPrice.toFixed(2);
+        }
+
+        updatePieceRowMetrics(index);
+        recalcEditModalTotals();
+    }
+
+    function onEditPieceUnitPriceChange(index, val) {
+        if (!editModalPieces[index]) return;
+        const uPrice = parseFloat(val) || 0;
+        editModalPieces[index].unitPrice = uPrice;
+        const qty = parseInt(editModalPieces[index].quantity) || 1;
+        editModalPieces[index].totalPrice = Math.round((uPrice * qty) * 100) / 100;
+
+        const rowEl = document.querySelector(`.edit-piece-row[data-index="${index}"]`);
+        if (rowEl) {
+            const tpriceInput = rowEl.querySelector('.edit-piece-tprice');
+            if (tpriceInput) tpriceInput.value = editModalPieces[index].totalPrice.toFixed(2);
+        }
+
+        updatePieceRowMetrics(index);
+        recalcEditModalTotals();
+    }
+
+    function onEditPieceTotalPriceChange(index, val) {
+        if (!editModalPieces[index]) return;
+        const tPrice = parseFloat(val) || 0;
+        editModalPieces[index].totalPrice = tPrice;
+        const qty = parseInt(editModalPieces[index].quantity) || 1;
+        editModalPieces[index].unitPrice = qty > 0 ? Math.round((tPrice / qty) * 100) / 100 : 0;
+
+        const rowEl = document.querySelector(`.edit-piece-row[data-index="${index}"]`);
+        if (rowEl) {
+            const upriceInput = rowEl.querySelector('.edit-piece-uprice');
+            if (upriceInput) upriceInput.value = editModalPieces[index].unitPrice.toFixed(2);
+        }
+
+        updatePieceRowMetrics(index);
+        recalcEditModalTotals();
+    }
+
+    function onEditPieceStatusChange(index, val) {
+        if (!editModalPieces[index]) return;
+        editModalPieces[index].status = val;
+    }
+
+    function updatePieceRowMetrics(index) {
+        const rowEl = document.querySelector(`.edit-piece-row[data-index="${index}"]`);
+        if (!rowEl) return;
+        const piece = editModalPieces[index];
+        const profit = Math.round(((piece.totalPrice || 0) - (piece.totalCost || 0)) * 100) / 100;
+        const margin = (piece.totalPrice || 0) > 0 ? ((profit / piece.totalPrice) * 100).toFixed(0) : '0';
+
+        const profitEl = rowEl.querySelector('.piece-profit-val');
+        const marginEl = rowEl.querySelector('.piece-margin-badge');
+
+        if (profitEl) {
+            profitEl.textContent = `€${profit.toFixed(2)}`;
+            profitEl.className = `piece-profit-val font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`;
+        }
+        if (marginEl) {
+            marginEl.textContent = `${margin}%`;
+            marginEl.className = `piece-margin-badge px-1.5 py-0.5 rounded text-[10px] font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}`;
+        }
+    }
+
+    function handleEditAutocomplete(inputEl, index) {
+        const dropdown = document.getElementById(`edit-autocomplete-${index}`);
+        if (!dropdown) return;
+        const query = inputEl.value.trim().toLowerCase();
+        if (editModalPieces[index]) {
+            editModalPieces[index].description = inputEl.value;
+        }
+
+        if (!query) {
+            dropdown.innerHTML = '';
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        const matches = (typeof catalogProducts !== 'undefined' ? catalogProducts : []).filter(p => p.title.toLowerCase().includes(query));
+        if (matches.length === 0) {
+            dropdown.innerHTML = `
+                <div class="p-2.5 text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-1.5">
+                    <span>✨</span> Encargo a medida: "${escapeHtml(inputEl.value)}"
+                </div>
+            `;
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        let html = '';
+        matches.forEach(item => {
+            const regex = new RegExp(`(${query})`, 'gi');
+            const highlightedTitle = item.title.replace(regex, '<span class="text-cyan-500 dark:text-cyan-400 font-extrabold underline">$1</span>');
+            const effectivePrice = (item.sale_price !== null && item.is_on_sale) ? item.sale_price : item.price;
+
+            html += `
+                <div class="p-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 cursor-pointer flex items-center gap-2.5 transition edit-cat-opt"
+                    onclick="selectEditCatalogProduct(${index}, ${item.id})">
+                    ${item.image_url ? `
+                        <img src="${item.image_url}" alt="" class="w-8 h-8 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    ` : `
+                        <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-sm flex-shrink-0">📦</div>
+                    `}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white truncate">${highlightedTitle}</p>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            <span>⚖️ ${item.weight_grams}g</span>
+                            <span>⏱️ ${item.print_time_hours}h ${item.print_time_minutes}m</span>
+                            <span class="px-1 py-0.2 rounded bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300 font-bold">€${Number(effectivePrice).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        dropdown.innerHTML = html;
+        dropdown.classList.remove('hidden');
+    }
+
+    function selectEditCatalogProduct(index, productId) {
+        const item = (typeof catalogProducts !== 'undefined' ? catalogProducts : []).find(p => p.id === productId);
+        if (!item || !editModalPieces[index]) return;
+
+        const piece = editModalPieces[index];
+        piece.productId = item.id;
+        piece.description = item.title;
+        piece.imageUrl = item.image_url;
+        piece.weight = parseFloat(item.weight_grams) || 0;
+        piece.hours = parseFloat(item.print_time_hours) || 0;
+        piece.mins = parseInt(item.print_time_minutes) || 0;
+        piece.extra = parseFloat(item.extra_costs) || 0;
+
+        const effectivePrice = (item.sale_price !== null && item.is_on_sale) ? item.sale_price : item.price;
+        piece.unitPrice = parseFloat(effectivePrice) || 0;
+        piece.totalPrice = Math.round((piece.unitPrice * (piece.quantity || 1)) * 100) / 100;
+
+        renderEditPieces();
+    }
+
+    function recalcEditModalTotals() {
+        let sumItems = 0;
+        let sumWeight = 0;
+        let sumMinutes = 0;
+        let sumCost = 0;
+        let sumPrice = 0;
+
+        editModalPieces.forEach(p => {
+            const qty = parseInt(p.quantity) || 1;
+            const w = parseFloat(p.weight) || 0;
+            const h = parseFloat(p.hours) || 0;
+            const m = parseInt(p.mins) || 0;
+            const c = parseFloat(p.totalCost) || 0;
+            const pr = parseFloat(p.totalPrice) || 0;
+
+            sumItems += qty;
+            sumWeight += w * qty;
+            sumMinutes += ((h * 60) + m) * qty;
+            sumCost += c;
+            sumPrice += pr;
+        });
+
+        const totH = Math.floor(sumMinutes / 60);
+        const totM = Math.round(sumMinutes % 60);
+        const profit = sumPrice - sumCost;
+        const margin = sumPrice > 0 ? ((profit / sumPrice) * 100).toFixed(0) : '0';
+
+        const elItems = document.getElementById('edit-summary-items');
+        const elWeight = document.getElementById('edit-summary-weight');
+        const elTime = document.getElementById('edit-summary-time');
+        const elCost = document.getElementById('edit-summary-cost');
+        const elPrice = document.getElementById('edit-summary-price');
+        const elProfit = document.getElementById('edit-summary-profit');
+        const elMargin = document.getElementById('edit-summary-margin');
+
+        if (elItems) elItems.textContent = `${sumItems} uds`;
+        if (elWeight) elWeight.textContent = `${sumWeight.toFixed(1)} g`;
+        if (elTime) elTime.textContent = `${totH}h ${totM}m`;
+        if (elCost) elCost.textContent = `€${sumCost.toFixed(2)}`;
+        if (elPrice) elPrice.textContent = `€${sumPrice.toFixed(2)}`;
+        if (elProfit) elProfit.textContent = `€${profit.toFixed(2)}`;
+        if (elMargin) elMargin.textContent = `${margin}%`;
+    }
+
+    function submitEditOrderModal() {
+        if (!currentEditOrderId) return;
+
+        const clientName = document.getElementById('edit-order-client-name').value.trim();
+        const orderDate = document.getElementById('edit-order-date').value;
+        const deadline = document.getElementById('edit-order-deadline').value;
+        const status = document.getElementById('edit-order-status').value;
+        const platform = document.getElementById('edit-order-platform').value;
+        const shipping = document.getElementById('edit-order-shipping').value;
+        const notes = document.getElementById('edit-order-notes').value;
+
+        if (!clientName) {
+            alert('Por favor introduce el nombre del cliente.');
+            document.getElementById('edit-order-client-name').focus();
+            return;
+        }
+
+        if (!orderDate) {
+            alert('Por favor selecciona la fecha del pedido.');
+            document.getElementById('edit-order-date').focus();
+            return;
+        }
+
+        if (editModalPieces.length === 0) {
+            alert('Debes incluir al menos una pieza.');
+            return;
+        }
+
+        for (let i = 0; i < editModalPieces.length; i++) {
+            const p = editModalPieces[i];
+            if (!p.description || !p.description.trim()) {
+                alert(`Por favor describe o selecciona un producto para la pieza #${i + 1}`);
+                return;
+            }
+        }
+
+        const payload = {
+            client_name: clientName,
+            order_date: orderDate,
+            deadline: deadline || null,
+            status: status,
+            platform: platform,
+            shipping: shipping,
+            notes: notes,
+            pieces: editModalPieces.map(p => ({
+                id: p.id || null,
+                product_id: p.productId || null,
+                description: p.description.trim(),
+                quantity: parseInt(p.quantity) || 1,
+                weight_grams: parseFloat(p.weight) || 0,
+                print_time_hours: parseFloat(p.hours) || 0,
+                print_time_minutes: parseInt(p.mins) || 0,
+                extra_costs: parseFloat(p.extra) || 0,
+                unit_cost: parseFloat(p.unitCost) || 0,
+                total_cost: parseFloat(p.totalCost) || 0,
+                unit_price: parseFloat(p.unitPrice) || 0,
+                price: parseFloat(p.totalPrice) || 0,
+                status: p.status || status
+            }))
+        };
+
+        const btn = document.getElementById('btn-save-order-full');
+        const oldHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> Guardando...';
+
+        fetch(`/crm/api/order/${currentEditOrderId}/edit/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closeEditOrderModal();
+                window.location.reload();
+            } else {
+                alert('Error al guardar pedido: ' + (data.error || ''));
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
+        })
+        .catch(err => {
+            alert('Error de conexión al guardar pedido.');
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+        });
+    }
+
+    function deleteCurrentEditOrder() {
+        if (!currentEditOrderId) return;
+        if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el Pedido #${currentEditOrderId} y todas sus piezas? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        fetch(`/crm/api/order/${currentEditOrderId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closeEditOrderModal();
+                window.location.reload();
+            } else {
+                alert('Error al eliminar pedido: ' + (data.error || ''));
+            }
+        })
+        .catch(() => alert('Error de conexión al eliminar pedido.'));
+    }
+
+    // Cerrar con Escape o clic exterior
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePaymentModal();
+            closeEditOrderModal();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.edit-autocomplete-wrap')) {
+            document.querySelectorAll('.edit-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);

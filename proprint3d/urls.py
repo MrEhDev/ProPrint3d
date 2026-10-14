@@ -35,6 +35,8 @@ urlpatterns = [
     path('crm/api/order/<int:order_id>/cost/', views.update_order_cost_api, name='update_order_cost_api'),
     path('crm/api/order/<int:order_id>/dates/', views.update_order_dates_api, name='update_order_dates_api'),
     path('crm/api/order/<int:order_id>/payment/', views.update_order_payment_api, name='update_order_payment_api'),
+    path('crm/api/order/<int:order_id>/edit/', views.update_order_full_api, name='update_order_full_api'),
+    path('crm/api/order/<int:order_id>/delete/', views.delete_order_api, name='delete_order_api'),
     path('crm/api/item/<int:item_id>/status/', views.update_item_status_api, name='update_item_status_api'),
     path('crm/api/item/<int:item_id>/cost/', views.update_item_cost_api, name='update_item_cost_api'),
     
