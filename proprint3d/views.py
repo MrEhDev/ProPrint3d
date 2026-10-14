@@ -299,7 +299,7 @@ def generate_quote_pdf_view(request, quote_id):
 # VISTA: crm_dashboard_view
 # Propósito: Panel de control de pedidos para administradores.
 # =====================================================================
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Count
 
 import calendar
 import datetime
@@ -380,6 +380,26 @@ def crm_dashboard_view(request):
             Q(items__description__icontains=search_query)
         ).distinct()
             
+    # Autocorrección transparente: si hay pedidos antiguos o creados sin piezas,
+    # se genera automáticamente su OrderItem para que se muestren de inmediato en el Kanban.
+    orders_without_items = Order.objects.annotate(item_count=Count('items')).filter(item_count=0).exclude(status='Cancelado')
+    for ord_obj in orders_without_items:
+        OrderItem.objects.create(
+            order=ord_obj,
+            product=ord_obj.product,
+            description=ord_obj.description or (ord_obj.product.title if ord_obj.product else f"Pedido #{ord_obj.id}"),
+            quantity=ord_obj.quantity or 1,
+            weight_grams=ord_obj.weight_grams or 0.0,
+            print_time_hours=ord_obj.print_time_hours or 0.0,
+            print_time_minutes=ord_obj.print_time_minutes or 0,
+            extra_costs=ord_obj.extra_costs or decimal.Decimal('0.00'),
+            unit_cost=ord_obj.unit_cost or decimal.Decimal('0.00'),
+            total_cost=ord_obj.total_cost or decimal.Decimal('0.00'),
+            unit_price=ord_obj.unit_price or decimal.Decimal('0.00'),
+            price=ord_obj.price or decimal.Decimal('0.00'),
+            status=ord_obj.status or 'Presupuestado'
+        )
+
     # Kanban: Pasos solicitados -> Presupuestado - En proceso - Realizado - Enviado - Entregado - Cobrado
     active_order_items = OrderItem.objects.select_related('order', 'product').exclude(order__status='Cancelado')
     if date_from:
