@@ -13,8 +13,7 @@
             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
                 <span>📋</span> Panel de Pedidos
             </h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción,
-                trazabilidad de envíos y flujo Kanban.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción, trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{% url 'order_create' %}"
@@ -28,17 +27,12 @@
     </div>
 
     <!-- Barra de Filtros de Período Desde - Hasta -->
-    <div
-        class="mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
-
+    <div class="mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <form id="filter-form" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <div
-                class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
-
+            <div class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                 <!-- DESDE -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Período
-                        Desde:</span>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Período Desde:</span>
                     <select name="month_from" id="month_from" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
@@ -70,8 +64,7 @@
 
                 <!-- HASTA -->
                 <div class="flex items-center gap-2">
-                    <span
-                        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hasta:</span>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hasta:</span>
                     <select name="month_to" id="month_to" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
@@ -103,29 +96,30 @@
                 <button type="button" onclick="clearDateFilters()"
                     class="text-xs text-red-500 hover:text-red-700 font-semibold px-2.5 py-1 rounded bg-red-50 dark:bg-red-900/30 ml-auto transition-colors"
                     title="Restablecer filtro de fechas">
-                    ✕ </button>
+                    ✕
+                </button>
                 {% endif %}
-
             </div>
         </form>
+    </div>
 
-    </div> <!-- Tablero Kanban: 5 Pasos -->
+    <!-- Tablero Kanban: Flujo de 6 Pasos -->
     {% if kanban_columns %}
     <div class="mb-10">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📌</span> Flujo de Pedidos (Tablero Kanban)
             </h2>
-            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra para cambiar estado (actualiza fechas
-                automáticamente)</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de estado</span>
         </div>
 
         <div class="flex overflow-x-auto space-x-4 pb-4 kanban-board">
             {% for status_name, group_orders in kanban_columns.items %}
-            <!-- Columna Kanban -->
-            <div class="flex-none w-72 bg-gray-50/90 dark:bg-gray-800/40 rounded-xl p-3.5 kanban-col border border-gray-200/80 dark:border-gray-700/60 shadow-sm
+            <!-- Columna Kanban: {{ status_name }} -->
+            <div class="flex-none w-80 bg-gray-50/90 dark:bg-gray-800/40 rounded-xl p-3.5 kanban-col border border-gray-200/80 dark:border-gray-700/60 shadow-sm
                 {% if status_name == 'Presupuestado' %}border-t-4 border-t-indigo-500
-                {% elif status_name == 'Realizado' %}border-t-4 border-t-yellow-400
+                {% elif status_name == 'En proceso' %}border-t-4 border-t-amber-500
+                {% elif status_name == 'Realizado' %}border-t-4 border-t-teal-500
                 {% elif status_name == 'Enviado' %}border-t-4 border-t-blue-500
                 {% elif status_name == 'Entregado' %}border-t-4 border-t-purple-500
                 {% elif status_name == 'Cobrado' %}border-t-4 border-t-emerald-500
@@ -134,7 +128,8 @@
                 <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                         {% if status_name == 'Presupuestado' %}<span>📝</span>
-                        {% elif status_name == 'Realizado' %}<span>⚙️</span>
+                        {% elif status_name == 'En proceso' %}<span>⚙️</span>
+                        {% elif status_name == 'Realizado' %}<span>✅</span>
                         {% elif status_name == 'Enviado' %}<span>🚚</span>
                         {% elif status_name == 'Entregado' %}<span>📦</span>
                         {% elif status_name == 'Cobrado' %}<span>💰</span>
@@ -143,73 +138,155 @@
                     </h3>
                     <span class="text-xs px-2 py-0.5 rounded-full font-bold
                         {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
-                        {% elif status_name == 'Realizado' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300
+                        {% elif status_name == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
+                        {% elif status_name == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
                         {% elif status_name == 'Enviado' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
                         {% elif status_name == 'Entregado' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
                         {% elif status_name == 'Cobrado' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
                         {% else %}bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
-                        {{ group_orders.count }}
+                        {{ group_orders|length }}
                     </span>
                 </div>
 
-                <div class="space-y-3 kanban-items min-h-[120px]">
-                    {% for order in group_orders %}
-                    <!-- Tarjeta Kanban -->
-                    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-3.5 cursor-grab hover:shadow-md transition-shadow kanban-card relative"
-                        draggable="true" ondragstart="drag(event)" data-id="{{ order.id }}">
+                <div class="space-y-3 kanban-items min-h-[140px]">
+                    {% for group in group_orders %}
+                    <!-- Tarjeta de Pedido / Agrupación en columna -->
+                    <div class="bg-white dark:bg-dark rounded-xl p-3.5 transition-all kanban-card relative
+                        {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                            border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md
+                        {% else %}
+                            border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md
+                        {% endif %}"
+                        data-order-id="{{ group.order.id }}"
+                        data-client-name="{{ group.order.client_name|escapejs }}"
+                        data-price="{{ group.order.price|default:0|unlocalize }}"
+                        data-deposit-amount="{{ group.order.deposit_amount|default:0|unlocalize }}"
+                        data-deposit-method="{{ group.order.deposit_method|default:''|escapejs }}"
+                        data-final-method="{{ group.order.final_payment_method|default:''|escapejs }}"
+                        data-payment-notes="{{ group.order.payment_notes|default:''|escapejs }}"
+                        data-current-status="{{ group.order.status }}"
+                        {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
+                            draggable="true" ondragstart="dragOrder(event)" title="Arrastrar pedido completo"
+                        {% endif %}>
 
-                        <div class="flex items-start justify-between gap-1 mb-1.5">
-                            <div class="flex-1 min-w-0 pr-1">
-                                <h4 class="font-bold text-gray-900 dark:text-white text-xs leading-snug">
-                                    {% if order.product %}
-                                        {{ order.product.title }}
-                                    {% elif order.description %}
-                                        {{ order.description }}
-                                    {% else %}
-                                        Pedido #{{ order.id }}
-                                    {% endif %}
-                                </h4>
-                                {% if order.product and order.description and order.description != order.product.title %}
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400 italic truncate" title="{{ order.description }}">{{ order.description }}</p>
-                                {% endif %}
+                        <!-- Encabezado de la Tarjeta -->
+                        <div class="flex items-start justify-between gap-1.5 mb-1.5">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                        #{{ group.order.id }}
+                                    </span>
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                        {{ group.order.client_name }}
+                                    </span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                    📅 {{ group.order.order_date|date:"d/m/Y" }}
+                                    {% if group.order.platform %} · <span class="font-medium text-gray-600 dark:text-gray-300">{{ group.order.platform }}</span>{% endif %}
+                                </p>
                             </div>
-                            <span
-                                class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap flex-shrink-0">
-                                x{{ order.quantity }}
-                            </span>
-                        </div>
 
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">👤 {{ order.client_name }}</p>
-
-                        <!-- Fechas en la tarjeta -->
-                        <div class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mb-2">
-                            <div>📅 Pedido: {{ order.order_date|date:"d/m/Y" }}</div>
-                            {% if order.shipped_date %}<div>🚚 Enviado: <span class="text-blue-600 dark:text-blue-400 font-medium">{{ order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if order.delivered_date %}<div>📦 Entregado: <span class="text-purple-600 dark:text-purple-400 font-medium">{{ order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if order.paid_date %}<div>💰 Cobrado: <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
-                        </div>
-
-                        <div
-                            class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+                            <!-- Badge de Estado / Completado -->
                             <div>
-                                <span class="font-bold text-primary">€{{ order.price }}</span>
-                                {% if order.quantity > 1 and order.unit_price %}
-                                <span class="block text-[10px] text-gray-400 dark:text-gray-500 font-normal">€{{ order.unit_price }}/ud</span>
+                                {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
+                                    ✅ Completo
+                                </span>
+                                {% elif group.total_items_in_order > 1 %}
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold whitespace-nowrap">
+                                    {{ group.items|length }}/{{ group.total_items_in_order }} piezas
+                                </span>
                                 {% endif %}
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold"
-                                    title="Ganancia Neta">
-                                    +€{{ order.profit }}
+                        </div>
+
+                        <!-- Badge de Cobros / Señal (Clicable) -->
+                        {% if group.order.deposit_amount > 0 and group.order.status != 'Cobrado' %}
+                        <div class="mb-2">
+                            <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
+                                title="Paga y señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}. Clic para editar">
+                                <span>🤝 Señal: €{{ group.order.deposit_amount|floatformat:2 }}{% if group.order.deposit_method %} ({{ group.order.deposit_method }}){% endif %}</span>
+                                <span class="text-[9px] text-amber-600 dark:text-amber-400">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
+                            </button>
+                        </div>
+                        {% elif group.order.status == 'Cobrado' %}
+                        <div class="mb-2">
+                            <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition"
+                                title="Pedido cobrado. Clic para ver detalles">
+                                <span>💰 {{ group.order.payment_summary_text }}</span>
+                                <span class="text-[9px] text-emerald-600 dark:text-emerald-400">Cobrado</span>
+                            </button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Piezas en esta columna (Arrastrables individualmente) -->
+                        <div class="space-y-1.5 my-2.5">
+                            {% for item in group.items %}
+                            <div class="p-2 rounded-lg bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
+                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}" data-order-id="{{ group.order.id }}" title="Arrastra esta pieza individual a otra columna">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-gray-400 select-none">⠿</span>
+                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                            {{ item.description }}
+                                        </span>
+                                        <span class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">
+                                            x{{ item.quantity }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 pl-3.5 mt-0.5">
+                                        {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
+                                        {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="text-xs font-bold text-primary">€{{ item.price }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Fechas de seguimiento si existen -->
+                        {% if group.order.shipped_date or group.order.delivered_date or group.order.paid_date %}
+                        <div class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                            {% if group.order.shipped_date %}<div>🚚 Enviado: <span class="text-blue-600 dark:text-blue-400 font-medium">{{ group.order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if group.order.delivered_date %}<div>📦 Entregado: <span class="text-purple-600 dark:text-purple-400 font-medium">{{ group.order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if group.order.paid_date %}<div>💰 Cobrado: <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ group.order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Pie de la Tarjeta: Total, Rentabilidad y Accesos directos -->
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                            <div>
+                                {% if status_name == 'Realizado' and group.are_all_items_realizado %}
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total Pedido</span>
+                                <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                {% else %}
+                                <span class="font-bold text-primary">€{{ group.group_price|floatformat:2 }}</span>
+                                {% if group.total_items_in_order > 1 and not group.all_items_in_this_col %}
+                                <span class="block text-[10px] text-gray-400">(de €{{ group.order.price }})</span>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold" title="Ganancia Neta Pedido">
+                                    +€{{ group.order.profit }}
                                 </span>
-                                <a href="{% url 'admin:proprint3d_order_change' order.id %}"
-                                    class="text-[11px] text-gray-400 hover:text-primary" title="Editar pedido">✏️</a>
+                                <!-- Acceso al modal de cobro/señal -->
+                                <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                                    class="p-1 rounded text-gray-400 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-[11px]"
+                                    title="Gestionar Cobro o Paga y Señal">
+                                    💳
+                                </button>
+                                <a href="{% url 'admin:proprint3d_order_change' group.order.id %}"
+                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1" title="Editar pedido en admin">✏️</a>
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div
-                        class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg flex items-center justify-center text-xs text-gray-400">
+                    <div class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center text-xs text-gray-400">
                         Sin pedidos
                     </div>
                     {% endfor %}
@@ -220,14 +297,13 @@
     </div>
     {% endif %}
 
-    <!-- Tarjetas de Resumen -->
+    <!-- Tarjetas de Resumen Global -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
             <dd id="stat-total-sales" class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
         </div>
-        <div
-            class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
+        <div class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-green-500"></div>
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
             <dd id="stat-total-profit" class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
@@ -236,30 +312,31 @@
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.</dt>
             <dd id="stat-total-costs" class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
         </div>
-        <div
-            class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
+        <div class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-cyan-500"></div>
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media Ganancia/Pedido</dt>
             <dd id="stat-avg-profit" class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
         </div>
-    </div> <!-- Cabecera de Sección y Buscador sobre la Tabla Principal -->
+    </div>
+
+    <!-- Cabecera de Sección y Buscador sobre la Tabla Principal -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>📦</span> Todos los Pedidos (<span id="visible-orders-count">{{ orders.count }}</span>)
+                <span>📦</span> Desglose de Pedidos (<span id="visible-orders-count">{{ orders.count }}</span>)
             </h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Una fila por pedido con resumen global de rentabilidad y acordeón desplegable de piezas.</p>
         </div>
 
         <!-- Buscador exclusivo sobre la Tabla Principal -->
         <div class="w-full sm:w-80 md:w-96">
             <div class="relative">
-                <input type="text" id="table-search-input" placeholder="🔍 Buscar por descripción o cliente..."
+                <input type="text" id="table-search-input" placeholder="🔍 Buscar pedido, cliente o pieza..."
                     oninput="filterTableLive(this.value)"
                     class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
                 <button type="button" id="btn-clear-table-search" onclick="clearTableSearchLive()"
@@ -271,209 +348,258 @@
         </div>
     </div>
 
-    <!-- Tabla Principal de Pedidos -->
-    <div
-        class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-12">
+    <!-- Tabla Principal: 1 Fila por Pedido con Acordeón Desplegable -->
+    <div class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-12">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left">
-                <thead class="bg-gray-50 dark:bg-gray-800/50">
+                <thead class="bg-gray-50 dark:bg-gray-800/60">
                     <tr>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Fecha Pedido</th>
-                        <th scope="col"
-                            class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Cant</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Descripción</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Cliente</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Precio</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">
-                            Ganancia</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Coste</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Estado</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Trazabilidad Fechas</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Plataforma</th>
-                        <th scope="col"
-                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Envío</th>
-                        <th scope="col" class="relative px-3 py-3"><span class="sr-only">Editar</span></th>
+                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8"></th>
+                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pedido / Cliente</th>
+                        <th scope="col" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fechas</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fabricación</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Prod.</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Venta</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">Rentabilidad</th>
+                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cobros</th>
+                        <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logística</th>
+                        <th scope="col" class="relative px-3 py-3"><span class="sr-only">Acciones</span></th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-dark divide-y divide-gray-200 dark:divide-gray-800" id="orders-tbody">
                     {% for order in orders %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors order-row"
+                    <!-- Fila Principal del Pedido -->
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors order-row cursor-pointer group"
+                        id="order-row-{{ order.id }}"
+                        onclick="toggleOrderAccordion({{ order.id }})"
+                        data-order-id="{{ order.id }}"
                         data-price="{{ order.price|default:0|unlocalize }}"
                         data-profit="{{ order.profit|default:0|unlocalize }}"
-                        data-cost="{{ order.total_cost|default:0|unlocalize }}">
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 font-medium">
-                            {{ order.order_date|date:"d/m/Y" }}
+                        data-cost="{{ order.total_cost|default:0|unlocalize }}"
+                        data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
+
+                        <!-- Icono toggle acordeón -->
+                        <td class="px-3 py-3 whitespace-nowrap text-center text-gray-400 group-hover:text-primary">
+                            <span id="accordion-arrow-{{ order.id }}" class="inline-block transition-transform duration-150 text-xs font-bold">▶</span>
                         </td>
-                        <td
-                            class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-900 dark:text-gray-300">
-                            {{ order.quantity }}
+
+                        <!-- Pedido / Cliente -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                    #{{ order.id }}
+                                </span>
+                                <div>
+                                    <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                        <span>{{ order.client_name }}</span>
+                                        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
+                                            {{ order.total_items_count }} uds · {{ order.items.count }} ref
+                                        </span>
+                                    </div>
+                                    {% if order.notes %}
+                                    <p class="text-[11px] text-gray-400 truncate max-w-xs">{{ order.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </td>
-                        <td
-                            class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium order-desc">
-                            <div class="flex items-center gap-1.5">
-                                <span>{{ order.description }}</span>
-                                {% if order.product %}
-                                <a href="{% url 'product_detail' order.product.slug %}"
-                                    class="text-xs text-primary hover:underline ml-1" title="Ver ficha en catálogo"
-                                    target="_blank">🔗</a>
-                                {% endif %}
-                            </div>
-                            {% if order.weight_grams or order.print_time_hours %}
-                            <div
-                                class="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 font-normal">
-                                {% if order.weight_grams %}<span>⚖️ {{ order.weight_grams }}g</span>{% endif %}
-                                {% if order.print_time_hours %}<span>⏱️ {{ order.print_time_hours }}h{% if order.print_time_minutes %} {{ order.print_time_minutes }}m{% endif %}</span>{% endif %}
-                            </div>
+
+                        <!-- Fechas -->
+                        <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                            <div>📅 {{ order.order_date|date:"d/m/Y" }}</div>
+                            {% if order.deadline %}
+                            <div class="text-amber-600 dark:text-amber-400 font-medium text-[11px] mt-0.5">⏳ {{ order.deadline|date:"d/m/Y" }}</div>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 order-client">
-                            {{ order.client_name }}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
-                            <span class="font-bold text-gray-900 dark:text-white">€{{ order.price }}</span>
-                            {% if order.quantity > 1 and order.unit_price %}
-                            <span class="block text-[11px] text-gray-400 dark:text-gray-500 font-normal">€{{ order.unit_price }}/ud</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right font-bold text-green-600 dark:text-green-400">
-                            €{{ order.profit }}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-500">
-                            <div class="flex items-center justify-end">
-                                <span>€</span>
-                                <input type="number" step="0.01" onchange="updateOrderCost({{ order.id }}, this.value)"
-                                    value="{{ order.total_cost|unlocalize }}"
-                                    class="w-16 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1 py-1 ml-1 text-right">
-                            </div>
-                            {% if order.quantity > 1 and order.unit_cost %}
-                            <span class="block text-[11px] text-gray-400 dark:text-gray-500 font-normal text-right">€{{ order.unit_cost }}/ud</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                            <label class="flex items-center justify-center space-x-2">
-                                <span class="w-3 h-3 rounded-full flex-shrink-0
+
+                        <!-- Estado con Selector Interactivo -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0
                                     {% if order.status == 'Presupuestado' %}bg-indigo-500
-                                    {% elif order.status == 'Realizado' %}bg-yellow-400
+                                    {% elif order.status == 'En proceso' %}bg-amber-500
+                                    {% elif order.status == 'Realizado' %}bg-teal-500
                                     {% elif order.status == 'Enviado' %}bg-blue-500
                                     {% elif order.status == 'Entregado' %}bg-purple-500
                                     {% elif order.status == 'Cobrado' %}bg-emerald-500
-                                    {% else %}bg-gray-400{% endif %}" title="{{ order.status }}"></span>
-                                <select onchange="updateOrderStatus({{ order.id }}, this.value)"
-                                    class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded focus:ring-primary focus:border-primary px-1.5 py-1 w-auto min-w-[125px]">
-                                    <option value="Presupuestado" {% if order.status == 'Presupuestado' %}selected{% endif %}>Presupuestado</option>
-                                    <option value="Realizado" {% if order.status == 'Realizado' %}selected{% endif %}>Realizado</option>
-                                    <option value="Enviado" {% if order.status == 'Enviado' %}selected{% endif %}>Enviado</option>
-                                    <option value="Entregado" {% if order.status == 'Entregado' %}selected{% endif %}>Entregado</option>
-                                    <option value="Cobrado" {% if order.status == 'Cobrado' %}selected{% endif %}>Cobrado</option>
-                                    <option value="Cancelado" {% if order.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                                    {% else %}bg-gray-400{% endif %}"></span>
+                                <select onchange="onOrderStatusSelectChange({{ order.id }}, this.value, this)"
+                                    data-current-status="{{ order.status }}"
+                                    class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-primary focus:border-primary px-2 py-1 font-semibold">
+                                    {% for s in status_choices %}
+                                    <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
+                                    {% endfor %}
                                 </select>
-                            </label>
-                        </td>
-                        <!-- Trazabilidad de Fechas (Enviado, Entregado, Cobrado) -->
-                        <td class="px-4 py-3 whitespace-nowrap text-xs text-center text-gray-500 dark:text-gray-400">
-                            <div class="flex flex-col gap-0.5 items-center justify-center">
-                                {% if order.shipped_date %}
-                                <span
-                                    class="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400"
-                                    title="Fecha de Envío">
-                                    🚚 {{ order.shipped_date|date:"d/m/Y" }}
-                                </span>
-                                {% endif %}
-                                {% if order.delivered_date %}
-                                <span
-                                    class="inline-flex items-center gap-1 text-[11px] text-purple-600 dark:text-purple-400"
-                                    title="Fecha de Entrega">
-                                    📦 {{ order.delivered_date|date:"d/m/Y" }}
-                                </span>
-                                {% endif %}
-                                {% if order.paid_date %}
-                                <span
-                                    class="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"
-                                    title="Fecha de Cobro">
-                                    💰 {{ order.paid_date|date:"d/m/Y" }}
-                                </span>
-                                {% endif %}
-                                {% if not order.shipped_date and not order.delivered_date and not order.paid_date %}
-                                <span class="text-gray-400 text-[11px]">-</span>
-                                {% endif %}
                             </div>
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                            {% if order.platform %}
-                            <span
-                                class="px-2 py-1 inline-flex text-xs leading-5 font-bold rounded bg-[#13192B] text-white">
-                                {{ order.platform }}
-                            </span>
-                            {% else %}
-                            <span class="text-xs text-gray-400">-</span>
-                            {% endif %}
+
+                        <!-- Métricas de Fabricación -->
+                        <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
+                            <div class="font-semibold">{{ order.total_items_count }} uds · ⚖️ {{ order.total_weight_calc|floatformat:0 }}g</div>
+                            <div class="text-[11px] text-gray-400 mt-0.5">⏱️ {{ order.total_print_time_str }}</div>
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                            {% if order.shipping %}
-                            <span
-                                class="px-2 py-1 inline-flex text-xs leading-5 font-medium rounded bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
-                                {{ order.shipping }}
-                            </span>
-                            {% else %}
-                            <span class="text-xs text-gray-400">-</span>
-                            {% endif %}
+
+                        <!-- Coste de Fabricación -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
+                            <span class="font-bold text-red-500">€{{ order.total_cost|floatformat:2 }}</span>
                         </td>
-                        <td class="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
+
+                        <!-- Total Venta -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                            <span class="font-black text-gray-900 dark:text-white">€{{ order.price|floatformat:2 }}</span>
+                        </td>
+
+                        <!-- Rentabilidad y Margen -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                            <div class="font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|floatformat:2 }}</div>
+                            <span class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                {{ order.profit_margin_percent }}%
+                            </span>
+                        </td>
+
+                        <!-- Cobros -->
+                        <td class="px-4 py-3 whitespace-nowrap text-xs" onclick="event.stopPropagation()">
+                            <div class="flex items-center gap-1.5">
+                                {% if order.status == 'Cobrado' %}
+                                <button type="button" onclick="openPaymentModal({{ order.id }})"
+                                    class="px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition text-left"
+                                    title="Pedido cobrado. Clic para ver o modificar">
+                                    💰 {{ order.payment_summary_text }}
+                                </button>
+                                {% elif order.deposit_amount > 0 %}
+                                <button type="button" onclick="openPaymentModal({{ order.id }})"
+                                    class="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-semibold hover:bg-amber-200 dark:hover:bg-amber-900/60 transition text-left"
+                                    title="Señal registrada: €{{ order.deposit_amount }} ({{ order.deposit_method }}). Clic para gestionar">
+                                    🤝 Señal: €{{ order.deposit_amount }} ({{ order.deposit_method }})
+                                </button>
+                                {% else %}
+                                <span class="text-gray-400 dark:text-gray-500 italic">Pendiente</span>
+                                {% endif %}
+                                <button type="button" onclick="openPaymentModal({{ order.id }})"
+                                    class="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-emerald-600 transition"
+                                    title="Gestionar Cobro / Paga y Señal">
+                                    💳
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Logística -->
+                        <td class="px-3 py-3 whitespace-nowrap text-xs text-center text-gray-500 dark:text-gray-400">
+                            <div>{{ order.platform|default:"-" }}</div>
+                            <div class="text-[10px] text-gray-400">{{ order.shipping|default:"" }}</div>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td class="px-3 py-3 whitespace-nowrap text-right text-xs" onclick="event.stopPropagation()">
                             <a href="{% url 'admin:proprint3d_order_change' order.id %}"
-                                class="text-primary hover:text-secondary font-bold text-xs"
-                                title="Editar en detalle">Editar</a>
+                                class="text-gray-400 hover:text-primary transition-colors text-sm" title="Editar en Django Admin">✏️</a>
+                        </td>
+                    </tr>
+
+                    <!-- Fila del Acordeón Desplegable: Piezas del Pedido -->
+                    <tr id="order-accordion-{{ order.id }}" class="hidden bg-gray-50/80 dark:bg-gray-900/60 transition-all border-b border-gray-200 dark:border-gray-800">
+                        <td colspan="11" class="p-4 sm:p-5">
+                            <div class="bg-white dark:bg-dark rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-inner">
+                                <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <span>🧩</span> Piezas incluidas en el Pedido #{{ order.id }} ({{ order.items.count }} referencias)
+                                    </h4>
+                                    <span class="text-[11px] text-gray-500">
+                                        Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{ order.total_items_count }} uds</strong> · Coste prod: <strong class="text-red-500">€{{ order.total_cost }}</strong> · Total venta: <strong class="text-primary">€{{ order.price }}</strong>
+                                    </span>
+                                </div>
+
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-xs">
+                                        <thead class="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30">
+                                            <tr>
+                                                <th class="py-2 px-3">Pieza / Producto</th>
+                                                <th class="py-2 px-2 text-center">Cant</th>
+                                                <th class="py-2 px-3">Fabricación</th>
+                                                <th class="py-2 px-3 text-right">Coste Unit / Total</th>
+                                                <th class="py-2 px-3 text-right">Precio Unit / Total</th>
+                                                <th class="py-2 px-3 text-center">Estado Pieza</th>
+                                                <th class="py-2 px-3 text-right">Rentabilidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                            {% for item in order.items.all %}
+                                            <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/20">
+                                                <!-- Foto y Nombre de Pieza -->
+                                                <td class="py-2.5 px-3 whitespace-nowrap">
+                                                    <div class="flex items-center gap-2.5">
+                                                        {% if item.product and item.product.main_image %}
+                                                        <img src="{{ item.product.main_image.url }}" alt="{{ item.description }}" class="w-8 h-8 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                                        {% else %}
+                                                        <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm flex-shrink-0">📦</div>
+                                                        {% endif %}
+                                                        <div>
+                                                            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                                                <span>{{ item.description }}</span>
+                                                                {% if item.product %}
+                                                                <a href="{% url 'product_detail' item.product.slug %}" target="_blank" class="text-primary hover:underline text-[11px]" title="Ver en catálogo">🔗</a>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Cantidad -->
+                                                <td class="py-2.5 px-2 text-center font-bold text-gray-800 dark:text-gray-200">
+                                                    {{ item.quantity }}
+                                                </td>
+
+                                                <!-- Fabricación -->
+                                                <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400">
+                                                    <span>⚖️ {{ item.weight_grams|default:0 }}g</span> ·
+                                                    <span>⏱️ {{ item.print_time_hours|default:0 }}h {{ item.print_time_minutes|default:0 }}m</span>
+                                                    {% if item.extra_costs %}<span class="block text-[10px] text-gray-400">+€{{ item.extra_costs }} extras</span>{% endif %}
+                                                </td>
+
+                                                <!-- Coste -->
+                                                <td class="py-2.5 px-3 text-right text-gray-500">
+                                                    <span class="font-semibold text-red-500">€{{ item.total_cost }}</span>
+                                                    <span class="block text-[10px] text-gray-400">(€{{ item.unit_cost }}/ud)</span>
+                                                </td>
+
+                                                <!-- Precio -->
+                                                <td class="py-2.5 px-3 text-right font-bold text-gray-900 dark:text-white">
+                                                    <span>€{{ item.price }}</span>
+                                                    <span class="block text-[10px] font-normal text-gray-400">(€{{ item.unit_price }}/ud)</span>
+                                                </td>
+
+                                                <!-- Estado individual -->
+                                                <td class="py-2.5 px-3 text-center">
+                                                    <select onchange="updateItemStatus({{ item.id }}, this.value)"
+                                                        class="text-[11px] py-0.5 px-1.5 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                                                        {% for s in status_choices %}
+                                                        <option value="{{ s }}" {% if item.status == s %}selected{% endif %}>{{ s }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+
+                                                <!-- Rentabilidad -->
+                                                <td class="py-2.5 px-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                                    +€{{ item.profit }}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="12" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No se encontraron pedidos
-                            </h3>
-                            <p class="mt-1 text-sm text-gray-500">Prueba ajustando el rango de fechas o añade un nuevo
-                                pedido.</p>
-                            <div class="mt-6 flex justify-center gap-3">
-                                {% if year_from or month_from or year_to or month_to %}
-                                <button type="button" onclick="clearDateFilters()"
-                                    class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200">
-                                    Ver todos los períodos
-                                </button>
-                                {% endif %}
-                                <a href="{% url 'order_create' %}"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                    Añadir Nuevo Pedido
-                                </a>
-                            </div>
+                        <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+                            No hay pedidos en el período seleccionado.
                         </td>
                     </tr>
                     {% endfor %}
-                    <!-- Fila dinámica si no hay resultados en el filtro en vivo -->
                     <tr id="no-search-results-row" class="hidden">
-                        <td colspan="12" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
-                            🔍 No se encontraron pedidos que coincidan con la búsqueda.
+                        <td colspan="11" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                            No se encontraron pedidos ni piezas que coincidan con la búsqueda.
                         </td>
                     </tr>
                 </tbody>
@@ -482,15 +608,375 @@
     </div>
 </div>
 
+<!-- Modal Emergente de Gestión de Cobros -->
+<div id="payment-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-5 text-white flex justify-between items-center">
+            <div>
+                <h3 class="text-lg font-black flex items-center gap-2">
+                    <span>💳</span> Gestión de Cobros - Pedido <span id="modal-order-id-label">#--</span>
+                </h3>
+                <p class="text-xs text-emerald-100 mt-0.5" id="modal-client-label">Cliente: --</p>
+            </div>
+            <button type="button" onclick="closePaymentModal(false)" class="text-white/80 hover:text-white p-1 rounded-lg text-lg">✕</button>
+        </div>
+
+        <!-- Formulario del Modal -->
+        <form id="payment-modal-form" onsubmit="event.preventDefault()" class="p-5 space-y-4">
+            <input type="hidden" id="modal-order-id" value="">
+
+            <!-- Resumen de Importes -->
+            <div class="bg-gray-50 dark:bg-gray-800/60 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-2 text-center">
+                <div>
+                    <span class="text-[10px] text-gray-500 uppercase font-bold">Total Pedido</span>
+                    <p class="text-base font-black text-gray-900 dark:text-white">€<span id="modal-total-price">0.00</span></p>
+                </div>
+                <div>
+                    <span class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Adelanto / Señal</span>
+                    <p class="text-base font-black text-amber-600 dark:text-amber-400">€<span id="modal-deposit-display">0.00</span></p>
+                </div>
+                <div>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Restante</span>
+                    <p class="text-base font-black text-emerald-600 dark:text-emerald-400">€<span id="modal-remaining-display">0.00</span></p>
+                </div>
+            </div>
+
+            <!-- Estado actual del pedido -->
+            <div class="flex items-center justify-between text-xs px-1 text-gray-500 dark:text-gray-400">
+                <span>Estado actual del pedido:</span>
+                <span id="modal-current-status-badge" class="px-2.5 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">--</span>
+            </div>
+
+            <!-- Sección 1: Paga y Señal Previa (Adelanto) -->
+            <div class="border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 bg-amber-50/20 dark:bg-amber-950/10">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                        <span>🤝</span> 1. Paga y Señal / Adelanto
+                    </label>
+                    <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier momento</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Importe Señal (€)</label>
+                        <input type="number" step="0.01" min="0" id="modal-deposit-amount" oninput="recalcModalAmounts()"
+                            class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
+                            placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de la Señal</label>
+                        <select id="modal-deposit-method" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            <option value="">(Selecciona método...)</option>
+                            {% for m in payment_methods %}
+                            <option value="{{ m }}">{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Cobro Final (Total) -->
+            <div class="border border-emerald-300 dark:border-emerald-800/80 rounded-xl p-3.5 bg-emerald-50/30 dark:bg-emerald-950/20">
+                <label class="block text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><span>💵</span> 2. Cobro Restante / Final</span>
+                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€<span id="modal-remaining-calc">0.00</span></span>
+                </label>
+                <div>
+                    <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de Cobro del Restante (para cerrar y cobrar)</label>
+                    <select id="modal-final-method" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                        <option value="">Selecciona cómo se ha cobrado el resto...</option>
+                        {% for m in payment_methods %}
+                        <option value="{{ m }}">{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Notas -->
+            <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Notas o comentarios de cobro (opcional)</label>
+                <input type="text" id="modal-payment-notes" placeholder="Ej. 20€ Bizum señal el 10/10, restante en mano en efectivo"
+                    class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <button type="button" onclick="closePaymentModal(false)"
+                    class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    Cerrar
+                </button>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <!-- Botón 1: Guardar solo señal (en cualquier momento) -->
+                    <button type="button" id="btn-save-deposit-only" onclick="submitDepositOnly()"
+                        class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+                        title="Guarda la señal/adelanto sin cambiar el estado actual del pedido">
+                        <span>🤝</span> Guardar Señal
+                    </button>
+                    <!-- Botón 2: Confirmar cobro completo -->
+                    <button type="button" id="btn-save-full-payment" onclick="submitFullPayment()"
+                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white shadow-md transition flex items-center justify-center gap-1.5">
+                        <span>✅</span> Confirmar Cobro Total
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    // Kanban Drag & Drop
-    function allowDrop(ev) {
-        ev.preventDefault();
-        ev.currentTarget.classList.add('bg-indigo-50', 'dark:bg-indigo-900/20');
+    // Diccionario con los datos de cobro de cada pedido
+    const ordersPaymentData = {
+        {% for order in orders %}
+        "{{ order.id }}": {
+            id: {{ order.id }},
+            clientName: "{{ order.client_name|escapejs }}",
+            totalPrice: {{ order.price|default:0|unlocalize }},
+            depositAmount: {{ order.deposit_amount|default:0|unlocalize }},
+            depositMethod: "{{ order.deposit_method|default:''|escapejs }}",
+            finalMethod: "{{ order.final_payment_method|default:''|escapejs }}",
+            paymentNotes: "{{ order.payment_notes|default:''|escapejs }}",
+            status: "{{ order.status|escapejs }}"
+        },
+        {% endfor %}
+    };
+
+    // Estado del modal de cobro
+    let currentModalContext = {
+        orderId: null,
+        source: null, // 'order_drag' | 'table_select' | 'direct_btn'
+        previousStatus: null,
+        selectElement: null
+    };
+
+    // ==========================================
+    // TOGGLE ACORDEÓN DE PIEZAS POR PEDIDO
+    // ==========================================
+    function toggleOrderAccordion(orderId) {
+        const row = document.getElementById(`order-accordion-${orderId}`);
+        const arrow = document.getElementById(`accordion-arrow-${orderId}`);
+        if (row) {
+            if (row.classList.contains('hidden')) {
+                row.classList.remove('hidden');
+                if (arrow) arrow.textContent = '▼';
+            } else {
+                row.classList.add('hidden');
+                if (arrow) arrow.textContent = '▶';
+            }
+        }
     }
 
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.currentTarget.dataset.id);
+    // ==========================================
+    // MODAL DE COBRO
+    // ==========================================
+    function openPaymentModal(orderId, source = 'direct_btn', previousStatus = null, selectElement = null) {
+        let order = ordersPaymentData[orderId];
+        if (!order) {
+            const cardEl = document.querySelector(`.kanban-card[data-order-id="${orderId}"]`);
+            if (cardEl) {
+                order = {
+                    id: orderId,
+                    clientName: cardEl.dataset.clientName || '',
+                    totalPrice: parseFloat(cardEl.dataset.price) || 0,
+                    depositAmount: parseFloat(cardEl.dataset.depositAmount) || 0,
+                    depositMethod: cardEl.dataset.depositMethod || '',
+                    finalMethod: cardEl.dataset.finalMethod || '',
+                    paymentNotes: cardEl.dataset.paymentNotes || '',
+                    status: cardEl.dataset.currentStatus || 'Presupuestado'
+                };
+            }
+        }
+        if (!order) return;
+
+        currentModalContext = {
+            orderId: orderId,
+            source: source,
+            previousStatus: previousStatus || order.status,
+            selectElement: selectElement
+        };
+
+        document.getElementById('modal-order-id').value = orderId;
+        document.getElementById('modal-order-id-label').textContent = `#${orderId}`;
+        document.getElementById('modal-client-label').textContent = `Cliente: ${order.clientName}`;
+        document.getElementById('modal-current-status-badge').textContent = order.status;
+
+        document.getElementById('modal-total-price').textContent = Number(order.totalPrice || 0).toFixed(2);
+
+        const depAmountInput = document.getElementById('modal-deposit-amount');
+        const depMethodSelect = document.getElementById('modal-deposit-method');
+        const finalMethodSelect = document.getElementById('modal-final-method');
+        const notesInput = document.getElementById('modal-payment-notes');
+
+        depAmountInput.value = order.depositAmount > 0 ? order.depositAmount.toFixed(2) : '';
+        depMethodSelect.value = order.depositMethod || '';
+        finalMethodSelect.value = order.finalMethod || '';
+        notesInput.value = order.paymentNotes || '';
+
+        recalcModalAmounts();
+
+        const modal = document.getElementById('payment-modal');
+        modal.classList.remove('hidden');
+    }
+
+    function closePaymentModal(confirmed = false) {
+        const modal = document.getElementById('payment-modal');
+        modal.classList.add('hidden');
+
+        // Si se canceló y venía de un select, restaurar estado anterior
+        if (!confirmed) {
+            if (currentModalContext.source === 'table_select' && currentModalContext.selectElement) {
+                currentModalContext.selectElement.value = currentModalContext.previousStatus;
+            }
+        }
+    }
+
+    function recalcModalAmounts() {
+        const total = parseFloat(document.getElementById('modal-total-price').textContent) || 0;
+        const dep = parseFloat(document.getElementById('modal-deposit-amount').value) || 0;
+        const rem = Math.max(0, total - dep);
+
+        document.getElementById('modal-deposit-display').textContent = dep.toFixed(2);
+        document.getElementById('modal-remaining-display').textContent = rem.toFixed(2);
+        document.getElementById('modal-remaining-calc').textContent = rem.toFixed(2);
+    }
+
+    // Guardar SOLO Señal / Adelanto (Disponible en cualquier momento sin cambiar estado a Cobrado)
+    function submitDepositOnly() {
+        const orderId = document.getElementById('modal-order-id').value;
+        const depAmount = document.getElementById('modal-deposit-amount').value;
+        const depMethod = document.getElementById('modal-deposit-method').value;
+        const notes = document.getElementById('modal-payment-notes').value;
+
+        if (parseFloat(depAmount) > 0 && !depMethod) {
+            alert('Por favor selecciona el método utilizado para la señal (ej. Bizum, Efectivo...).');
+            document.getElementById('modal-deposit-method').focus();
+            return;
+        }
+
+        const btn = document.getElementById('btn-save-deposit-only');
+        const oldHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> Guardando...';
+
+        fetch(`/crm/api/order/${orderId}/payment/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                deposit_amount: depAmount || 0,
+                deposit_method: depMethod,
+                payment_notes: notes
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closePaymentModal(true);
+                window.location.reload();
+            } else {
+                alert('Error al guardar señal: ' + (data.error || ''));
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
+        })
+        .catch(err => {
+            alert('Error de conexión');
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+        });
+    }
+
+    // Confirmar Cobro Total (Mueve el pedido a Cobrado)
+    function submitFullPayment() {
+        const orderId = document.getElementById('modal-order-id').value;
+        const depAmount = document.getElementById('modal-deposit-amount').value;
+        const depMethod = document.getElementById('modal-deposit-method').value;
+        const finalMethod = document.getElementById('modal-final-method').value;
+        const notes = document.getElementById('modal-payment-notes').value;
+
+        const total = parseFloat(document.getElementById('modal-total-price').textContent) || 0;
+        const dep = parseFloat(depAmount) || 0;
+        const rem = Math.max(0, total - dep);
+
+        if (rem > 0 && !finalMethod) {
+            alert('Por favor selecciona el método de cobro del restante antes de confirmar el cobro total.');
+            document.getElementById('modal-final-method').focus();
+            return;
+        }
+
+        const effectiveFinalMethod = finalMethod || (rem === 0 ? depMethod : '');
+
+        const btn = document.getElementById('btn-save-full-payment');
+        const oldHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> Guardando...';
+
+        fetch(`/crm/api/order/${orderId}/payment/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                status: 'Cobrado',
+                deposit_amount: depAmount || 0,
+                deposit_method: depMethod,
+                final_payment_method: effectiveFinalMethod,
+                payment_notes: notes
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closePaymentModal(true);
+                window.location.reload();
+            } else {
+                alert('Error al registrar cobro: ' + (data.error || ''));
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
+        })
+        .catch(err => {
+            alert('Error de conexión');
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+        });
+    }
+
+    // ==========================================
+    // CAMBIO DE ESTADO EN SELECT DE LA TABLA
+    // ==========================================
+    function onOrderStatusSelectChange(orderId, newStatus, selectElement) {
+        const prevStatus = selectElement.dataset.currentStatus || 'Presupuestado';
+        if (newStatus === 'Cobrado') {
+            openPaymentModal(orderId, 'table_select', prevStatus, selectElement);
+        } else {
+            updateOrderStatus(orderId, newStatus);
+        }
+    }
+
+    // ==========================================
+    // DRAG AND DROP KANBAN
+    // ==========================================
+    function allowDrop(ev) {
+        ev.preventDefault();
+        const col = ev.currentTarget.closest('.kanban-col');
+        if (col) {
+            col.classList.add('bg-indigo-50', 'dark:bg-indigo-900/20');
+        }
+    }
+
+    function dragPiece(ev) {
+        ev.dataTransfer.setData("type", "item");
+        ev.dataTransfer.setData("id", ev.currentTarget.dataset.itemId);
+        ev.dataTransfer.setData("orderId", ev.currentTarget.dataset.orderId || '');
+        ev.currentTarget.classList.add('opacity-50');
+    }
+
+    function dragOrder(ev) {
+        ev.dataTransfer.setData("type", "order");
+        ev.dataTransfer.setData("id", ev.currentTarget.dataset.orderId);
         ev.currentTarget.classList.add('opacity-50');
     }
 
@@ -499,15 +985,30 @@
         const col = ev.currentTarget.closest('.kanban-col');
         col.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20');
 
-        const orderId = ev.dataTransfer.getData("text");
+        const dragType = ev.dataTransfer.getData("type");
+        const id = ev.dataTransfer.getData("id");
         const newStatus = col.dataset.status;
-        const card = document.querySelector(`.kanban-card[data-id="${orderId}"]`);
 
-        if (card && col) {
-            col.querySelector('.kanban-items').appendChild(card);
-            card.classList.remove('opacity-50');
+        if (!id || !newStatus) return;
 
-            fetch(`/crm/api/order/${orderId}/status/`, {
+        // Si se mueve a Cobrado, abrir el modal emergente de cobro
+        if (newStatus === 'Cobrado') {
+            if (dragType === 'order') {
+                openPaymentModal(id, 'order_drag');
+                return;
+            } else if (dragType === 'item') {
+                const orderId = ev.dataTransfer.getData("orderId");
+                if (orderId) {
+                    openPaymentModal(orderId, 'order_drag');
+                } else {
+                    updateItemStatus(id, 'Cobrado');
+                }
+                return;
+            }
+        }
+
+        if (dragType === "item") {
+            fetch(`/crm/api/item/${id}/status/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -515,18 +1016,49 @@
                 },
                 body: JSON.stringify({ status: newStatus })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        alert('Error al actualizar el estado: ' + (data.error || ''));
-                    }
-                    window.location.reload();
-                })
-                .catch(error => {
-                    alert('Error de conexión');
-                    window.location.reload();
-                });
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Error al actualizar pieza: ' + (data.error || ''));
+                }
+                window.location.reload();
+            })
+            .catch(() => window.location.reload());
+        } else if (dragType === "order") {
+            fetch(`/crm/api/order/${id}/status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Error al actualizar pedido: ' + (data.error || ''));
+                }
+                window.location.reload();
+            })
+            .catch(() => window.location.reload());
         }
+    }
+
+    function updateItemStatus(itemId, newStatus) {
+        fetch(`/crm/api/item/${itemId}/status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) alert('Error: ' + (data.error || ''));
+            window.location.reload();
+        })
+        .catch(() => window.location.reload());
     }
 
     function updateOrderStatus(orderId, newStatus) {
@@ -538,52 +1070,25 @@
             },
             body: JSON.stringify({ status: newStatus })
         })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    alert('Error al actualizar el estado: ' + (data.error || ''));
-                }
-                window.location.reload();
-            })
-            .catch(error => {
-                alert('Error de conexión');
-                window.location.reload();
-            });
-    }
-
-    function updateOrderCost(orderId, newCost) {
-        fetch(`/crm/api/order/${orderId}/cost/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ cost: newCost })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) alert('Error: ' + (data.error || ''));
+            window.location.reload();
         })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    alert('Error al actualizar el coste: ' + (data.error || ''));
-                }
-                window.location.reload();
-            })
-            .catch(error => {
-                alert('Error de conexión');
-                window.location.reload();
-            });
+        .catch(() => window.location.reload());
     }
 
     document.querySelectorAll('.kanban-col').forEach(col => {
         col.addEventListener('dragleave', function (ev) {
             ev.currentTarget.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20');
         });
-        col.addEventListener('dragend', function (ev) {
-            document.querySelectorAll('.kanban-card').forEach(c => c.classList.remove('opacity-50'));
+        col.addEventListener('dragend', function () {
+            document.querySelectorAll('.kanban-card, .kanban-piece').forEach(c => c.classList.remove('opacity-50'));
         });
     });
 
     // ==========================================
-    // FILTRADO EN VIVO SOBRE LA TABLA (SIN RECARGA)
+    // BUSCADOR EN VIVO DE LA TABLA
     // ==========================================
     function formatStatCurrency(val) {
         return '€' + Number(val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -615,10 +1120,11 @@
         }
 
         rows.forEach(row => {
-            const desc = row.querySelector('.order-desc')?.textContent.toLowerCase() || '';
-            const client = row.querySelector('.order-client')?.textContent.toLowerCase() || '';
+            const searchText = (row.dataset.searchText || '').toLowerCase();
+            const orderId = row.dataset.orderId;
+            const accordionRow = document.getElementById(`order-accordion-${orderId}`);
 
-            if (desc.includes(filter) || client.includes(filter)) {
+            if (!filter || searchText.includes(filter)) {
                 row.style.display = '';
                 visibleCount++;
 
@@ -631,6 +1137,7 @@
                 sumCosts += c;
             } else {
                 row.style.display = 'none';
+                if (accordionRow) accordionRow.classList.add('hidden');
             }
         });
 
@@ -642,12 +1149,9 @@
             }
         }
 
-        if (countSpan) {
-            countSpan.textContent = visibleCount;
-        }
+        if (countSpan) countSpan.textContent = visibleCount;
 
         const avgProfit = visibleCount > 0 ? (sumProfit / visibleCount) : 0;
-
         if (statSales) statSales.textContent = formatStatCurrency(sumSales);
         if (statProfit) statProfit.textContent = formatStatCurrency(sumProfit);
         if (statCosts) statCosts.textContent = formatStatCurrency(sumCosts);
@@ -664,7 +1168,7 @@
     }
 
     // ==========================================
-    // FILTRO DE FECHAS Y LOCALSTORAGE (INDEPENDIENTE)
+    // FILTROS DE FECHAS
     // ==========================================
     function onDateFilterChange() {
         const yFrom = document.getElementById('year_from').value;
@@ -685,16 +1189,12 @@
         localStorage.removeItem('crm_filter_month_from');
         localStorage.removeItem('crm_filter_year_to');
         localStorage.removeItem('crm_filter_month_to');
-        localStorage.removeItem('crm_filter_year');
-        localStorage.removeItem('crm_filter_month');
-
-        // Redirigir a /crm/ sin query params de fechas
         window.location.href = window.location.pathname;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
-        const hasDateParams = urlParams.has('year_from') || urlParams.has('month_from') || urlParams.has('year_to') || urlParams.has('month_to') || urlParams.has('year') || urlParams.has('month');
+        const hasDateParams = urlParams.has('year_from') || urlParams.has('month_from') || urlParams.has('year_to') || urlParams.has('month_to');
 
         if (!hasDateParams) {
             const savedYF = localStorage.getItem('crm_filter_year_from') || '';
@@ -709,13 +1209,7 @@
                 if (savedYT) params.set('year_to', savedYT);
                 if (savedMT) params.set('month_to', savedMT);
                 window.location.replace(window.location.pathname + '?' + params.toString());
-                return;
             }
-        } else {
-            localStorage.setItem('crm_filter_year_from', urlParams.get('year_from') || '');
-            localStorage.setItem('crm_filter_month_from', urlParams.get('month_from') || '');
-            localStorage.setItem('crm_filter_year_to', urlParams.get('year_to') || '');
-            localStorage.setItem('crm_filter_month_to', urlParams.get('month_to') || '');
         }
     });
 </script>

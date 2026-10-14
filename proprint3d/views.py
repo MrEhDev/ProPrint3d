@@ -1,4 +1,5 @@
 import io
+import decimal
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
@@ -9,8 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 # Utilidades PDF
 import io
 
-# Modelos, Formularios y Utilidades
-from .models import Category, Product, Quote, QuoteItem, Order, ProductImage, Review, Cart, CartItem
+from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
@@ -371,24 +371,64 @@ def crm_dashboard_view(request):
         
     if search_query:
         orders = orders.filter(
+            Q(id__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(client_name__icontains=search_query) |
             Q(notes__icontains=search_query) |
             Q(platform__icontains=search_query) |
-            Q(shipping__icontains=search_query)
-        )
+            Q(shipping__icontains=search_query) |
+            Q(items__description__icontains=search_query)
+        ).distinct()
             
-    # Kanban: Pasos solicitados -> Presupuestado - Realizado - Enviado - Entregado - Cobrado
-    active_orders_qs = orders.exclude(status='Cancelado')
-    kanban_columns = {
-        'Presupuestado': active_orders_qs.filter(status='Presupuestado'),
-        'Realizado': active_orders_qs.filter(status='Realizado'),
-        'Enviado': active_orders_qs.filter(status='Enviado'),
-        'Entregado': active_orders_qs.filter(status='Entregado'),
-        'Cobrado': active_orders_qs.filter(status='Cobrado'),
-    }
-    
-    # Cálculos globales (excluir cancelados)
+    # Kanban: Pasos solicitados -> Presupuestado - En proceso - Realizado - Enviado - Entregado - Cobrado
+    active_order_items = OrderItem.objects.select_related('order', 'product').exclude(order__status='Cancelado')
+    if date_from:
+        active_order_items = active_order_items.filter(order__order_date__gte=date_from)
+    if date_to:
+        active_order_items = active_order_items.filter(order__order_date__lte=date_to)
+    if search_query:
+        active_order_items = active_order_items.filter(
+            Q(description__icontains=search_query) |
+            Q(order__client_name__icontains=search_query) |
+            Q(order__notes__icontains=search_query) |
+            Q(order__platform__icontains=search_query) |
+            Q(order__shipping__icontains=search_query) |
+            Q(order__id__icontains=search_query)
+        )
+
+    kanban_columns = {}
+    for col_status in ['Presupuestado', 'En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado']:
+        col_items = active_order_items.filter(status=col_status)
+        orders_map = {}
+        for item in col_items:
+            oid = item.order_id
+            if oid not in orders_map:
+                orders_map[oid] = {
+                    'order': item.order,
+                    'items': [],
+                    'total_items_in_order': item.order.items.count(),
+                    'are_all_items_realizado': item.order.are_all_items_realizado,
+                    'is_all_completed': item.order.is_all_completed,
+                    'group_price': 0,
+                    'group_cost': 0,
+                    'group_weight': 0,
+                }
+            orders_map[oid]['items'].append(item)
+            orders_map[oid]['group_price'] += float(item.price or 0)
+            orders_map[oid]['group_cost'] += float(item.total_cost or 0)
+            orders_map[oid]['group_weight'] += float(item.weight_grams or 0)
+
+        card_groups = []
+        for oid, data in orders_map.items():
+            data['all_items_in_this_col'] = (len(data['items']) == data['total_items_in_order'])
+            card_groups.append(data)
+            
+        kanban_columns[col_status] = card_groups
+
+    # Tabla Desglose: Una fila por cada Pedido con acordeón desplegable de sus piezas
+    orders = orders.prefetch_related('items', 'items__product').order_by('-order_date', '-id')
+
+    # Cálculos globales sobre pedidos activos
     orders_for_stats = orders.exclude(status='Cancelado')
     totals = orders_for_stats.aggregate(
         total_sales=Sum('price'),
@@ -414,7 +454,9 @@ def crm_dashboard_view(request):
         'total_sales': total_sales,
         'total_costs': total_costs,
         'total_profit': total_profit,
-        'avg_profit': avg_profit
+        'avg_profit': avg_profit,
+        'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
+        'status_choices': [c[0] for c in Order.STATUS_CHOICES]
     }
     
     return render(request, 'crm_dashboard.html', context)
@@ -430,6 +472,8 @@ def update_order_status_api(request, order_id):
                 order.status = new_status
                 order.update_status_dates(new_status)
                 order.save()
+                # Sincronizar todas las piezas del pedido a este nuevo estado
+                order.items.all().update(status=new_status)
                 return JsonResponse({
                     'success': True,
                     'status': order.status,
@@ -438,6 +482,74 @@ def update_order_status_api(request, order_id):
                     'paid_date': order.paid_date.strftime('%d/%m/%Y') if order.paid_date else None,
                 })
             return JsonResponse({'success': False, 'error': 'Estado inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def update_item_status_api(request, item_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_status = data.get('status')
+            item = OrderItem.objects.select_related('order').get(id=item_id)
+            if new_status in [s[0] for s in Order.STATUS_CHOICES]:
+                item.status = new_status
+                item.save()
+                order = item.order
+                
+                order_items = list(order.items.all())
+                all_realizado = all(i.status == 'Realizado' for i in order_items)
+                
+                # Si se mueve a fases globales de envío/entrega/cobro
+                if new_status in ['Enviado', 'Entregado', 'Cobrado']:
+                    order.status = new_status
+                    order.update_status_dates(new_status)
+                    order.save()
+                    order.items.all().update(status=new_status)
+                elif all_realizado:
+                    order.status = 'Realizado'
+                    order.update_status_dates('Realizado')
+                    order.save()
+                elif any(i.status == 'En proceso' for i in order_items):
+                    if order.status == 'Presupuestado':
+                        order.status = 'En proceso'
+                        order.save()
+                elif all(i.status == 'Presupuestado' for i in order_items):
+                    order.status = 'Presupuestado'
+                    order.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'item_id': item.id,
+                    'item_status': item.status,
+                    'order_id': order.id,
+                    'order_status': order.status,
+                    'are_all_items_realizado': order.are_all_items_realizado
+                })
+            return JsonResponse({'success': False, 'error': 'Estado inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def update_item_cost_api(request, item_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_cost = data.get('cost')
+            item = OrderItem.objects.select_related('order').get(id=item_id)
+            if new_cost is not None:
+                import decimal
+                cleaned_cost = str(new_cost).strip().replace(',', '.')
+                if cleaned_cost:
+                    item.total_cost = decimal.Decimal(cleaned_cost)
+                    if item.quantity and item.quantity > 0:
+                        item.unit_cost = item.total_cost / decimal.Decimal(str(item.quantity))
+                    item.save()
+                    item.order.update_totals_from_items()
+                    return JsonResponse({'success': True, 'total_cost': str(item.total_cost)})
+            return JsonResponse({'success': False, 'error': 'Coste inválido'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
@@ -467,6 +579,53 @@ def update_order_dates_api(request, order_id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def update_order_payment_api(request, order_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order = Order.objects.get(id=order_id)
+            
+            # Actualizar estado si se indica (por ejemplo al cobrar)
+            new_status = data.get('status')
+            if new_status and new_status in dict(Order.STATUS_CHOICES):
+                order.status = new_status
+                order.update_status_dates(new_status)
+                # Cascada a todas sus piezas
+                order.items.all().update(status=new_status)
+            
+            # Datos de pagos
+            if 'deposit_amount' in data:
+                try:
+                    raw_dep = str(data['deposit_amount']).strip().replace(',', '.')
+                    order.deposit_amount = decimal.Decimal(raw_dep) if raw_dep else decimal.Decimal('0.00')
+                except Exception:
+                    pass
+            if 'deposit_method' in data:
+                order.deposit_method = data.get('deposit_method') or ''
+            if 'final_payment_method' in data:
+                order.final_payment_method = data.get('final_payment_method') or ''
+            if 'payment_notes' in data:
+                order.payment_notes = data.get('payment_notes') or ''
+                
+            order.save()
+            
+            return JsonResponse({
+                'success': True,
+                'status': order.status,
+                'deposit_amount': float(order.deposit_amount or 0),
+                'deposit_method': order.deposit_method or '',
+                'final_payment_method': order.final_payment_method or '',
+                'remaining_amount': float(order.remaining_amount),
+                'payment_summary': order.payment_summary_text,
+                'paid_date': order.paid_date.strftime('%d/%m/%Y') if order.paid_date else ''
+            })
+        except Order.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Pedido no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 @staff_member_required
 def update_order_cost_api(request, order_id):
@@ -579,7 +738,8 @@ class SmartOrderForm(forms.ModelForm):
             'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs',
             'unit_cost', 'total_cost', 'unit_price', 'price',
             'shipped_date', 'delivered_date', 'paid_date',
-            'platform', 'shipping', 'notes'
+            'platform', 'shipping', 'notes',
+            'deposit_amount', 'deposit_method', 'final_payment_method', 'payment_notes'
         ]
         widgets = {
             'order_date': forms.DateInput(attrs={'type': 'date'}),
@@ -587,6 +747,8 @@ class SmartOrderForm(forms.ModelForm):
             'shipped_date': forms.DateInput(attrs={'type': 'date'}),
             'delivered_date': forms.DateInput(attrs={'type': 'date'}),
             'paid_date': forms.DateInput(attrs={'type': 'date'}),
+            'deposit_amount': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'payment_notes': forms.TextInput(attrs={'placeholder': 'Ej. Pagado 20€ Bizum señal...'}),
             'weight_grams': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
             'print_time_hours': forms.NumberInput(attrs={'step': 'any', 'placeholder': '0'}),
             'print_time_minutes': forms.NumberInput(attrs={'step': '1', 'min': '0', 'max': '59', 'placeholder': '0'}),
@@ -613,6 +775,10 @@ class SmartOrderForm(forms.ModelForm):
         self.fields['delivered_date'].required = False
         self.fields['paid_date'].required = False
         self.fields['notes'].required = False
+        self.fields['deposit_amount'].required = False
+        self.fields['deposit_method'].required = False
+        self.fields['final_payment_method'].required = False
+        self.fields['payment_notes'].required = False
         
         # Add Tailwind classes dynamically
         for field in self.fields.values():
@@ -621,7 +787,95 @@ class SmartOrderForm(forms.ModelForm):
 
 @staff_member_required
 def order_create_view(request):
+    import json
+    import decimal
+
     if request.method == 'POST':
+        pieces_json = request.POST.get('pieces_json', '').strip()
+        client_name = request.POST.get('client_name', '').strip()
+        order_date = request.POST.get('order_date')
+        deadline = request.POST.get('deadline') or None
+        platform = request.POST.get('platform', '').strip()
+        shipping = request.POST.get('shipping', '').strip()
+        notes = request.POST.get('notes', '').strip()
+        
+        parsed_pieces = []
+        if pieces_json:
+            try:
+                parsed_pieces = json.loads(pieces_json)
+            except Exception:
+                parsed_pieces = []
+                
+        initial_status = request.POST.get('status', 'Presupuestado').strip() or 'Presupuestado'
+        if initial_status not in dict(Order.STATUS_CHOICES):
+            initial_status = 'Presupuestado'
+
+        raw_dep = request.POST.get('deposit_amount', '').strip().replace(',', '.')
+        try:
+            deposit_val = decimal.Decimal(raw_dep) if raw_dep else decimal.Decimal('0.00')
+        except Exception:
+            deposit_val = decimal.Decimal('0.00')
+        deposit_method_val = request.POST.get('deposit_method', '').strip()
+        final_payment_method_val = request.POST.get('final_payment_method', '').strip()
+        payment_notes_val = request.POST.get('payment_notes', '').strip()
+
+        if client_name and order_date and parsed_pieces:
+            order = Order.objects.create(
+                client_name=client_name,
+                order_date=order_date,
+                deadline=deadline,
+                platform=platform,
+                shipping=shipping,
+                notes=notes,
+                status=initial_status,
+                deposit_amount=deposit_val,
+                deposit_method=deposit_method_val,
+                final_payment_method=final_payment_method_val,
+                payment_notes=payment_notes_val
+            )
+            
+            for p in parsed_pieces:
+                prod_id = p.get('product_id')
+                product = None
+                if prod_id:
+                    try:
+                        product = Product.objects.filter(id=int(prod_id)).first()
+                    except (ValueError, TypeError):
+                        product = None
+                desc = p.get('description') or (product.title if product else 'Pieza a medida')
+                if not product and desc:
+                    product = Product.objects.filter(title__iexact=desc).first()
+                
+                qty = int(p.get('quantity') or 1)
+                weight = float(p.get('weight_grams') or 0.0)
+                h = float(p.get('print_time_hours') or 0.0)
+                m = int(p.get('print_time_minutes') or 0)
+                extra = decimal.Decimal(str(p.get('extra_costs') or 0.00).replace(',', '.'))
+                u_cost = decimal.Decimal(str(p.get('unit_cost') or 0.00).replace(',', '.'))
+                t_cost = decimal.Decimal(str(p.get('total_cost') or 0.00).replace(',', '.'))
+                u_price = decimal.Decimal(str(p.get('unit_price') or 0.00).replace(',', '.'))
+                t_price = decimal.Decimal(str(p.get('price') or 0.00).replace(',', '.'))
+                
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    description=desc,
+                    quantity=qty,
+                    weight_grams=weight,
+                    print_time_hours=h,
+                    print_time_minutes=m,
+                    extra_costs=extra,
+                    unit_cost=u_cost,
+                    total_cost=t_cost if t_cost > 0 else (u_cost * qty),
+                    unit_price=u_price,
+                    price=t_price if t_price > 0 else (u_price * qty),
+                    status=initial_status
+                )
+                
+            order.update_totals_from_items()
+            return redirect('crm_dashboard')
+
+        # Fallback a formulario tradicional SmartOrderForm
         form = SmartOrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
@@ -636,16 +890,55 @@ def order_create_view(request):
                 order.product = None
                 order.description = smart_name
                 
+            order.deposit_amount = deposit_val
+            order.deposit_method = deposit_method_val
+            order.final_payment_method = final_payment_method_val
+            order.payment_notes = payment_notes_val
             order.save()
+            OrderItem.objects.create(
+                order=order,
+                product=order.product,
+                description=order.description,
+                quantity=order.quantity or 1,
+                weight_grams=order.weight_grams or 0.0,
+                print_time_hours=order.print_time_hours or 0.0,
+                print_time_minutes=order.print_time_minutes or 0,
+                extra_costs=order.extra_costs or 0.00,
+                unit_cost=order.unit_cost or 0.00,
+                total_cost=order.total_cost or 0.00,
+                unit_price=order.unit_price or 0.00,
+                price=order.price or 0.00,
+                status=order.status or 'Presupuestado'
+            )
             return redirect('crm_dashboard')
     else:
         form = SmartOrderForm()
     
-    products = Product.objects.filter(is_active=True).values_list('title', flat=True)
-    products_with_id = Product.objects.filter(is_active=True).values(
-        'id', 'title', 'price', 'sale_price', 'is_on_sale', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs'
-    )
-    return render(request, 'order_form.html', {'form': form, 'products': products, 'products_with_id': products_with_id})
+    products_qs = Product.objects.filter(is_active=True).select_related('category')
+    products_with_id = []
+    for p in products_qs:
+        products_with_id.append({
+            'id': p.id,
+            'title': p.title,
+            'price': float(p.price),
+            'sale_price': float(p.sale_price) if p.sale_price else None,
+            'is_on_sale': p.is_on_sale,
+            'weight_grams': p.weight_grams or 0.0,
+            'print_time_hours': p.print_time_hours or 0.0,
+            'print_time_minutes': p.print_time_minutes or 0,
+            'extra_costs': float(p.extra_costs or 0.0),
+            'image_url': p.main_image.url if p.main_image else None,
+            'category_name': p.category.name if p.category else 'Catálogo'
+        })
+    products = [p['title'] for p in products_with_id]
+    
+    return render(request, 'order_form.html', {
+        'form': form, 
+        'products': products, 
+        'products_with_id': products_with_id,
+        'products_json': json.dumps(products_with_id, default=str),
+        'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
+    })
 
 # =====================================================================
 # VISTAS DEL CARRITO DE COMPRAS

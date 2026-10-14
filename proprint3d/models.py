@@ -312,6 +312,7 @@ class QuoteItem(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = [
         ('Presupuestado', 'Presupuestado'),
+        ('En proceso', 'En proceso'),
         ('Realizado', 'Realizado'),
         ('Enviado', 'Enviado'),
         ('Entregado', 'Entregado'),
@@ -333,6 +334,17 @@ class Order(models.Model):
         ('Correos', 'Correos'),
         ('GLS', 'GLS'),
         ('En mano', 'En mano'),
+        ('Otro', 'Otro')
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ('Efectivo', 'Efectivo'),
+        ('Bizum', 'Bizum'),
+        ('Vinted', 'Vinted'),
+        ('Wallapop', 'Wallapop'),
+        ('Wallapop Elyest', 'Wallapop Elyest'),
+        ('Transferencia', 'Transferencia bancaria'),
+        ('Web', 'Web / Tarjeta'),
         ('Otro', 'Otro')
     ]
 
@@ -370,6 +382,12 @@ class Order(models.Model):
     shipping = models.CharField(max_length=50, choices=SHIPPING_CHOICES, blank=True, null=True, default='', help_text="Método de envío")
     
     notes = models.TextField(blank=True, null=True, help_text="Notas adicionales")
+
+    # Gestión de Pagos y Paga y Señal
+    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Paga y señal / Adelanto cobrado (€)")
+    deposit_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True, null=True, default='', help_text="Método del adelanto")
+    final_payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True, null=True, default='', help_text="Método de cobro restante/final")
+    payment_notes = models.CharField(max_length=255, blank=True, null=True, default='', help_text="Detalles o notas sobre los pagos")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -480,8 +498,228 @@ class Order(models.Model):
             return p - c
         return decimal.Decimal('0.00')
 
+    @property
+    def are_all_items_realizado(self):
+        """Devuelve True si todas las piezas del pedido están en estado 'Realizado'."""
+        items = list(self.items.all())
+        if not items:
+            return self.status == 'Realizado'
+        return all(i.status == 'Realizado' for i in items)
+
+    @property
+    def is_all_completed(self):
+        """Devuelve True si todas las piezas están realizadas o si el pedido ya está en fase de entrega/cobro."""
+        if self.status in ['Realizado', 'Enviado', 'Entregado', 'Cobrado']:
+            return True
+        items = list(self.items.all())
+        if not items:
+            return False
+        return all(i.status in ['Realizado', 'Enviado', 'Entregado', 'Cobrado'] for i in items)
+
+    @property
+    def remaining_amount(self):
+        """Calcula el importe que queda por cobrar tras la paga y señal."""
+        import decimal
+        p = self.price or decimal.Decimal('0.00')
+        d = self.deposit_amount or decimal.Decimal('0.00')
+        rem = p - d
+        return max(decimal.Decimal('0.00'), rem)
+
+    @property
+    def payment_summary_text(self):
+        """Genera un texto resumen amigable de cómo se ha cobrado el pedido."""
+        import decimal
+        p = self.price or decimal.Decimal('0.00')
+        d = self.deposit_amount or decimal.Decimal('0.00')
+        dep_method = self.deposit_method or 'Adelanto'
+        final_method = self.final_payment_method or 'Cobro'
+
+        if d > 0 and self.status == 'Cobrado':
+            rem = max(decimal.Decimal('0.00'), p - d)
+            if rem > 0:
+                return f"€{d:.2f} ({dep_method}) + €{rem:.2f} ({final_method})"
+            else:
+                return f"€{d:.2f} ({dep_method})"
+        elif d > 0:
+            rem = max(decimal.Decimal('0.00'), p - d)
+            return f"Señal: €{d:.2f} ({dep_method}) · Pendiente: €{rem:.2f}"
+        elif self.status == 'Cobrado' and self.final_payment_method:
+            return f"€{p:.2f} ({final_method})"
+        elif self.status == 'Cobrado':
+            return f"€{p:.2f} (Cobrado)"
+        return "Pendiente de cobro"
+
+    @property
+    def total_weight_calc(self):
+        """Peso total acumulado de las piezas del pedido."""
+        items = list(self.items.all())
+        if items:
+            return sum((i.weight_grams or 0.0) * (i.quantity or 1) for i in items)
+        return (self.weight_grams or 0.0) * (self.quantity or 1)
+
+    @property
+    def total_print_time_str(self):
+        """Tiempo de fabricación acumulado formateado."""
+        items = list(self.items.all())
+        if items:
+            mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in items)
+        else:
+            mins = ((self.print_time_hours or 0.0) * 60 + (self.print_time_minutes or 0)) * (self.quantity or 1)
+        h = int(mins // 60)
+        m = int(mins % 60)
+        return f"{h}h {m}m"
+
+    @property
+    def total_items_count(self):
+        """Cantidad total de piezas / unidades en el pedido."""
+        items = list(self.items.all())
+        if items:
+            return sum(i.quantity for i in items)
+        return self.quantity or 1
+
+    @property
+    def profit_margin_percent(self):
+        """Margen de beneficio comercial global en porcentaje."""
+        p = self.price or 0
+        if p > 0:
+            return round(float(self.profit / p) * 100, 1)
+        return 0.0
+
+    def update_totals_from_items(self):
+        """Recalcula los totales del pedido sumando las métricas de sus piezas."""
+        import decimal
+        items = list(self.items.all())
+        if not items:
+            return
+        
+        total_qty = sum(i.quantity for i in items)
+        total_p = sum((i.price or decimal.Decimal('0.00')) for i in items)
+        total_c = sum((i.total_cost or decimal.Decimal('0.00')) for i in items)
+        total_w = sum((i.weight_grams or 0.0) for i in items)
+        total_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) for i in items)
+        
+        h = total_mins // 60
+        m = int(total_mins % 60)
+        
+        if len(items) == 1:
+            desc = items[0].description
+            prod = items[0].product
+            u_price = items[0].unit_price
+            u_cost = items[0].unit_cost
+        else:
+            desc = " + ".join(i.description for i in items[:3]) + (f" (+{len(items)-3} más)" if len(items) > 3 else "")
+            prod = None
+            u_price = round(total_p / total_qty, 2) if total_qty > 0 else decimal.Decimal('0.00')
+            u_cost = round(total_c / total_qty, 2) if total_qty > 0 else decimal.Decimal('0.00')
+
+        Order.objects.filter(pk=self.pk).update(
+            quantity=total_qty,
+            price=total_p,
+            total_cost=total_c,
+            weight_grams=total_w,
+            print_time_hours=h,
+            print_time_minutes=m,
+            description=desc,
+            product=prod,
+            unit_price=u_price,
+            unit_cost=u_cost
+        )
+        self.refresh_from_db()
+
     def __str__(self):
         return f"Pedido #{self.id} - {self.description} ({self.client_name})"
+
+# =====================================================================
+# MODELO: OrderItem
+# Propósito: Representa una pieza individual dentro de un pedido (Order).
+# Permite que un pedido contenga múltiples piezas independientes con su
+# propio coste, precio, peso, tiempo y estado en el flujo Kanban.
+# =====================================================================
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.CharField(max_length=250, help_text="Nombre o descripción de la pieza")
+    quantity = models.IntegerField(default=1, help_text="Cantidad de esta pieza")
+    
+    # Métricas de fabricación individuales por unidad
+    weight_grams = models.FloatField(null=True, blank=True, default=0.0, help_text="Peso en gramos (por unidad)")
+    print_time_hours = models.FloatField(null=True, blank=True, default=0.0, help_text="Horas de impresión (por unidad)")
+    print_time_minutes = models.IntegerField(null=True, blank=True, default=0, help_text="Minutos de impresión (por unidad)")
+    extra_costs = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00, help_text="Costes extra (€)")
+    
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00, help_text="Coste unitario (€)")
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Coste total (€)")
+    
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00, help_text="Precio unitario (€)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Precio total cobrado (€)")
+    
+    status = models.CharField(max_length=20, choices=Order.STATUS_CHOICES, default='Presupuestado')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def calculate_unit_cost(self):
+        """Calcula el coste de producción por unidad según peso, tiempo y consumibles."""
+        w = float(self.weight_grams or 0)
+        h = float(self.print_time_hours or 0)
+        m = float(self.print_time_minutes or 0)
+        extra = float(self.extra_costs or 0)
+        
+        total_hours = h + (m / 60)
+        if w > 0 and total_hours > 0:
+            cost_filament = 0.02 * w
+            cost_energy = 0.15 * 0.12 * total_hours
+            cost_wear = 0.025 * total_hours
+            cost_subtotal = cost_filament + cost_energy + cost_wear
+            error_margin = cost_subtotal * 0.15
+            return round(cost_subtotal + error_margin + extra, 2)
+        elif self.product:
+            return float(self.product.calculate_production_cost())
+        return 0.0
+
+    def save(self, *args, **kwargs):
+        import decimal
+        qty = decimal.Decimal(str(self.quantity or 1))
+        
+        if self.unit_price is not None:
+            self.unit_price = decimal.Decimal(str(self.unit_price))
+        if self.price is not None:
+            self.price = decimal.Decimal(str(self.price))
+        if self.unit_cost is not None:
+            self.unit_cost = decimal.Decimal(str(self.unit_cost))
+        if self.total_cost is not None:
+            self.total_cost = decimal.Decimal(str(self.total_cost))
+        if self.extra_costs is not None:
+            self.extra_costs = decimal.Decimal(str(self.extra_costs))
+            
+        calc_cost = self.calculate_unit_cost()
+        if calc_cost > 0:
+            self.unit_cost = decimal.Decimal(str(calc_cost))
+        elif self.unit_cost is None:
+            self.unit_cost = decimal.Decimal('0.00')
+            
+        if (self.total_cost is None or self.total_cost == 0) and self.unit_cost:
+            self.total_cost = self.unit_cost * qty
+            
+        if self.unit_price is not None and self.unit_price > 0:
+            if self.price is None or self.price == 0:
+                self.price = self.unit_price * qty
+        elif self.price is not None and self.price > 0:
+            if self.unit_price is None or self.unit_price == 0:
+                self.unit_price = round(self.price / qty, 2)
+                
+        super().save(*args, **kwargs)
+        if self.order_id:
+            self.order.update_totals_from_items()
+
+    @property
+    def profit(self):
+        """Ganancia neta generada por esta pieza."""
+        import decimal
+        p = decimal.Decimal(str(self.price or 0))
+        c = decimal.Decimal(str(self.total_cost or 0))
+        return p - c
+
+    def __str__(self):
+        return f"{self.quantity}x {self.description} (Pedido #{self.order_id})"
 
 # =====================================================================
 # MODELO: Review

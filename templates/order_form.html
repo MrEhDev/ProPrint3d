@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load l10n %}
-{% block title %}Nuevo Pedido - Mini CRM ProPrint3D{% endblock %}
+{% block title %}Nuevo Pedido Multi-pieza - Mini CRM ProPrint3D{% endblock %}
 
 {% block content %}
 <style>
 .of-input {
   display: block;
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding: 0.55rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   background-color: #f9fafb;
@@ -28,7 +28,7 @@
 .of-field input, .of-field select, .of-field textarea {
   display: block;
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding: 0.55rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   background-color: #f9fafb;
@@ -46,10 +46,20 @@
   border-color: #06b6d4;
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
 }
+.piece-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.piece-card:hover {
+  border-color: rgba(6, 182, 212, 0.4);
+}
+.custom-autocomplete-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.4) transparent;
+}
 </style>
 
-<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-  <!-- Breadcrumb -->
+<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb & Tag -->
   <div class="mb-6 flex items-center justify-between">
     <a href="{% url 'crm_dashboard' %}" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary transition-colors">
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,22 +75,44 @@
   <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl overflow-hidden">
     <!-- Header Card -->
     <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-6 py-6 sm:px-8 text-white border-b border-gray-700">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
             <span class="p-2 bg-primary/20 rounded-xl text-primary">📦</span>
-            Alta de Nuevo Pedido
+            Alta de Pedido Multi-pieza
           </h2>
           <p class="mt-1 text-sm text-gray-300">
-            Calcula el coste de producción por peso/tiempo y fija el precio unitario y total automáticamente.
+            Añade una o varias piezas en el mismo pedido con autocompletado visual del catálogo y cálculo automático.
           </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="header-pieces-badge" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
+            1 Pieza en el pedido
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Formulario -->
-    <form method="POST" class="p-6 sm:p-8 space-y-8">
+    <!-- Formulario Principal -->
+    <form method="POST" id="order-form" class="p-6 sm:p-8 space-y-8">
       {% csrf_token %}
+
+      <!-- Campo Oculto con la serialización JSON de las piezas -->
+      <input type="hidden" name="pieces_json" id="id_pieces_json" value="[]">
+
+      <!-- Campos ocultos de fallback para compatibilidad con SmartOrderForm -->
+      <div class="hidden">
+        {{ form.smart_product_name }}
+        {{ form.quantity }}
+        {{ form.weight_grams }}
+        {{ form.print_time_hours }}
+        {{ form.print_time_minutes }}
+        {{ form.extra_costs }}
+        {{ form.unit_cost }}
+        {{ form.total_cost }}
+        {{ form.unit_price }}
+        {{ form.price }}
+      </div>
 
       {% if form.errors %}
       <div class="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
@@ -102,7 +134,7 @@
       <div>
         <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
-          1. Información del Cliente
+          1. Información del Pedido y Cliente
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="of-field sm:col-span-1">
@@ -123,164 +155,83 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: PRODUCTO, PESO Y TIEMPO (FABRICACIÓN) -->
+      <!-- SECCIÓN 2: PIEZAS DEL PEDIDO (MULTILÍNEA DINÁMICA CON BÚSQUEDA VISUAL) -->
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          2. Pieza y Parámetros de Fabricación
-        </h3>
-        
-        <div class="space-y-4">
-          <!-- Selector Inteligente de Producto -->
+        <div class="flex items-center justify-between mb-4">
           <div>
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Producto o Pieza a Medida *
-            </label>
-            <div class="relative">
-              <input type="text" id="id_smart_product_name" name="smart_product_name"
-                list="products-datalist" autocomplete="off"
-                class="of-input pr-10 font-medium"
-                placeholder="Escribe el nombre o selecciona un producto del catálogo..."
-                value="{{ form.smart_product_name.value|default:'' }}">
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              </div>
-            </div>
-            <datalist id="products-datalist">
-              {% for p in products %}<option value="{{ p }}"></option>{% endfor %}
-            </datalist>
-            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-              💡 Al seleccionar un producto del catálogo se autorrellenan el peso, horas, minutos y precio. También puedes escribir un encargo custom.
+            <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+              2. Piezas y Fabricación del Pedido
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Busca en el catálogo con imagen en tiempo real o escribe un encargo personalizado a medida.
             </p>
           </div>
+          <button type="button" id="btn-add-piece" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white text-xs font-bold transition shadow-sm hover:shadow">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            + Añadir Pieza
+          </button>
+        </div>
 
-          <!-- Métricas de Impresión: Peso, Horas, Minutos, Otros -->
-          <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                ⚙️ Cálculo de Coste de Producción (Por Unidad)
-              </span>
-              <span id="badge-source" class="text-[11px] px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                Personalizado
-              </span>
-            </div>
+        <!-- Contenedor dinámico de piezas -->
+        <div id="pieces-container" class="space-y-4">
+          <!-- Las tarjetas de piezas se renderizan aquí dinámicamente -->
+        </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div class="of-field">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (g)</label>
-                {{ form.weight_grams }}
-              </div>
-              <div class="of-field">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Horas Impresión</label>
-                {{ form.print_time_hours }}
-              </div>
-              <div class="of-field">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Minutos Extra</label>
-                {{ form.print_time_minutes }}
-              </div>
-              <div class="of-field">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Otros Costes (€)</label>
-                {{ form.extra_costs }}
-              </div>
-            </div>
-
-            <!-- Desglose de Coste Calculado y Precios Sugeridos -->
-            <div id="cost-calc-panel" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                
-                <!-- Coste unitario y total de producción -->
-                <div class="flex items-center gap-4 bg-white dark:bg-dark p-3 rounded-lg border border-gray-200 dark:border-gray-800">
-                  <div class="flex-1">
-                    <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">Coste Unitario</p>
-                    <p class="text-lg font-black text-red-600 dark:text-red-400">
-                      €<span id="live-unit-cost">0.00</span>
-                    </p>
-                  </div>
-                  <div class="border-l border-gray-200 dark:border-gray-700 pl-4 flex-1">
-                    <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">Coste Total Prod.</p>
-                    <p class="text-lg font-black text-red-500">
-                      €<span id="live-total-cost">0.00</span>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Botones de Margen Rápido (Sugerencias) -->
-                <div>
-                  <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
-                    ⚡ Aplicar Margen Sugerido al Precio Unitario:
-                  </p>
-                  <div class="grid grid-cols-3 gap-2">
-                    <button type="button" id="btn-sugg-x25" class="px-2 py-1.5 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg text-left transition-all group">
-                      <span class="block text-[10px] text-yellow-700 dark:text-yellow-400 font-bold uppercase">x2.5</span>
-                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x25">0.00</span></span>
-                    </button>
-                    <button type="button" id="btn-sugg-x30" class="px-2 py-1.5 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg text-left transition-all group">
-                      <span class="block text-[10px] text-green-700 dark:text-green-400 font-bold uppercase">x3.0</span>
-                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x30">0.00</span></span>
-                    </button>
-                    <button type="button" id="btn-sugg-x40" class="px-2 py-1.5 bg-purple-50 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg text-left transition-all group">
-                      <span class="block text-[10px] text-purple-700 dark:text-purple-400 font-bold uppercase">x4.0</span>
-                      <span class="block text-xs font-black text-gray-900 dark:text-white">€<span id="val-sugg-x40">0.00</span></span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Campos ocultos sincronizados del coste -->
-            <div class="hidden">
-              {{ form.unit_cost }}
-              {{ form.total_cost }}
-            </div>
-          </div>
+        <!-- Botón adicional al pie de la lista de piezas -->
+        <div class="pt-2">
+          <button type="button" id="btn-add-piece-bottom" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            + Añadir otra pieza a este pedido
+          </button>
         </div>
       </div>
 
-      <!-- SECCIÓN 3: PRECIOS, CANTIDAD Y RENTABILIDAD -->
+      <!-- SECCIÓN 3: RESUMEN GLOBAL DEL PEDIDO Y TOTALES -->
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
         <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          3. Precios y Cantidad Cobrada
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          3. Resumen Global del Pedido y Rentabilidad
         </h3>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <!-- Cantidad -->
-          <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Cantidad *</label>
-            {{ form.quantity }}
-          </div>
-          <!-- Precio Unitario -->
-          <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Precio Unitario (€)</label>
-            {{ form.unit_price }}
-          </div>
-          <!-- Total Cobrado -->
-          <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Total Cobrado Final (€) *</label>
-            {{ form.price }}
-          </div>
-        </div>
+        <div class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-5 shadow-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 items-center text-center">
+            
+            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
+              <p class="text-lg font-black text-gray-900 dark:text-white"><span id="summary-total-items">1</span> <span class="text-xs font-semibold text-gray-500">uds</span></p>
+            </div>
 
-        <!-- Banner en vivo: Preview de Rentabilidad y Ganancia -->
-        <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-xl p-4">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center items-center">
-            <div>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase">Total Venta</p>
-              <p class="text-xl font-black text-gray-900 dark:text-white">€<span id="preview-total-sale">0.00</span></p>
+            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
+              <p class="text-lg font-black text-cyan-600 dark:text-cyan-400"><span id="summary-total-weight">0</span> <span class="text-xs font-semibold text-cyan-500">g</span></p>
             </div>
-            <div>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase">Coste Prod.</p>
-              <p class="text-xl font-black text-red-500">€<span id="preview-total-cost">0.00</span></p>
+
+            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Tiempo Fab.</p>
+              <p class="text-lg font-black text-indigo-600 dark:text-indigo-400" id="summary-total-time">0h 0m</p>
             </div>
-            <div>
-              <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Ganancia Neta</p>
-              <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400">€<span id="preview-profit">0.00</span></p>
+
+            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
+              <p class="text-lg font-black text-red-500">€<span id="summary-total-cost">0.00</span></p>
             </div>
-            <div>
-              <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Margen</p>
-              <p class="text-lg font-black text-emerald-600 dark:text-emerald-400"><span id="preview-margin">0</span>%</p>
+
+            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50 sm:col-span-2 lg:col-span-1">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Pedido</p>
+              <p class="text-xl font-black text-primary">€<span id="summary-total-price">0.00</span></p>
             </div>
+
+            <div class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
+              <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">€<span id="summary-net-profit">0.00</span></p>
+            </div>
+
+            <div class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
+              <p class="text-lg font-black text-emerald-600 dark:text-emerald-400"><span id="summary-margin-percent">0</span>%</p>
+            </div>
+
           </div>
         </div>
       </div>
@@ -289,9 +240,10 @@
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
         <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
-          4. Logística y Estado
+          4. Logística y Estado del Pedido
         </h3>
 
+        <!-- Logística y Fechas -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
           <div class="of-field">
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado Inicial</label>
@@ -310,7 +262,7 @@
         <!-- Fechas de seguimiento manual (Opcionales) -->
         <details class="mb-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-xl p-3.5">
           <summary class="text-xs font-bold text-gray-700 dark:text-gray-300 cursor-pointer select-none flex items-center gap-1.5">
-            <span>📅 Fechas de Seguimiento Manuales (Opcional - Se asignan solas al cambiar de estado)</span>
+            <span>📅 Fechas de Seguimiento Manuales (Opcional - Se asignan solas al mover en Kanban)</span>
           </summary>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
             <div class="of-field">
@@ -336,11 +288,11 @@
 
       <!-- BOTÓN SUBMIT -->
       <div class="pt-4">
-        <button type="submit" class="w-full bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
+        <button type="submit" id="btn-submit" class="w-full bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          Guardar Pedido en el CRM
+          <span id="btn-submit-text">Guardar Pedido en el CRM</span>
         </button>
       </div>
     </form>
@@ -348,53 +300,40 @@
 </div>
 
 <script>
-// Diccionario de productos desde el backend
-const productMap = {
-  {% for p in products_with_id %}
-  "{{ p.title|escapejs }}": {
-    price: {{ p.price|unlocalize }},
-    salePrice: {% if p.is_on_sale and p.sale_price %}{{ p.sale_price|unlocalize }}{% else %}null{% endif %},
-    weight: {{ p.weight_grams|default:0|unlocalize }},
-    hours: {{ p.print_time_hours|default:0|unlocalize }},
-    mins: {{ p.print_time_minutes|default:0 }},
-    extra: {{ p.extra_costs|default:0|unlocalize }}
-  },
-  {% endfor %}
-};
+// Lista completa de productos con fotos y datos del catálogo
+const productCatalogList = {{ products_json|safe }};
 
-// Referencias a elementos del DOM
-const nameInput = document.getElementById('id_smart_product_name');
-const qtyInput = document.getElementById('id_quantity');
-const weightInput = document.getElementById('id_weight_grams');
-const hoursInput = document.getElementById('id_print_time_hours');
-const minsInput = document.getElementById('id_print_time_minutes');
-const extraInput = document.getElementById('id_extra_costs');
+// Diccionario indexado por título
+const productCatalogMap = {};
+productCatalogList.forEach(p => {
+  productCatalogMap[p.title.trim().toLowerCase()] = p;
+});
 
-const unitCostInput = document.getElementById('id_unit_cost');
-const totalCostInput = document.getElementById('id_total_cost');
+// Estado global de las piezas
+let piecesState = [
+  {
+    uid: Date.now(),
+    productId: null,
+    description: '',
+    imageUrl: null,
+    quantity: 1,
+    weight: 0,
+    hours: 0,
+    mins: 0,
+    extra: 0,
+    unitCost: 0,
+    totalCost: 0,
+    unitPrice: 0,
+    totalPrice: 0,
+    isCatalog: false,
+    suggX25: 0,
+    suggX30: 0,
+    suggX40: 0
+  }
+];
 
-const unitPriceInput = document.getElementById('id_unit_price');
-const totalPriceInput = document.getElementById('id_price');
-
-const liveUnitCost = document.getElementById('live-unit-cost');
-const liveTotalCost = document.getElementById('live-total-cost');
-const badgeSource = document.getElementById('badge-source');
-
-const valSuggX25 = document.getElementById('val-sugg-x25');
-const valSuggX30 = document.getElementById('val-sugg-x30');
-const valSuggX40 = document.getElementById('val-sugg-x40');
-
-const btnSuggX25 = document.getElementById('btn-sugg-x25');
-const btnSuggX30 = document.getElementById('btn-sugg-x30');
-const btnSuggX40 = document.getElementById('btn-sugg-x40');
-
-const previewTotalSale = document.getElementById('preview-total-sale');
-const previewTotalCost = document.getElementById('preview-total-cost');
-const previewProfit = document.getElementById('preview-profit');
-const previewMargin = document.getElementById('preview-margin');
-
-// Función de cálculo de coste de producción exacto
-function calculateCostValues(w, h, m, extra) {
+// Cálculo de coste exacto por pieza
+function calculateUnitCost(w, h, m, extra) {
   const totalHours = (parseFloat(h) || 0) + ((parseFloat(m) || 0) / 60);
   const weight = parseFloat(w) || 0;
   const extraVal = parseFloat(extra) || 0;
@@ -431,117 +370,568 @@ function calculateCostValues(w, h, m, extra) {
   };
 }
 
-// Actualizar panel de costes y sugerencias
-function refreshCostCalculations() {
-  const w = weightInput ? weightInput.value : 0;
-  const h = hoursInput ? hoursInput.value : 0;
-  const m = minsInput ? minsInput.value : 0;
-  const extra = extraInput ? extraInput.value : 0;
-  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+// Renderizado completo del contenedor de piezas
+function renderPieces() {
+  const container = document.getElementById('pieces-container');
+  if (!container) return;
 
-  const res = calculateCostValues(w, h, m, extra);
-  const totalCost = Math.round((res.unitCost * qty) * 100) / 100;
+  container.innerHTML = '';
 
-  if (liveUnitCost) liveUnitCost.textContent = res.unitCost.toFixed(2);
-  if (liveTotalCost) liveTotalCost.textContent = totalCost.toFixed(2);
+  piecesState.forEach((piece, index) => {
+    const card = document.createElement('div');
+    card.className = 'piece-card bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 relative shadow-sm';
+    card.dataset.index = index;
 
-  if (unitCostInput) unitCostInput.value = res.unitCost.toFixed(2);
-  if (totalCostInput) totalCostInput.value = totalCost.toFixed(2);
+    // Calcular costes actuales
+    const costData = calculateUnitCost(piece.weight, piece.hours, piece.mins, piece.extra);
+    piece.unitCost = costData.unitCost;
+    piece.totalCost = Math.round((piece.unitCost * piece.quantity) * 100) / 100;
+    piece.suggX25 = costData.suggX25;
+    piece.suggX30 = costData.suggX30;
+    piece.suggX40 = costData.suggX40;
 
-  if (valSuggX25) valSuggX25.textContent = res.suggX25.toFixed(2);
-  if (valSuggX30) valSuggX30.textContent = res.suggX30.toFixed(2);
-  if (valSuggX40) valSuggX40.textContent = res.suggX40.toFixed(2);
+    const pieceProfit = Math.round((piece.totalPrice - piece.totalCost) * 100) / 100;
+    const pieceMargin = piece.totalPrice > 0 ? ((pieceProfit / piece.totalPrice) * 100).toFixed(0) : '0';
 
-  refreshProfitPreview();
+    card.innerHTML = `
+      <!-- Cabecera de la Pieza con Miniatura si tiene foto -->
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-200 dark:border-gray-800">
+        <div class="flex items-center gap-2.5">
+          ${piece.imageUrl ? `
+            <img src="${piece.imageUrl}" alt="Foto producto" class="w-9 h-9 rounded-lg object-cover border border-cyan-400/50 shadow-sm flex-shrink-0">
+          ` : `
+            <span class="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-bold text-xs flex items-center gap-1.5">
+              🧩 Pieza #${index + 1}
+            </span>
+          `}
+          ${piece.imageUrl ? `
+            <span class="text-xs font-bold text-primary">#${index + 1}</span>
+          ` : ''}
+          <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[180px] sm:max-w-[280px]">
+            ${piece.description ? piece.description : '<span class="text-gray-400 italic">Sin asignar</span>'}
+          </span>
+          <span class="text-[10px] px-2 py-0.5 rounded ${piece.isCatalog ? 'bg-primary/20 text-primary font-bold' : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}">
+            ${piece.isCatalog ? 'Catálogo' : 'A medida'}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn-duplicate-piece p-1.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-200 dark:hover:bg-gray-800 transition" title="Duplicar pieza" data-index="${index}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          </button>
+          ${piecesState.length > 1 ? `
+          <button type="button" class="btn-remove-piece p-1.5 rounded-lg text-red-500 hover:text-white hover:bg-red-500 transition" title="Eliminar pieza" data-index="${index}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Fila 1: Buscador visual interactivo con estética web -->
+      <div class="mb-4 relative">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          Pieza o Producto del Catálogo *
+        </label>
+        <div class="relative">
+          <input type="text" class="of-input pr-10 font-medium input-desc" data-index="${index}"
+            autocomplete="off"
+            placeholder="Escribe para buscar en el catálogo o escribe un encargo a medida..."
+            value="${piece.description || ''}">
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+
+        <!-- Menú flotante de resultados con foto y estilo web -->
+        <div id="autocomplete-dropdown-${index}" class="custom-autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1.5 z-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
+        </div>
+      </div>
+
+      <!-- Fila 2: Fabricación (Peso, Horas, Minutos, Otros costes) -->
+      <div class="bg-white/80 dark:bg-dark/60 p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-800 mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+            ⚙️ Parámetros de Fabricación (Unidad)
+          </span>
+          <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
+            Coste Unit.: <strong class="text-red-500 font-black">€${piece.unitCost.toFixed(2)}</strong>
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Peso (g)</label>
+            <input type="number" step="any" min="0" class="of-input input-weight" data-index="${index}" value="${piece.weight || ''}" placeholder="0">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Horas Impresión</label>
+            <input type="number" step="any" min="0" class="of-input input-hours" data-index="${index}" value="${piece.hours || ''}" placeholder="0">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Minutos Extra</label>
+            <input type="number" step="1" min="0" max="59" class="of-input input-mins" data-index="${index}" value="${piece.mins || ''}" placeholder="0">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-1">Otros Costes (€)</label>
+            <input type="number" step="0.01" min="0" class="of-input input-extra" data-index="${index}" value="${piece.extra || ''}" placeholder="0.00">
+          </div>
+        </div>
+
+        <!-- Botones de margen sugerido por pieza -->
+        <div class="mt-3 pt-2.5 border-t border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">
+            ⚡ Margen Rápido al P.U.:
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button type="button" class="btn-sugg px-2 py-1 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 rounded text-[11px] font-bold text-yellow-800 dark:text-yellow-300 transition" data-index="${index}" data-val="${piece.suggX25}">
+              x2.5 (€${piece.suggX25.toFixed(2)})
+            </button>
+            <button type="button" class="btn-sugg px-2 py-1 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-700 hover:bg-green-100 rounded text-[11px] font-bold text-green-800 dark:text-green-300 transition" data-index="${index}" data-val="${piece.suggX30}">
+              x3.0 (€${piece.suggX30.toFixed(2)})
+            </button>
+            <button type="button" class="btn-sugg px-2 py-1 bg-purple-50 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 hover:bg-purple-100 rounded text-[11px] font-bold text-purple-800 dark:text-purple-300 transition" data-index="${index}" data-val="${piece.suggX40}">
+              x4.0 (€${piece.suggX40.toFixed(2)})
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 3: Cantidad, Precio Unitario, Total Pieza y Rentabilidad -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Cantidad (uds) *</label>
+          <input type="number" min="1" step="1" class="of-input font-bold input-qty" data-index="${index}" value="${piece.quantity || 1}">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Precio Unitario (€)</label>
+          <input type="number" step="0.01" min="0" class="of-input font-semibold input-uprice" data-index="${index}" value="${piece.unitPrice || ''}" placeholder="0.00">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Total Cobrado Pieza (€) *</label>
+          <input type="number" step="0.01" min="0" class="of-input font-black text-primary input-tprice" data-index="${index}" value="${piece.totalPrice || ''}" placeholder="0.00">
+        </div>
+
+        <div class="bg-gray-100 dark:bg-gray-800/80 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div>
+            <p class="text-[10px] font-bold text-gray-500 uppercase">Beneficio Pieza</p>
+            <p class="text-sm font-black ${pieceProfit < 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}">
+              €${pieceProfit.toFixed(2)}
+            </p>
+          </div>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-md ${pieceProfit < 0 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'}">
+            ${pieceMargin}%
+          </span>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  bindPieceEvents();
+  updateOrderGrandTotals();
 }
 
-// Actualizar panel de rentabilidad y total cobrado
-function refreshProfitPreview() {
-  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-  const totalSale = parseFloat(totalPriceInput ? totalPriceInput.value : 0) || 0;
-  const totalCost = parseFloat(totalCostInput ? totalCostInput.value : 0) || 0;
+// Búsqueda en vivo en el catálogo de productos con imagen
+function handleAutocompleteSearch(inputEl, index) {
+  const dropdown = document.getElementById(`autocomplete-dropdown-${index}`);
+  if (!dropdown) return;
 
-  const profit = totalSale - totalCost;
-  const marginPercent = totalSale > 0 ? ((profit / totalSale) * 100).toFixed(1) : '0';
+  const query = inputEl.value.trim().toLowerCase();
+  if (!query) {
+    dropdown.innerHTML = '';
+    dropdown.classList.add('hidden');
+    return;
+  }
 
-  if (previewTotalSale) previewTotalSale.textContent = totalSale.toFixed(2);
-  if (previewTotalCost) previewTotalCost.textContent = totalCost.toFixed(2);
-  if (previewProfit) {
-    previewProfit.textContent = profit.toFixed(2);
-    if (profit < 0) {
-      previewProfit.className = 'text-2xl font-black text-red-500';
-    } else {
-      previewProfit.className = 'text-2xl font-black text-emerald-600 dark:text-emerald-400';
+  const matches = productCatalogList.filter(p => p.title.toLowerCase().includes(query));
+
+  if (matches.length === 0) {
+    dropdown.innerHTML = `
+      <div class="p-3 text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-2">
+        <span>✨</span> Encargo personalizado no catalogado: "${inputEl.value}"
+      </div>
+    `;
+    dropdown.classList.remove('hidden');
+    return;
+  }
+
+  let html = '';
+  matches.forEach(item => {
+    // Resaltar coincidencia
+    const regex = new RegExp(`(${query})`, 'gi');
+    const highlightedTitle = item.title.replace(regex, '<span class="text-cyan-500 dark:text-cyan-400 font-extrabold underline">$1</span>');
+
+    const effectivePrice = item.sale_price !== null && item.is_on_sale ? item.sale_price : item.price;
+
+    html += `
+      <div class="p-2.5 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 cursor-pointer flex items-center gap-3 transition-colors catalog-option"
+        data-index="${index}" data-prod-id="${item.id}">
+        ${item.image_url ? `
+          <img src="${item.image_url}" alt="${item.title}" class="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
+        ` : `
+          <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-lg flex-shrink-0">📦</div>
+        `}
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-gray-900 dark:text-white truncate">${highlightedTitle}</p>
+          <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+            <span>⚖️ ${item.weight_grams}g</span>
+            <span>⏱️ ${item.print_time_hours}h ${item.print_time_minutes}m</span>
+            <span class="px-1.5 py-0.2 rounded bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300 font-bold">€${Number(effectivePrice).toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  dropdown.innerHTML = html;
+  dropdown.classList.remove('hidden');
+
+  // Event listener para las opciones sugeridas
+  dropdown.querySelectorAll('.catalog-option').forEach(opt => {
+    opt.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const pId = parseInt(this.dataset.prodId);
+      const catalogItem = productCatalogList.find(p => p.id === pId);
+      if (catalogItem) {
+        selectCatalogProduct(index, catalogItem);
+      }
+    });
+  });
+}
+
+// Al seleccionar producto del catálogo
+function selectCatalogProduct(index, catalogItem) {
+  const p = piecesState[index];
+  p.productId = catalogItem.id;
+  p.description = catalogItem.title;
+  p.imageUrl = catalogItem.image_url || null;
+  p.isCatalog = true;
+  p.weight = catalogItem.weight_grams || 0;
+  p.hours = catalogItem.print_time_hours || 0;
+  p.mins = catalogItem.print_time_minutes || 0;
+  p.extra = catalogItem.extra_costs || 0;
+
+  const effectivePrice = catalogItem.sale_price !== null && catalogItem.is_on_sale ? catalogItem.sale_price : catalogItem.price;
+  p.unitPrice = effectivePrice;
+  p.totalPrice = Math.round((effectivePrice * p.quantity) * 100) / 100;
+
+  renderPieces();
+}
+
+// Enlazar eventos de los inputs de las piezas
+function bindPieceEvents() {
+  document.querySelectorAll('.input-desc').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].description = this.value;
+
+      // Buscar coincidencia exacta
+      const exactMatch = productCatalogMap[this.value.trim().toLowerCase()];
+      if (exactMatch) {
+        piecesState[idx].productId = exactMatch.id;
+        piecesState[idx].imageUrl = exactMatch.image_url;
+        piecesState[idx].isCatalog = true;
+      } else {
+        piecesState[idx].isCatalog = false;
+        piecesState[idx].productId = null;
+        piecesState[idx].imageUrl = null;
+      }
+
+      handleAutocompleteSearch(this, idx);
+      updatePieceCalculations(idx);
+    });
+
+    input.addEventListener('focus', function() {
+      const idx = parseInt(this.dataset.index);
+      if (this.value.trim()) {
+        handleAutocompleteSearch(this, idx);
+      }
+    });
+  });
+
+  // Métricas de fabricación
+  document.querySelectorAll('.input-weight').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].weight = parseFloat(this.value) || 0;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  document.querySelectorAll('.input-hours').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].hours = parseFloat(this.value) || 0;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  document.querySelectorAll('.input-mins').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].mins = parseInt(this.value) || 0;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  document.querySelectorAll('.input-extra').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].extra = parseFloat(this.value) || 0;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  // Cantidad
+  document.querySelectorAll('.input-qty').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].quantity = parseInt(this.value) || 1;
+      if (piecesState[idx].unitPrice > 0) {
+        piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
+      }
+      updatePieceCalculations(idx);
+    });
+  });
+
+  // Precio unitario
+  document.querySelectorAll('.input-uprice').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].unitPrice = parseFloat(this.value) || 0;
+      piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  // Total cobrado pieza
+  document.querySelectorAll('.input-tprice').forEach(input => {
+    input.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.index);
+      piecesState[idx].totalPrice = parseFloat(this.value) || 0;
+      if (piecesState[idx].quantity > 0) {
+        piecesState[idx].unitPrice = Math.round((piecesState[idx].totalPrice / piecesState[idx].quantity) * 100) / 100;
+      }
+      updatePieceCalculations(idx);
+    });
+  });
+
+  // Botones de sugerencias de precio x2.5, x3.0, x4.0
+  document.querySelectorAll('.btn-sugg').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.index);
+      const val = parseFloat(this.dataset.val) || 0;
+      piecesState[idx].unitPrice = val;
+      piecesState[idx].totalPrice = Math.round((val * piecesState[idx].quantity) * 100) / 100;
+      updatePieceCalculations(idx);
+    });
+  });
+
+  // Botón duplicar pieza
+  document.querySelectorAll('.btn-duplicate-piece').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.index);
+      duplicatePiece(idx);
+    });
+  });
+
+  // Botón eliminar pieza
+  document.querySelectorAll('.btn-remove-piece').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.index);
+      removePiece(idx);
+    });
+  });
+}
+
+// Cerrar desplegables de autocompletado al hacer clic fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.relative')) {
+    document.querySelectorAll('.custom-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
+  }
+});
+
+// Actualizar cálculos de una pieza sin perder el foco si es posible
+function updatePieceCalculations(index) {
+  const p = piecesState[index];
+  const costData = calculateUnitCost(p.weight, p.hours, p.mins, p.extra);
+  p.unitCost = costData.unitCost;
+  p.totalCost = Math.round((p.unitCost * p.quantity) * 100) / 100;
+  p.suggX25 = costData.suggX25;
+  p.suggX30 = costData.suggX30;
+  p.suggX40 = costData.suggX40;
+
+  const card = document.querySelector(`.piece-card[data-index="${index}"]`);
+  if (card) {
+    const uPriceInput = card.querySelector('.input-uprice');
+    const tPriceInput = card.querySelector('.input-tprice');
+    if (uPriceInput && document.activeElement !== uPriceInput) {
+      uPriceInput.value = p.unitPrice > 0 ? p.unitPrice.toFixed(2) : '';
+    }
+    if (tPriceInput && document.activeElement !== tPriceInput) {
+      tPriceInput.value = p.totalPrice > 0 ? p.totalPrice.toFixed(2) : '';
+    }
+
+    const suggBtns = card.querySelectorAll('.btn-sugg');
+    if (suggBtns.length >= 3) {
+      suggBtns[0].dataset.val = p.suggX25;
+      suggBtns[0].textContent = `x2.5 (€${p.suggX25.toFixed(2)})`;
+      suggBtns[1].dataset.val = p.suggX30;
+      suggBtns[1].textContent = `x3.0 (€${p.suggX30.toFixed(2)})`;
+      suggBtns[2].dataset.val = p.suggX40;
+      suggBtns[2].textContent = `x4.0 (€${p.suggX40.toFixed(2)})`;
     }
   }
-  if (previewMargin) previewMargin.textContent = marginPercent;
+
+  updateOrderGrandTotals();
 }
 
-// Cuando cambia el precio unitario -> calcular precio total
-function onUnitPriceChange() {
-  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-  const uPrice = parseFloat(unitPriceInput.value) || 0;
-  const total = Math.round((uPrice * qty) * 100) / 100;
-  if (totalPriceInput) totalPriceInput.value = total.toFixed(2);
-  refreshProfitPreview();
+// Añadir nueva pieza
+function addPiece() {
+  piecesState.push({
+    uid: Date.now(),
+    productId: null,
+    description: '',
+    imageUrl: null,
+    quantity: 1,
+    weight: 0,
+    hours: 0,
+    mins: 0,
+    extra: 0,
+    unitCost: 0,
+    totalCost: 0,
+    unitPrice: 0,
+    totalPrice: 0,
+    isCatalog: false,
+    suggX25: 0,
+    suggX30: 0,
+    suggX40: 0
+  });
+  renderPieces();
 }
 
-// Cuando cambia el precio total cobrado -> calcular precio unitario
-function onTotalPriceChange() {
-  const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-  const total = parseFloat(totalPriceInput.value) || 0;
-  if (qty > 0 && unitPriceInput) {
-    const uPrice = Math.round((total / qty) * 100) / 100;
-    unitPriceInput.value = uPrice.toFixed(2);
+// Duplicar pieza
+function duplicatePiece(index) {
+  const source = piecesState[index];
+  piecesState.splice(index + 1, 0, {
+    ...source,
+    uid: Date.now(),
+    description: source.description ? `${source.description} (Copia)` : ''
+  });
+  renderPieces();
+}
+
+// Eliminar pieza
+function removePiece(index) {
+  if (piecesState.length <= 1) return;
+  piecesState.splice(index, 1);
+  renderPieces();
+}
+
+// Actualizar totales generales del pedido
+function updateOrderGrandTotals() {
+  let totalItems = 0;
+  let totalWeight = 0;
+  let totalMinutes = 0;
+  let totalCost = 0;
+  let totalPrice = 0;
+
+  piecesState.forEach(p => {
+    const qty = parseInt(p.quantity) || 1;
+    totalItems += qty;
+    totalWeight += (parseFloat(p.weight) || 0) * qty;
+    totalMinutes += ((parseFloat(p.hours) || 0) * 60 + (parseInt(p.mins) || 0)) * qty;
+    totalCost += parseFloat(p.totalCost) || 0;
+    totalPrice += parseFloat(p.totalPrice) || 0;
+  });
+
+  const grandHours = Math.floor(totalMinutes / 60);
+  const grandMins = Math.round(totalMinutes % 60);
+  const netProfit = Math.round((totalPrice - totalCost) * 100) / 100;
+  const marginPercent = totalPrice > 0 ? ((netProfit / totalPrice) * 100).toFixed(1) : '0';
+
+  const elTotalItems = document.getElementById('summary-total-items');
+  const elTotalWeight = document.getElementById('summary-total-weight');
+  const elTotalTime = document.getElementById('summary-total-time');
+  const elTotalCost = document.getElementById('summary-total-cost');
+  const elTotalPrice = document.getElementById('summary-total-price');
+  const elNetProfit = document.getElementById('summary-net-profit');
+  const elMarginPercent = document.getElementById('summary-margin-percent');
+  const headerBadge = document.getElementById('header-pieces-badge');
+  const btnSubmitText = document.getElementById('btn-submit-text');
+
+  if (elTotalItems) elTotalItems.textContent = totalItems;
+  if (elTotalWeight) elTotalWeight.textContent = totalWeight.toFixed(0);
+  if (elTotalTime) elTotalTime.textContent = `${grandHours}h ${grandMins}m`;
+  if (elTotalCost) elTotalCost.textContent = totalCost.toFixed(2);
+  if (elTotalPrice) elTotalPrice.textContent = totalPrice.toFixed(2);
+  if (elNetProfit) {
+    elNetProfit.textContent = netProfit.toFixed(2);
+    elNetProfit.className = netProfit < 0 ? 'text-xl font-black text-red-500' : 'text-xl font-black text-emerald-600 dark:text-emerald-400';
   }
-  refreshProfitPreview();
-}
+  if (elMarginPercent) elMarginPercent.textContent = marginPercent;
 
-// Cuando cambia la cantidad
-function onQtyChange() {
-  const qty = parseInt(qtyInput.value) || 1;
-  const uPrice = parseFloat(unitPriceInput.value) || 0;
-  if (uPrice > 0) {
-    const total = Math.round((uPrice * qty) * 100) / 100;
-    if (totalPriceInput) totalPriceInput.value = total.toFixed(2);
+  if (headerBadge) {
+    headerBadge.textContent = `${piecesState.length} ${piecesState.length === 1 ? 'Pieza' : 'Piezas'} (${totalItems} uds)`;
   }
-  refreshCostCalculations();
+  if (btnSubmitText) {
+    btnSubmitText.textContent = `Guardar Pedido (${piecesState.length} ${piecesState.length === 1 ? 'pieza' : 'piezas'} · €${totalPrice.toFixed(2)})`;
+  }
+
+  syncHiddenInputs(totalPrice, totalCost);
 }
 
-// Cuando se selecciona un producto del catálogo
-function onProductSelect(name) {
-  const trimmed = name.trim();
-  const p = productMap[trimmed];
+// Sincronizar campo JSON oculto y fallbacks de SmartOrderForm
+function syncHiddenInputs(totalPrice, totalCost) {
+  const jsonInput = document.getElementById('id_pieces_json');
+  if (jsonInput) {
+    const payload = piecesState.map(p => ({
+      product_id: p.productId,
+      description: p.description || 'Pieza a medida',
+      quantity: p.quantity || 1,
+      weight_grams: p.weight || 0,
+      print_time_hours: p.hours || 0,
+      print_time_minutes: p.mins || 0,
+      extra_costs: p.extra || 0,
+      unit_cost: p.unitCost || 0,
+      total_cost: p.totalCost || 0,
+      unit_price: p.unitPrice || 0,
+      price: p.totalPrice || 0
+    }));
+    jsonInput.value = JSON.stringify(payload);
+  }
 
-  if (p) {
-    if (badgeSource) {
-      badgeSource.textContent = 'Catálogo';
-      badgeSource.className = 'text-[11px] px-2 py-0.5 rounded bg-primary/20 text-primary font-bold';
-    }
+  if (piecesState.length > 0) {
+    const first = piecesState[0];
+    const fbName = document.getElementById('id_smart_product_name');
+    const fbQty = document.getElementById('id_quantity');
+    const fbWeight = document.getElementById('id_weight_grams');
+    const fbHours = document.getElementById('id_print_time_hours');
+    const fbMins = document.getElementById('id_print_time_minutes');
+    const fbExtra = document.getElementById('id_extra_costs');
+    const fbUnitCost = document.getElementById('id_unit_cost');
+    const fbTotalCost = document.getElementById('id_total_cost');
+    const fbUnitPrice = document.getElementById('id_unit_price');
+    const fbPrice = document.getElementById('id_price');
 
-    if (weightInput) weightInput.value = p.weight || '';
-    if (hoursInput) hoursInput.value = p.hours || '';
-    if (minsInput) minsInput.value = p.mins || '';
-    if (extraInput) extraInput.value = p.extra || '';
-
-    const effectivePrice = p.salePrice !== null ? p.salePrice : p.price;
-    if (unitPriceInput) unitPriceInput.value = effectivePrice.toFixed(2);
-
-    const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-    if (totalPriceInput) totalPriceInput.value = (effectivePrice * qty).toFixed(2);
-
-    refreshCostCalculations();
-  } else {
-    if (badgeSource) {
-      badgeSource.textContent = 'Personalizado';
-      badgeSource.className = 'text-[11px] px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
-    }
+    if (fbName) fbName.value = first.description || 'Pedido multi-pieza';
+    if (fbQty) fbQty.value = first.quantity || 1;
+    if (fbWeight) fbWeight.value = first.weight || 0;
+    if (fbHours) fbHours.value = first.hours || 0;
+    if (fbMins) fbMins.value = first.mins || 0;
+    if (fbExtra) fbExtra.value = first.extra || 0;
+    if (fbUnitCost) fbUnitCost.value = (first.unitCost || 0).toFixed(2);
+    if (fbTotalCost) fbTotalCost.value = (totalCost || 0).toFixed(2);
+    if (fbUnitPrice) fbUnitPrice.value = (first.unitPrice || 0).toFixed(2);
+    if (fbPrice) fbPrice.value = (totalPrice || 0).toFixed(2);
   }
 }
 
-// Event Listeners
+// Inicialización en DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Hoy btn
   const btnToday = document.getElementById('btn-today');
   if (btnToday) {
     btnToday.addEventListener('click', function() {
@@ -551,67 +941,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Escucha cambios en los campos de fabricación
-  [weightInput, hoursInput, minsInput, extraInput].forEach(el => {
-    if (el) el.addEventListener('input', refreshCostCalculations);
-  });
-
-  // Escucha cambios en cantidad y precios
-  if (qtyInput) qtyInput.addEventListener('input', onQtyChange);
-  if (unitPriceInput) unitPriceInput.addEventListener('input', onUnitPriceChange);
-  if (totalPriceInput) totalPriceInput.addEventListener('input', onTotalPriceChange);
-
-  // Botones de sugerencias de precio
-  if (btnSuggX25) {
-    btnSuggX25.addEventListener('click', function() {
-      if (valSuggX25 && unitPriceInput) {
-        unitPriceInput.value = valSuggX25.textContent;
-        onUnitPriceChange();
-      }
-    });
-  }
-  if (btnSuggX30) {
-    btnSuggX30.addEventListener('click', function() {
-      if (valSuggX30 && unitPriceInput) {
-        unitPriceInput.value = valSuggX30.textContent;
-        onUnitPriceChange();
-      }
-    });
-  }
-  if (btnSuggX40) {
-    btnSuggX40.addEventListener('click', function() {
-      if (valSuggX40 && unitPriceInput) {
-        unitPriceInput.value = valSuggX40.textContent;
-        onUnitPriceChange();
-      }
-    });
-  }
-
-  // Escucha del selector de producto
-  let debounceTimeout;
-  if (nameInput) {
-    nameInput.addEventListener('input', function() {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(() => onProductSelect(this.value), 200);
-    });
-    nameInput.addEventListener('change', function() {
-      clearTimeout(debounceTimeout);
-      onProductSelect(this.value);
-    });
-
-    if (nameInput.value) {
-      onProductSelect(nameInput.value);
-    }
-  }
-
-  // Si la fecha está vacía, poner hoy por defecto
   const dateInput = document.getElementById('id_order_date');
   if (dateInput && !dateInput.value) {
     dateInput.value = new Date().toISOString().split('T')[0];
   }
 
-  // Inicializar cálculos
-  refreshCostCalculations();
+  const btnAdd = document.getElementById('btn-add-piece');
+  const btnAddBottom = document.getElementById('btn-add-piece-bottom');
+  if (btnAdd) btnAdd.addEventListener('click', addPiece);
+  if (btnAddBottom) btnAddBottom.addEventListener('click', addPiece);
+
+  const form = document.getElementById('order-form');
+  if (form) {
+    form.addEventListener('submit', function() {
+      piecesState.forEach((p, idx) => {
+        if (!p.description || !p.description.trim()) {
+          p.description = `Pieza #${idx + 1}`;
+        }
+      });
+      syncHiddenInputs();
+    });
+  }
+
+  renderPieces();
 });
 </script>
 {% endblock %}

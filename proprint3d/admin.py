@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, Quote, QuoteItem, Order, Review
+from .models import Category, Product, ProductImage, Quote, QuoteItem, Order, OrderItem, Review
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -27,11 +27,22 @@ class QuoteAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     inlines = [QuoteItemInline]
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'description', 'client_name', 'quantity', 'unit_price', 'price', 'profit', 'status', 'platform', 'shipping', 'order_date', 'shipped_date', 'delivered_date', 'paid_date')
+    list_display = ('id', 'description', 'client_name', 'quantity', 'price', 'deposit_amount', 'deposit_method', 'final_payment_method', 'profit', 'status', 'platform', 'shipping', 'order_date')
     list_filter = ('status', 'platform', 'shipping', 'order_date')
     search_fields = ('description', 'client_name', 'notes')
+    inlines = [OrderItemInline]
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order', 'description', 'quantity', 'price', 'total_cost', 'profit', 'status')
+    list_filter = ('status', 'order__platform')
+    search_fields = ('description', 'order__client_name')
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
