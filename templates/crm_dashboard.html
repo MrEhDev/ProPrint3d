@@ -6,6 +6,19 @@
 
 {% block content %}
 <style>
+        /* Elevación de z-index al hacer hover para que los tooltips nunca queden ocultos */
+    .kanban-card:hover {
+        z-index: 40 !important;
+        position: relative;
+    }
+    .group\/note:hover {
+        z-index: 50 !important;
+    }
+    .order-row:hover {
+        z-index: 40 !important;
+        position: relative;
+    }
+
     /* Estilos de compresión para tarjetas Kanban */
     .kanban-card-collapsible {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -267,16 +280,14 @@
                                     {% if group.order.notes %}
                                     <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                         📝
-                                        <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
-                                            <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                        <span class="pointer-events-none absolute top-full left-0 mt-1 hidden group-hover/note:flex flex-col items-start z-[9999] min-w-[160px] max-w-[280px]">
+                                            <span class="w-2 h-2 ml-3 -mb-1 bg-gray-900 border-l border-t border-gray-700/80 rotate-45 z-10"></span>
+                                            <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                     <span>📝</span> Notas del Pedido
                                                 </span>
-                                                <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
-                                                    {{ group.order.notes }}
-                                                </span>
+                                                <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ group.order.notes }}</span>
                                             </span>
-                                            <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                         </span>
                                     </span>
                                     {% endif %}
@@ -351,14 +362,12 @@
                                         {% if item.display_notes %}
                                         <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                             📝
-                                            <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
-                                                <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                            <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-[9999] min-w-[150px] max-w-[260px]">
+                                                <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                         <span>📝</span> Notas de la Pieza
                                                     </span>
-                                                    <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
-                                                        {{ item.display_notes }}
-                                                    </span>
+                                                    <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
                                                 </span>
                                                 <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                             </span>
@@ -801,14 +810,12 @@
                                                                 {% if item.display_notes %}
                                                                 <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                                                     📝
-                                                                    <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[150px] max-w-[260px]">
-                                                                        <span class="bg-gray-900 text-white rounded-lg p-2.5 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                                            <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1.5 flex items-center gap-1">
+                                                                    <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-[9999] min-w-[150px] max-w-[260px]">
+                                                                        <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
+                                                                            <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                                                 <span>📝</span> Notas de la Pieza
                                                                             </span>
-                                                                            <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-wrap break-words">
-                                                                                {{ item.display_notes }}
-                                                                            </span>
+                                                                            <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
                                                                         </span>
                                                                         <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                                                     </span>
