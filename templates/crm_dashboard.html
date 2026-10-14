@@ -5,6 +5,31 @@
 {% block title %}Mini-CRM - ProPrint3D{% endblock %}
 
 {% block content %}
+<style>
+    /* Estilos de compresión para tarjetas Kanban */
+    .kanban-card-collapsible {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .kanban-card-collapsible.is-collapsed {
+        padding: 0.75rem !important;
+    }
+    .kanban-card-collapsible.is-collapsed:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .kanban-card-collapsible.is-collapsed .kanban-compact-view {
+        display: block !important;
+    }
+    .kanban-card-collapsible.is-collapsed .kanban-full-view {
+        display: none !important;
+    }
+    .kanban-card-collapsible:not(.is-collapsed) .kanban-compact-view {
+        display: none !important;
+    }
+    .kanban-card-collapsible:not(.is-collapsed) .kanban-full-view {
+        display: block !important;
+    }
+</style>
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
     <!-- Encabezado -->
@@ -162,7 +187,7 @@
                             border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md
                         {% else %}
                             border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md
-                        {% endif %}" data-order-id="{{ group.order.id }}"
+                        {% endif %}{% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %} kanban-card-collapsible is-collapsed cursor-pointer{% endif %}" onclick="{% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}toggleKanbanCardCollapse(this, event){% endif %}" data-order-id="{{ group.order.id }}"
                         data-client-name="{{ group.order.client_name|escapejs }}"
                         data-price="{{ group.order.price|default:0|unlocalize }}"
                         data-deposit-amount="{{ group.order.deposit_amount|default:0|unlocalize }}"
@@ -171,6 +196,62 @@
                         data-payment-notes="{{ group.order.payment_notes|default:''|escapejs }}"
                         data-current-status="{{ group.order.status }}" {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %} draggable="true" ondragstart="dragOrder(event)"
                         title="Arrastrar pedido completo" {% endif %}>
+                        {% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
+                        <!-- VISTA COMPRIMIDA (Enviado, Entregado, Cobrado) -->
+                        <div class="kanban-compact-view select-none">
+                            <div class="flex items-center justify-between gap-1.5 mb-2">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 flex-shrink-0">
+                                        #{{ group.order.id }}
+                                    </span>
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white truncate" title="{{ group.order.client_name }}">
+                                        {{ group.order.client_name }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
+                                        💰 Cobrado
+                                    </span>
+                                    {% elif group.order.deposit_amount > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300/40" title="Señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}">
+                                        🤝 Señal €{{ group.order.deposit_amount|floatformat:0 }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+                                        ⏳ Pte. cobro
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Títulos de las piezas -->
+                            <div class="my-2 space-y-1 pl-1">
+                                {% for item in group.items %}
+                                <div class="text-[11px] text-gray-700 dark:text-gray-300 font-medium truncate flex items-center gap-1.5" title="{{ item.description }}">
+                                    <span class="text-gray-400 text-[10px] select-none">•</span>
+                                    <span class="truncate">{{ item.description }}</span>
+                                    {% if item.quantity > 1 %}<span class="text-[10px] text-gray-400 dark:text-gray-500 font-bold flex-shrink-0">x{{ item.quantity }}</span>{% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Total del pedido y llamada a desplegar -->
+                            <div class="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold">Total:</span>
+                                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                </div>
+                                <span class="text-[10px] text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline">
+                                    Detalles ▾
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- VISTA COMPLETA (Detalles) -->
+                        <div class="kanban-full-view">
+
 
                         <!-- Encabezado de la Tarjeta -->
                         <div class="flex items-start justify-between gap-1.5 mb-1.5">
@@ -332,6 +413,15 @@
                                     class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1"
                                     title="Editar pedido y piezas">✏️</button>
                             </div>
+                        </div>
+                    
+                            {% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
+                            <div class="mt-2 pt-1.5 border-t border-gray-100 dark:border-gray-800 flex justify-center">
+                                <span class="text-[10px] text-gray-400 hover:text-primary dark:hover:text-cyan-400 font-semibold flex items-center gap-1 select-none">
+                                    ▲ Comprimir tarjeta
+                                </span>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% empty %}
@@ -1397,7 +1487,25 @@
         }
     }
 
+    
+    let isDraggingKanban = false;
+
+    document.addEventListener('dragend', () => {
+        setTimeout(() => { isDraggingKanban = false; }, 120);
+    });
+
+    function toggleKanbanCardCollapse(cardElement, ev) {
+        if (isDraggingKanban) return;
+        if (ev.target.closest('button') || ev.target.closest('a') || ev.target.closest('select') || ev.target.closest('.kanban-piece')) {
+            return;
+        }
+        if (cardElement.classList.contains('kanban-card-collapsible')) {
+            cardElement.classList.toggle('is-collapsed');
+        }
+    }
+
     function dragPiece(ev) {
+        isDraggingKanban = true;
         ev.dataTransfer.setData("type", "item");
         ev.dataTransfer.setData("id", ev.currentTarget.dataset.itemId);
         ev.dataTransfer.setData("orderId", ev.currentTarget.dataset.orderId || '');
@@ -1405,6 +1513,7 @@
     }
 
     function dragOrder(ev) {
+        isDraggingKanban = true;
         ev.dataTransfer.setData("type", "order");
         ev.dataTransfer.setData("id", ev.currentTarget.dataset.orderId);
         ev.currentTarget.classList.add('opacity-50');
