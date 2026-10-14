@@ -159,31 +159,38 @@ class Command(BaseCommand):
                     if not dry_run:
                         sec.delete()
 
-                # Recalcular totales del pedido primario
+                # Calcular piezas, totales y estado consolidado (tanto para simulación como real)
+                all_simulated_items = list(primary.items.all())
+                for sec in secondary_orders:
+                    all_simulated_items.extend(list(sec.items.all()))
+
+                total_sim_price = sum((i.price or decimal.Decimal('0.00')) for i in all_simulated_items)
+                total_sim_qty = sum((i.quantity or 1) for i in all_simulated_items)
+                item_statuses = [i.status for i in all_simulated_items]
+
+                if all(s == 'Cobrado' for s in item_statuses):
+                    consolidated_status = 'Cobrado'
+                elif all(s in ['Cobrado', 'Entregado'] for s in item_statuses):
+                    consolidated_status = 'Entregado'
+                elif all(s in ['Cobrado', 'Entregado', 'Enviado'] for s in item_statuses):
+                    consolidated_status = 'Enviado'
+                elif all(s in ['Cobrado', 'Entregado', 'Enviado', 'Realizado'] for s in item_statuses):
+                    consolidated_status = 'Realizado'
+                elif any(s in ['En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'] for s in item_statuses):
+                    consolidated_status = 'En proceso'
+                else:
+                    consolidated_status = 'Presupuestado'
+
+                # Recalcular y guardar pedido primario en base de datos
                 if not dry_run:
                     primary.update_totals_from_items()
-
-                    # Determinar estado consolidado del pedido primario según sus piezas
-                    all_items = list(primary.items.all())
-                    item_statuses = [i.status for i in all_items]
-
-                    if all(s == 'Cobrado' for s in item_statuses):
-                        primary.status = 'Cobrado'
-                    elif all(s in ['Cobrado', 'Entregado'] for s in item_statuses):
-                        primary.status = 'Entregado'
-                    elif all(s in ['Cobrado', 'Entregado', 'Enviado'] for s in item_statuses):
-                        primary.status = 'Enviado'
-                    elif all(s in ['Cobrado', 'Entregado', 'Enviado', 'Realizado'] for s in item_statuses):
-                        primary.status = 'Realizado'
-                    elif any(s in ['En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'] for s in item_statuses):
-                        primary.status = 'En proceso'
-                    else:
-                        primary.status = 'Presupuestado'
-
+                    primary.status = consolidated_status
                     primary.update_status_dates(primary.status)
                     primary.save()
 
-                self.stdout.write(f"   ✅ Pedido #{primary.id} consolidado con éxito: Total €{primary.price}, Estado global: {primary.status}\n")
+                disp_price = primary.price if not dry_run else total_sim_price
+                disp_status = primary.status if not dry_run else consolidated_status
+                self.stdout.write(f"   ✅ Pedido #{primary.id} consolidado: {len(all_simulated_items)} piezas ({total_sim_qty} uds) | Total €{disp_price:.2f} | Estado global: {disp_status}\n")
 
             if dry_run:
                 transaction.set_rollback(True)
