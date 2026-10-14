@@ -397,7 +397,8 @@ def crm_dashboard_view(request):
             total_cost=ord_obj.total_cost or decimal.Decimal('0.00'),
             unit_price=ord_obj.unit_price or decimal.Decimal('0.00'),
             price=ord_obj.price or decimal.Decimal('0.00'),
-            status=ord_obj.status or 'Presupuestado'
+            status=ord_obj.status or 'Presupuestado',
+            notes=ord_obj.notes or ''
         )
 
     # Kanban: Pasos solicitados -> Presupuestado - En proceso - Realizado - Enviado - Entregado - Cobrado
@@ -441,6 +442,11 @@ def crm_dashboard_view(request):
         card_groups = []
         for oid, data in orders_map.items():
             data['all_items_in_this_col'] = (len(data['items']) == data['total_items_in_order'])
+            if data['order'].has_vat:
+                if data['all_items_in_this_col']:
+                    data['group_price'] = float(data['order'].price or 0)
+                else:
+                    data['group_price'] = round(data['group_price'] * 1.21, 2)
             card_groups.append(data)
             
         kanban_columns[col_status] = card_groups
@@ -694,6 +700,11 @@ def update_order_full_api(request, order_id):
             if 'status' in data and data['status'] in dict(Order.STATUS_CHOICES):
                 order.status = data['status']
                 order.update_status_dates(order.status)
+            if 'has_vat' in data:
+                order.has_vat = bool(data['has_vat'])
+            if 'has_irpf' in data:
+                order.has_irpf = bool(data['has_irpf'])
+            order.save()
                 
             # 2. Piezas del pedido
             pieces = data.get('pieces', [])
@@ -718,6 +729,7 @@ def update_order_full_api(request, order_id):
                 u_price = decimal.Decimal(str(p.get('unit_price') or 0.00).replace(',', '.'))
                 t_price = decimal.Decimal(str(p.get('price') or 0.00).replace(',', '.'))
                 status_piece = p.get('status') or order.status
+                notes_piece = p.get('notes', '').strip() if p.get('notes') else ''
                 
                 if pid and int(pid) in existing_items_map:
                     itm = existing_items_map[int(pid)]
@@ -733,6 +745,7 @@ def update_order_full_api(request, order_id):
                     itm.unit_price = u_price
                     itm.price = t_price
                     itm.status = status_piece
+                    itm.notes = notes_piece
                     itm.save()
                     retained_ids.add(itm.id)
                 else:
@@ -749,7 +762,8 @@ def update_order_full_api(request, order_id):
                         total_cost=t_cost,
                         unit_price=u_price,
                         price=t_price,
-                        status=status_piece
+                        status=status_piece,
+                        notes=notes_piece
                     )
                     retained_ids.add(new_itm.id)
                     
@@ -909,6 +923,7 @@ class SmartOrderForm(forms.ModelForm):
             'unit_cost', 'total_cost', 'unit_price', 'price',
             'shipped_date', 'delivered_date', 'paid_date',
             'platform', 'shipping', 'notes',
+            'has_vat', 'has_irpf',
             'deposit_amount', 'deposit_method', 'final_payment_method', 'payment_notes'
         ]
         widgets = {
@@ -980,6 +995,9 @@ def order_create_view(request):
         if initial_status not in dict(Order.STATUS_CHOICES):
             initial_status = 'Presupuestado'
 
+        has_vat = request.POST.get('has_vat') in ['true', 'on', '1', True]
+        has_irpf = request.POST.get('has_irpf') in ['true', 'on', '1', True]
+
         raw_dep = request.POST.get('deposit_amount', '').strip().replace(',', '.')
         try:
             deposit_val = decimal.Decimal(raw_dep) if raw_dep else decimal.Decimal('0.00')
@@ -998,6 +1016,8 @@ def order_create_view(request):
                 shipping=shipping,
                 notes=notes,
                 status=initial_status,
+                has_vat=has_vat,
+                has_irpf=has_irpf,
                 deposit_amount=deposit_val,
                 deposit_method=deposit_method_val,
                 final_payment_method=final_payment_method_val,
@@ -1039,7 +1059,8 @@ def order_create_view(request):
                     total_cost=t_cost if t_cost > 0 else (u_cost * qty),
                     unit_price=u_price,
                     price=t_price if t_price > 0 else (u_price * qty),
-                    status=initial_status
+                    status=initial_status,
+                    notes=p.get('notes', '').strip() if p.get('notes') else ''
                 )
                 
             order.update_totals_from_items()
@@ -1064,6 +1085,8 @@ def order_create_view(request):
             order.deposit_method = deposit_method_val
             order.final_payment_method = final_payment_method_val
             order.payment_notes = payment_notes_val
+            order.has_vat = has_vat
+            order.has_irpf = has_irpf
             order.save()
             OrderItem.objects.create(
                 order=order,
@@ -1078,7 +1101,8 @@ def order_create_view(request):
                 total_cost=order.total_cost or 0.00,
                 unit_price=order.unit_price or 0.00,
                 price=order.price or 0.00,
-                status=order.status or 'Presupuestado'
+                status=order.status or 'Presupuestado',
+                notes=order.notes or ''
             )
             return redirect('crm_dashboard')
     else:

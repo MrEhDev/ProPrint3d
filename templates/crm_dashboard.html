@@ -13,7 +13,8 @@
             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
                 <span>📋</span> Panel de Pedidos
             </h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción, trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción,
+                trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{% url 'order_create' %}"
@@ -27,36 +28,39 @@
     </div>
 
     <!-- Barra de Filtros de Período Desde - Hasta -->
-    <div class="mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+    <div
+        class="mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <form id="filter-form" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <div class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
+            <div
+                class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                 <!-- DESDE -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Período Desde:</span>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Período
+                        Desde:</span>
                     <select name="month_from" id="month_from" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
-                        <option value="1" {% if month_from == '1' %}selected{% endif %}>Enero</option>
-                        <option value="2" {% if month_from == '2' %}selected{% endif %}>Febrero</option>
-                        <option value="3" {% if month_from == '3' %}selected{% endif %}>Marzo</option>
-                        <option value="4" {% if month_from == '4' %}selected{% endif %}>Abril</option>
-                        <option value="5" {% if month_from == '5' %}selected{% endif %}>Mayo</option>
-                        <option value="6" {% if month_from == '6' %}selected{% endif %}>Junio</option>
-                        <option value="7" {% if month_from == '7' %}selected{% endif %}>Julio</option>
-                        <option value="8" {% if month_from == '8' %}selected{% endif %}>Agosto</option>
-                        <option value="9" {% if month_from == '9' %}selected{% endif %}>Septiembre</option>
-                        <option value="10" {% if month_from == '10' %}selected{% endif %}>Octubre</option>
-                        <option value="11" {% if month_from == '11' %}selected{% endif %}>Noviembre</option>
-                        <option value="12" {% if month_from == '12' %}selected{% endif %}>Diciembre</option>
+                        <option value="1" {% if month_from=='1' %}selected{% endif %}>Enero</option>
+                        <option value="2" {% if month_from=='2' %}selected{% endif %}>Febrero</option>
+                        <option value="3" {% if month_from=='3' %}selected{% endif %}>Marzo</option>
+                        <option value="4" {% if month_from=='4' %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if month_from=='5' %}selected{% endif %}>Mayo</option>
+                        <option value="6" {% if month_from=='6' %}selected{% endif %}>Junio</option>
+                        <option value="7" {% if month_from=='7' %}selected{% endif %}>Julio</option>
+                        <option value="8" {% if month_from=='8' %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if month_from=='9' %}selected{% endif %}>Septiembre</option>
+                        <option value="10" {% if month_from=='10' %}selected{% endif %}>Octubre</option>
+                        <option value="11" {% if month_from=='11' %}selected{% endif %}>Noviembre</option>
+                        <option value="12" {% if month_from=='12' %}selected{% endif %}>Diciembre</option>
                     </select>
 
                     <select name="year_from" id="year_from" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Año (Todo)</option>
-                        <option value="2024" {% if year_from == '2024' %}selected{% endif %}>2024</option>
-                        <option value="2025" {% if year_from == '2025' %}selected{% endif %}>2025</option>
-                        <option value="2026" {% if year_from == '2026' %}selected{% endif %}>2026</option>
-                        <option value="2027" {% if year_from == '2027' %}selected{% endif %}>2027</option>
+                        <option value="2024" {% if year_from=='2024' %}selected{% endif %}>2024</option>
+                        <option value="2025" {% if year_from=='2025' %}selected{% endif %}>2025</option>
+                        <option value="2026" {% if year_from=='2026' %}selected{% endif %}>2026</option>
+                        <option value="2027" {% if year_from=='2027' %}selected{% endif %}>2027</option>
                     </select>
                 </div>
 
@@ -64,31 +68,32 @@
 
                 <!-- HASTA -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hasta:</span>
+                    <span
+                        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hasta:</span>
                     <select name="month_to" id="month_to" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
-                        <option value="1" {% if month_to == '1' %}selected{% endif %}>Enero</option>
-                        <option value="2" {% if month_to == '2' %}selected{% endif %}>Febrero</option>
-                        <option value="3" {% if month_to == '3' %}selected{% endif %}>Marzo</option>
-                        <option value="4" {% if month_to == '4' %}selected{% endif %}>Abril</option>
-                        <option value="5" {% if month_to == '5' %}selected{% endif %}>Mayo</option>
-                        <option value="6" {% if month_to == '6' %}selected{% endif %}>Junio</option>
-                        <option value="7" {% if month_to == '7' %}selected{% endif %}>Julio</option>
-                        <option value="8" {% if month_to == '8' %}selected{% endif %}>Agosto</option>
-                        <option value="9" {% if month_to == '9' %}selected{% endif %}>Septiembre</option>
-                        <option value="10" {% if month_to == '10' %}selected{% endif %}>Octubre</option>
-                        <option value="11" {% if month_to == '11' %}selected{% endif %}>Noviembre</option>
-                        <option value="12" {% if month_to == '12' %}selected{% endif %}>Diciembre</option>
+                        <option value="1" {% if month_to=='1' %}selected{% endif %}>Enero</option>
+                        <option value="2" {% if month_to=='2' %}selected{% endif %}>Febrero</option>
+                        <option value="3" {% if month_to=='3' %}selected{% endif %}>Marzo</option>
+                        <option value="4" {% if month_to=='4' %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if month_to=='5' %}selected{% endif %}>Mayo</option>
+                        <option value="6" {% if month_to=='6' %}selected{% endif %}>Junio</option>
+                        <option value="7" {% if month_to=='7' %}selected{% endif %}>Julio</option>
+                        <option value="8" {% if month_to=='8' %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if month_to=='9' %}selected{% endif %}>Septiembre</option>
+                        <option value="10" {% if month_to=='10' %}selected{% endif %}>Octubre</option>
+                        <option value="11" {% if month_to=='11' %}selected{% endif %}>Noviembre</option>
+                        <option value="12" {% if month_to=='12' %}selected{% endif %}>Diciembre</option>
                     </select>
 
                     <select name="year_to" id="year_to" onchange="onDateFilterChange()"
                         class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
                         <option value="">Año (Todo)</option>
-                        <option value="2024" {% if year_to == '2024' %}selected{% endif %}>2024</option>
-                        <option value="2025" {% if year_to == '2025' %}selected{% endif %}>2025</option>
-                        <option value="2026" {% if year_to == '2026' %}selected{% endif %}>2026</option>
-                        <option value="2027" {% if year_to == '2027' %}selected{% endif %}>2027</option>
+                        <option value="2024" {% if year_to=='2024' %}selected{% endif %}>2024</option>
+                        <option value="2025" {% if year_to=='2025' %}selected{% endif %}>2025</option>
+                        <option value="2026" {% if year_to=='2026' %}selected{% endif %}>2026</option>
+                        <option value="2027" {% if year_to=='2027' %}selected{% endif %}>2027</option>
                     </select>
                 </div>
 
@@ -110,7 +115,8 @@
             <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📌</span> Flujo de Pedidos (Tablero Kanban)
             </h2>
-            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de estado</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de
+                estado</span>
         </div>
 
         <div class="flex overflow-x-auto space-x-4 pb-4 kanban-board">
@@ -156,48 +162,68 @@
                             border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md
                         {% else %}
                             border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md
-                        {% endif %}"
-                        data-order-id="{{ group.order.id }}"
+                        {% endif %}" data-order-id="{{ group.order.id }}"
                         data-client-name="{{ group.order.client_name|escapejs }}"
                         data-price="{{ group.order.price|default:0|unlocalize }}"
                         data-deposit-amount="{{ group.order.deposit_amount|default:0|unlocalize }}"
                         data-deposit-method="{{ group.order.deposit_method|default:''|escapejs }}"
                         data-final-method="{{ group.order.final_payment_method|default:''|escapejs }}"
                         data-payment-notes="{{ group.order.payment_notes|default:''|escapejs }}"
-                        data-current-status="{{ group.order.status }}"
-                        {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
-                            draggable="true" ondragstart="dragOrder(event)" title="Arrastrar pedido completo"
-                        {% endif %}>
+                        data-current-status="{{ group.order.status }}" {% if status_name=='Realizado' and
+                        group.are_all_items_realizado or status_name=='Enviado' or status_name=='Entregado' or
+                        status_name=='Cobrado' %} draggable="true" ondragstart="dragOrder(event)"
+                        title="Arrastrar pedido completo" {% endif %}>
 
                         <!-- Encabezado de la Tarjeta -->
                         <div class="flex items-start justify-between gap-1.5 mb-1.5">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                    <span
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
                                         #{{ group.order.id }}
                                     </span>
                                     <span class="text-xs font-bold text-gray-900 dark:text-white truncate">
                                         {{ group.order.client_name }}
                                     </span>
+                                    {% if group.order.notes %}
+                                    <span
+                                        class="cursor-help text-xs text-amber-500 hover:text-amber-600 select-none flex-shrink-0"
+                                        title="Nota del pedido: {{ group.order.notes }}">📝</span>
+                                    {% endif %}
+                                    {% if group.order.has_vat %}
+                                    <span
+                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none flex-shrink-0"
+                                        title="IVA (21%) incluido en el total">IVA</span>
+                                    {% endif %}
+                                    {% if group.order.has_irpf %}
+                                    <span
+                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none flex-shrink-0"
+                                        title="Retención IRPF (21%) aplicada a la ganancia">IRPF</span>
+                                    {% endif %}
                                 </div>
                                 <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
                                     📅 {{ group.order.order_date|date:"d/m/Y" }}
-                                    {% if group.order.platform %} · <span class="font-medium text-gray-600 dark:text-gray-300">{{ group.order.platform }}</span>{% endif %}
+                                    {% if group.order.platform %} · <span
+                                        class="font-medium text-gray-600 dark:text-gray-300">{{ group.order.platform
+                                        }}</span>{% endif %}
                                 </p>
                             </div>
 
                             <!-- Badge de Estado / Completado -->
                             <div>
                                 {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
+                                <span
+                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
                                     💰 Cobrado
                                 </span>
                                 {% elif status_name == 'Realizado' and group.are_all_items_realizado %}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
                                     ✅ Completo
                                 </span>
                                 {% elif group.total_items_in_order > 1 %}
-                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold whitespace-nowrap">
+                                <span
+                                    class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold whitespace-nowrap">
                                     {{ group.items|length }}/{{ group.total_items_in_order }} piezas
                                 </span>
                                 {% endif %}
@@ -207,11 +233,14 @@
                         <!-- Badge de Señal / Adelanto pendiente de cobro completo -->
                         {% if group.order.deposit_amount > 0 and group.order.status != 'Cobrado' %}
                         <div class="mb-2">
-                            <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                            <button type="button"
+                                onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
                                 class="w-full text-left inline-flex items-center justify-between gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
                                 title="Paga y señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}. Clic para editar">
-                                <span>🤝 Señal: €{{ group.order.deposit_amount|floatformat:2 }}{% if group.order.deposit_method %} ({{ group.order.deposit_method }}){% endif %}</span>
-                                <span class="text-[9px] text-amber-600 dark:text-amber-400">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
+                                <span>🤝 Señal: €{{ group.order.deposit_amount|floatformat:2 }}{% if
+                                    group.order.deposit_method %} ({{ group.order.deposit_method }}){% endif %}</span>
+                                <span class="text-[9px] text-amber-600 dark:text-amber-400">Restan €{{
+                                    group.order.remaining_amount|floatformat:2 }}</span>
                             </button>
                         </div>
                         {% endif %}
@@ -220,19 +249,41 @@
                         <div class="space-y-1.5 my-2.5">
                             {% for item in group.items %}
                             <div class="p-2 rounded-lg bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
-                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}" data-order-id="{{ group.order.id }}" title="{{ item.description }}">
+                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}"
+                                data-order-id="{{ group.order.id }}" title="{{ item.description }}">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate" title="{{ item.description }}">
+                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate"
+                                            title="{{ item.description }}">
                                             {{ item.description }}
                                         </span>
-                                        <span class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0">
+                                        <span
+                                            class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
+                                        {% if item.display_notes %}
+                                        <span
+                                            class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0"
+                                            title="{{ item.display_notes }}" onclick="event.stopPropagation();">
+                                            📝
+                                            <span
+                                                class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[140px] max-w-[240px]">
+                                                <span
+                                                    class="bg-gray-900 text-white text-[11px] font-medium rounded-md px-2.5 py-1.5 shadow-xl border border-gray-700/60 whitespace-pre-wrap break-words text-center leading-tight">
+                                                    {{ item.display_notes }}
+                                                </span>
+                                                <span
+                                                    class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/60 rotate-45"></span>
+                                            </span>
+                                        </span>
+                                        {% endif %}
                                     </div>
-                                    <div class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 mt-0.5">
+                                    <div
+                                        class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 mt-0.5">
                                         {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
-                                        {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
+                                        {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if
+                                            item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif
+                                            %}</span>{% endif %}
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0">
@@ -244,19 +295,31 @@
 
                         <!-- Fechas de seguimiento si existen -->
                         {% if group.order.shipped_date or group.order.delivered_date or group.order.paid_date %}
-                        <div class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                            {% if group.order.shipped_date %}<div>🚚 Enviado: <span class="text-blue-600 dark:text-blue-400 font-medium">{{ group.order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if group.order.delivered_date %}<div>📦 Entregado: <span class="text-purple-600 dark:text-purple-400 font-medium">{{ group.order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
-                            {% if group.order.paid_date %}<div>💰 Cobrado: <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ group.order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
+                        <div
+                            class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                            {% if group.order.shipped_date %}<div>🚚 Enviado: <span
+                                    class="text-blue-600 dark:text-blue-400 font-medium">{{
+                                    group.order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if group.order.delivered_date %}<div>📦 Entregado: <span
+                                    class="text-purple-600 dark:text-purple-400 font-medium">{{
+                                    group.order.delivered_date|date:"d/m/Y" }}</span></div>{% endif %}
+                            {% if group.order.paid_date %}<div>💰 Cobrado: <span
+                                    class="text-emerald-600 dark:text-emerald-400 font-medium">{{
+                                    group.order.paid_date|date:"d/m/Y" }}</span></div>{% endif %}
                         </div>
                         {% endif %}
 
                         <!-- Pie de la Tarjeta: Total, Rentabilidad y Accesos directos -->
-                        <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                        <div
+                            class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
                             <div>
-                                {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
-                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total Pedido</span>
-                                <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name ==
+                                'Cobrado' or group.order.status == 'Cobrado' %}
+                                <span
+                                    class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total
+                                    Pedido</span>
+                                <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{
+                                    group.order.price }}</span>
                                 {% else %}
                                 <span class="font-bold text-primary">€{{ group.group_price|floatformat:2 }}</span>
                                 {% if group.total_items_in_order > 1 and not group.all_items_in_this_col %}
@@ -265,22 +328,27 @@
                                 {% endif %}
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold" title="Ganancia Neta Pedido">
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold"
+                                    title="Ganancia Neta Pedido">
                                     +€{{ group.order.profit }}
                                 </span>
                                 <!-- Acceso al modal de cobro/señal -->
-                                <button type="button" onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
                                     class="p-1 rounded text-gray-400 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-[11px]"
                                     title="Gestionar Cobro o Paga y Señal">
                                     💳
                                 </button>
-                                <button type="button" onclick="event.stopPropagation(); openEditOrderModal({{ group.order.id }})"
-                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1" title="Editar pedido y piezas">✏️</button>
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openEditOrderModal({{ group.order.id }})"
+                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1"
+                                    title="Editar pedido y piezas">✏️</button>
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center text-xs text-gray-400">
+                    <div
+                        class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center text-xs text-gray-400">
                         Sin pedidos
                     </div>
                     {% endfor %}
@@ -295,21 +363,29 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
-            <dd id="stat-total-sales" class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
+            <dd id="stat-total-sales" class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{
+                total_sales|floatformat:2 }}</dd>
         </div>
-        <div class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
+        <div
+            class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-green-500"></div>
             <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
-            <dd id="stat-total-profit" class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
+            <dd id="stat-total-profit" class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{
+                total_profit|floatformat:2 }}</dd>
         </div>
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.</dt>
-            <dd id="stat-total-costs" class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
+            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.
+            </dt>
+            <dd id="stat-total-costs" class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{
+                total_costs|floatformat:2 }}</dd>
         </div>
-        <div class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
+        <div
+            class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-cyan-500"></div>
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media Ganancia/Pedido</dt>
-            <dd id="stat-avg-profit" class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
+            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media
+                Ganancia/Pedido</dt>
+            <dd id="stat-avg-profit" class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{
+                avg_profit|floatformat:2 }}</dd>
         </div>
     </div>
 
@@ -319,7 +395,8 @@
             <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📦</span> Desglose de Pedidos (<span id="visible-orders-count">{{ orders.count }}</span>)
             </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Una fila por pedido con resumen global de rentabilidad y acordeón desplegable de piezas.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Una fila por pedido con resumen global de
+                rentabilidad y acordeón desplegable de piezas.</p>
         </div>
 
         <!-- Buscador exclusivo sobre la Tabla Principal -->
@@ -330,7 +407,8 @@
                     class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
                 <button type="button" id="btn-clear-table-search" onclick="clearTableSearchLive()"
@@ -343,21 +421,42 @@
     </div>
 
     <!-- Tabla Principal: 1 Fila por Pedido con Acordeón Desplegable -->
-    <div class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-12">
+    <div
+        class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-12">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left">
                 <thead class="bg-gray-50 dark:bg-gray-800/60">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8"></th>
-                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pedido / Cliente</th>
-                        <th scope="col" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fechas</th>
-                        <th scope="col" class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fabricación</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Prod.</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Venta</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">Rentabilidad</th>
-                        <th scope="col" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cobros</th>
-                        <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logística</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">
+                        </th>
+                        <th scope="col"
+                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Pedido / Cliente</th>
+                        <th scope="col"
+                            class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Fechas</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Estado</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Fabricación</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Coste Prod.</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Total Venta</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">
+                            Rentabilidad</th>
+                        <th scope="col"
+                            class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Cobros</th>
+                        <th scope="col"
+                            class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Logística</th>
                         <th scope="col" class="relative px-3 py-3"><span class="sr-only">Acciones</span></th>
                     </tr>
                 </thead>
@@ -365,29 +464,30 @@
                     {% for order in orders %}
                     <!-- Fila Principal del Pedido -->
                     <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors order-row cursor-pointer group"
-                        id="order-row-{{ order.id }}"
-                        onclick="toggleOrderAccordion({{ order.id }})"
-                        data-order-id="{{ order.id }}"
-                        data-price="{{ order.price|default:0|unlocalize }}"
+                        id="order-row-{{ order.id }}" onclick="toggleOrderAccordion({{ order.id }})"
+                        data-order-id="{{ order.id }}" data-price="{{ order.price|default:0|unlocalize }}"
                         data-profit="{{ order.profit|default:0|unlocalize }}"
                         data-cost="{{ order.total_cost|default:0|unlocalize }}"
                         data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
 
                         <!-- Icono toggle acordeón -->
                         <td class="px-3 py-3 whitespace-nowrap text-center text-gray-400 group-hover:text-primary">
-                            <span id="accordion-arrow-{{ order.id }}" class="inline-block transition-transform duration-150 text-xs font-bold">▶</span>
+                            <span id="accordion-arrow-{{ order.id }}"
+                                class="inline-block transition-transform duration-150 text-xs font-bold">▶</span>
                         </td>
 
                         <!-- Pedido / Cliente -->
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
                                     #{{ order.id }}
                                 </span>
                                 <div>
                                     <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>{{ order.client_name }}</span>
-                                        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
+                                        <span
+                                            class="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
                                             {{ order.total_items_count }} uds · {{ order.items.count }} ref
                                         </span>
                                     </div>
@@ -402,7 +502,8 @@
                         <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                             <div>📅 {{ order.order_date|date:"d/m/Y" }}</div>
                             {% if order.deadline %}
-                            <div class="text-amber-600 dark:text-amber-400 font-medium text-[11px] mt-0.5">⏳ {{ order.deadline|date:"d/m/Y" }}</div>
+                            <div class="text-amber-600 dark:text-amber-400 font-medium text-[11px] mt-0.5">⏳ {{
+                                order.deadline|date:"d/m/Y" }}</div>
                             {% endif %}
                         </td>
 
@@ -421,7 +522,7 @@
                                     data-current-status="{{ order.status }}"
                                     class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-primary focus:border-primary px-2 py-1 font-semibold">
                                     {% for s in status_choices %}
-                                    <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
+                                    <option value="{{ s }}" {% if order.status==s %}selected{% endif %}>{{ s }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -429,7 +530,8 @@
 
                         <!-- Métricas de Fabricación -->
                         <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
-                            <div class="font-semibold">{{ order.total_items_count }} uds · ⚖️ {{ order.total_weight_calc|floatformat:0 }}g</div>
+                            <div class="font-semibold">{{ order.total_items_count }} uds · ⚖️ {{
+                                order.total_weight_calc|floatformat:0 }}g</div>
                             <div class="text-[11px] text-gray-400 mt-0.5">⏱️ {{ order.total_print_time_str }}</div>
                         </td>
 
@@ -440,13 +542,30 @@
 
                         <!-- Total Venta -->
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
-                            <span class="font-black text-gray-900 dark:text-white">€{{ order.price|floatformat:2 }}</span>
+                            <div class="flex items-center justify-end gap-1.5">
+                                <span class="font-black text-gray-900 dark:text-white">€{{ order.price|floatformat:2
+                                    }}</span>
+                                {% if order.has_vat %}
+                                <span
+                                    class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none"
+                                    title="Incluye 21% IVA">+IVA</span>
+                                {% endif %}
+                            </div>
                         </td>
 
                         <!-- Rentabilidad y Margen -->
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
-                            <div class="font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|floatformat:2 }}</div>
-                            <span class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                            <div class="flex items-center justify-end gap-1">
+                                <span class="font-black text-emerald-600 dark:text-emerald-400">+€{{
+                                    order.profit|floatformat:2 }}</span>
+                                {% if order.has_irpf %}
+                                <span
+                                    class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none"
+                                    title="Retención 21% IRPF aplicada a la ganancia">-IRPF</span>
+                                {% endif %}
+                            </div>
+                            <span
+                                class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                 {{ order.profit_margin_percent }}%
                             </span>
                         </td>
@@ -486,33 +605,49 @@
                         <!-- Acciones -->
                         <td class="px-3 py-3 whitespace-nowrap text-right text-xs" onclick="event.stopPropagation()">
                             <button type="button" onclick="openEditOrderModal({{ order.id }})"
-                                class="text-gray-400 hover:text-primary transition-colors text-sm p-1" title="Editar pedido y piezas">✏️</button>
+                                class="text-gray-400 hover:text-primary transition-colors text-sm p-1"
+                                title="Editar pedido y piezas">✏️</button>
                         </td>
                     </tr>
 
                     <!-- Fila del Acordeón Desplegable: Piezas del Pedido -->
-                    <tr id="order-accordion-{{ order.id }}" class="hidden bg-gray-50/80 dark:bg-gray-900/60 transition-all border-b border-gray-200 dark:border-gray-800">
+                    <tr id="order-accordion-{{ order.id }}"
+                        class="hidden bg-gray-50/80 dark:bg-gray-900/60 transition-all border-b border-gray-200 dark:border-gray-800">
                         <td colspan="11" class="p-4 sm:p-5">
-                            <div class="bg-white dark:bg-dark rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-inner">
-                                <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                        <span>🧩</span> Piezas incluidas en el Pedido #{{ order.id }} ({{ order.items.count }} referencias)
+                            <div
+                                class="bg-white dark:bg-dark rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-inner">
+                                <div
+                                    class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">
+                                    <h4
+                                        class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <span>🧩</span> Piezas incluidas en el Pedido #{{ order.id }} ({{
+                                        order.items.count }} referencias)
                                     </h4>
                                     <div class="flex items-center gap-3">
-                                        <button type="button" onclick="event.stopPropagation(); openEditOrderModal({{ order.id }})"
+                                        <button type="button"
+                                            onclick="event.stopPropagation(); openEditOrderModal({{ order.id }})"
                                             class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 hover:bg-primary text-primary hover:text-white dark:bg-primary/20 dark:hover:bg-primary dark:text-cyan-300 dark:hover:text-white transition flex items-center gap-1.5"
                                             title="Editar este pedido y gestionar piezas">
                                             <span>✏️</span> Editar Pedido
                                         </button>
                                         <span class="text-[11px] text-gray-500">
-                                            Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{ order.total_items_count }} uds</strong> · Coste prod: <strong class="text-red-500">€{{ order.total_cost }}</strong> · Total venta: <strong class="text-primary">€{{ order.price }}</strong>
+                                            Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{
+                                                order.total_items_count }} uds</strong> · Coste prod: <strong
+                                                class="text-red-500">€{{ order.total_cost }}</strong> · Total venta:
+                                            <strong class="text-primary">€{{ order.price }}</strong>{% if order.has_vat
+                                            %} <span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold">(IVA
+                                                incl.)</span>{% endif %}{% if order.has_irpf %} <span
+                                                class="text-[10px] text-amber-600 dark:text-amber-400 font-bold">(-21%
+                                                IRPF)</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-xs">
-                                        <thead class="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30">
+                                    <table
+                                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-xs">
+                                        <thead
+                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30">
                                             <tr>
                                                 <th class="py-2 px-3">Pieza / Producto</th>
                                                 <th class="py-2 px-2 text-center">Cant</th>
@@ -530,15 +665,39 @@
                                                 <td class="py-2.5 px-3 whitespace-nowrap">
                                                     <div class="flex items-center gap-2.5">
                                                         {% if item.product and item.product.main_image %}
-                                                        <img src="{{ item.product.main_image.url }}" alt="{{ item.description }}" class="w-8 h-8 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                                        <img src="{{ item.product.main_image.url }}"
+                                                            alt="{{ item.description }}"
+                                                            class="w-8 h-8 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
                                                         {% else %}
-                                                        <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm flex-shrink-0">📦</div>
+                                                        <div
+                                                            class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm flex-shrink-0">
+                                                            📦</div>
                                                         {% endif %}
                                                         <div>
-                                                            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                                            <div
+                                                                class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                                                 <span>{{ item.description }}</span>
+                                                                {% if item.display_notes %}
+                                                                <span
+                                                                    class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0"
+                                                                    title="{{ item.display_notes }}">
+                                                                    📝
+                                                                    <span
+                                                                        class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-50 min-w-[140px] max-w-[260px]">
+                                                                        <span
+                                                                            class="bg-gray-900 text-white text-[11px] font-medium rounded-md px-2.5 py-1.5 shadow-xl border border-gray-700/60 whitespace-pre-wrap break-words text-center leading-tight">
+                                                                            {{ item.display_notes }}
+                                                                        </span>
+                                                                        <span
+                                                                            class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/60 rotate-45"></span>
+                                                                    </span>
+                                                                </span>
+                                                                {% endif %}
                                                                 {% if item.product %}
-                                                                <a href="{% url 'product_detail' item.product.slug %}" target="_blank" class="text-primary hover:underline text-[11px]" title="Ver en catálogo">🔗</a>
+                                                                <a href="{% url 'product_detail' item.product.slug %}"
+                                                                    target="_blank"
+                                                                    class="text-primary hover:underline text-[11px]"
+                                                                    title="Ver en catálogo">🔗</a>
                                                                 {% endif %}
                                                             </div>
                                                         </div>
@@ -546,27 +705,35 @@
                                                 </td>
 
                                                 <!-- Cantidad -->
-                                                <td class="py-2.5 px-2 text-center font-bold text-gray-800 dark:text-gray-200">
+                                                <td
+                                                    class="py-2.5 px-2 text-center font-bold text-gray-800 dark:text-gray-200">
                                                     {{ item.quantity }}
                                                 </td>
 
                                                 <!-- Fabricación -->
                                                 <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400">
                                                     <span>⚖️ {{ item.weight_grams|default:0 }}g</span> ·
-                                                    <span>⏱️ {{ item.print_time_hours|default:0 }}h {{ item.print_time_minutes|default:0 }}m</span>
-                                                    {% if item.extra_costs %}<span class="block text-[10px] text-gray-400">+€{{ item.extra_costs }} extras</span>{% endif %}
+                                                    <span>⏱️ {{ item.print_time_hours|default:0 }}h {{
+                                                        item.print_time_minutes|default:0 }}m</span>
+                                                    {% if item.extra_costs %}<span
+                                                        class="block text-[10px] text-gray-400">+€{{ item.extra_costs }}
+                                                        extras</span>{% endif %}
                                                 </td>
 
                                                 <!-- Coste -->
                                                 <td class="py-2.5 px-3 text-right text-gray-500">
-                                                    <span class="font-semibold text-red-500">€{{ item.total_cost }}</span>
-                                                    <span class="block text-[10px] text-gray-400">(€{{ item.unit_cost }}/ud)</span>
+                                                    <span class="font-semibold text-red-500">€{{ item.total_cost
+                                                        }}</span>
+                                                    <span class="block text-[10px] text-gray-400">(€{{ item.unit_cost
+                                                        }}/ud)</span>
                                                 </td>
 
                                                 <!-- Precio -->
-                                                <td class="py-2.5 px-3 text-right font-bold text-gray-900 dark:text-white">
+                                                <td
+                                                    class="py-2.5 px-3 text-right font-bold text-gray-900 dark:text-white">
                                                     <span>€{{ item.price }}</span>
-                                                    <span class="block text-[10px] font-normal text-gray-400">(€{{ item.unit_price }}/ud)</span>
+                                                    <span class="block text-[10px] font-normal text-gray-400">(€{{
+                                                        item.unit_price }}/ud)</span>
                                                 </td>
 
                                                 <!-- Estado individual -->
@@ -574,13 +741,15 @@
                                                     <select onchange="updateItemStatus({{ item.id }}, this.value)"
                                                         class="text-[11px] py-0.5 px-1.5 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                                         {% for s in status_choices %}
-                                                        <option value="{{ s }}" {% if item.status == s %}selected{% endif %}>{{ s }}</option>
+                                                        <option value="{{ s }}" {% if item.status==s %}selected{% endif
+                                                            %}>{{ s }}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </td>
 
                                                 <!-- Rentabilidad -->
-                                                <td class="py-2.5 px-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                                <td
+                                                    class="py-2.5 px-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
                                                     +€{{ item.profit }}
                                                 </td>
                                             </tr>
@@ -610,17 +779,21 @@
 </div>
 
 <!-- Modal Emergente de Gestión de Cobros -->
-<div id="payment-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
+<div id="payment-modal"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+    <div
+        class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-5 text-white flex justify-between items-center">
+        <div
+            class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-5 text-white flex justify-between items-center">
             <div>
                 <h3 class="text-lg font-black flex items-center gap-2">
                     <span>💳</span> Gestión de Cobros - Pedido <span id="modal-order-id-label">#--</span>
                 </h3>
                 <p class="text-xs text-emerald-100 mt-0.5" id="modal-client-label">Cliente: --</p>
             </div>
-            <button type="button" onclick="closePaymentModal(false)" class="text-white/80 hover:text-white p-1 rounded-lg text-lg">✕</button>
+            <button type="button" onclick="closePaymentModal(false)"
+                class="text-white/80 hover:text-white p-1 rounded-lg text-lg">✕</button>
         </div>
 
         <!-- Formulario del Modal -->
@@ -628,45 +801,56 @@
             <input type="hidden" id="modal-order-id" value="">
 
             <!-- Resumen de Importes -->
-            <div class="bg-gray-50 dark:bg-gray-800/60 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-2 text-center">
+            <div
+                class="bg-gray-50 dark:bg-gray-800/60 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-2 text-center">
                 <div>
                     <span class="text-[10px] text-gray-500 uppercase font-bold">Total Pedido</span>
-                    <p class="text-base font-black text-gray-900 dark:text-white">€<span id="modal-total-price">0.00</span></p>
+                    <p class="text-base font-black text-gray-900 dark:text-white">€<span
+                            id="modal-total-price">0.00</span></p>
                 </div>
                 <div>
-                    <span class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Adelanto / Señal</span>
-                    <p class="text-base font-black text-amber-600 dark:text-amber-400">€<span id="modal-deposit-display">0.00</span></p>
+                    <span class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Adelanto /
+                        Señal</span>
+                    <p class="text-base font-black text-amber-600 dark:text-amber-400">€<span
+                            id="modal-deposit-display">0.00</span></p>
                 </div>
                 <div>
                     <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Restante</span>
-                    <p class="text-base font-black text-emerald-600 dark:text-emerald-400">€<span id="modal-remaining-display">0.00</span></p>
+                    <p class="text-base font-black text-emerald-600 dark:text-emerald-400">€<span
+                            id="modal-remaining-display">0.00</span></p>
                 </div>
             </div>
 
             <!-- Estado actual del pedido -->
             <div class="flex items-center justify-between text-xs px-1 text-gray-500 dark:text-gray-400">
                 <span>Estado actual del pedido:</span>
-                <span id="modal-current-status-badge" class="px-2.5 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">--</span>
+                <span id="modal-current-status-badge"
+                    class="px-2.5 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">--</span>
             </div>
 
             <!-- Sección 1: Paga y Señal Previa (Adelanto) -->
-            <div class="border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 bg-amber-50/20 dark:bg-amber-950/10">
+            <div
+                class="border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 bg-amber-50/20 dark:bg-amber-950/10">
                 <div class="flex items-center justify-between mb-2">
                     <label class="block text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                         <span>🤝</span> 1. Paga y Señal / Adelanto
                     </label>
-                    <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier momento</span>
+                    <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier
+                        momento</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Importe Señal (€)</label>
-                        <input type="number" step="0.01" min="0" id="modal-deposit-amount" oninput="recalcModalAmounts()"
+                        <input type="number" step="0.01" min="0" id="modal-deposit-amount"
+                            oninput="recalcModalAmounts()"
                             class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
                             placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de la Señal</label>
-                        <select id="modal-deposit-method" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de la
+                            Señal</label>
+                        <select id="modal-deposit-method"
+                            class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                             <option value="">(Selecciona método...)</option>
                             {% for m in payment_methods %}
                             <option value="{{ m }}">{{ m }}</option>
@@ -677,14 +861,19 @@
             </div>
 
             <!-- Sección 2: Cobro Final (Total) -->
-            <div class="border border-emerald-300 dark:border-emerald-800/80 rounded-xl p-3.5 bg-emerald-50/30 dark:bg-emerald-950/20">
-                <label class="block text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
+            <div
+                class="border border-emerald-300 dark:border-emerald-800/80 rounded-xl p-3.5 bg-emerald-50/30 dark:bg-emerald-950/20">
+                <label
+                    class="block text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
                     <span class="flex items-center gap-1.5"><span>💵</span> 2. Cobro Restante / Final</span>
-                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€<span id="modal-remaining-calc">0.00</span></span>
+                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€<span
+                            id="modal-remaining-calc">0.00</span></span>
                 </label>
                 <div>
-                    <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de Cobro del Restante (para cerrar y cobrar)</label>
-                    <select id="modal-final-method" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                    <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de Cobro del Restante
+                        (para cerrar y cobrar)</label>
+                    <select id="modal-final-method"
+                        class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
                         <option value="">Selecciona cómo se ha cobrado el resto...</option>
                         {% for m in payment_methods %}
                         <option value="{{ m }}">{{ m }}</option>
@@ -695,13 +884,16 @@
 
             <!-- Notas -->
             <div>
-                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Notas o comentarios de cobro (opcional)</label>
-                <input type="text" id="modal-payment-notes" placeholder="Ej. 20€ Bizum señal el 10/10, restante en mano en efectivo"
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Notas o comentarios de cobro
+                    (opcional)</label>
+                <input type="text" id="modal-payment-notes"
+                    placeholder="Ej. 20€ Bizum señal el 10/10, restante en mano en efectivo"
                     class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
             </div>
 
             <!-- Botones de Acción -->
-            <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            <div
+                class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
                 <button type="button" onclick="closePaymentModal(false)"
                     class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     Cerrar
@@ -727,23 +919,29 @@
 <!-- ========================================== -->
 <!-- MODAL DE EDICIÓN DE PEDIDO Y PIEZAS (WEB-STYLE) -->
 <!-- ========================================== -->
-<div id="edit-order-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm hidden overflow-y-auto">
-    <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative my-8 max-h-[92vh] flex flex-col">
+<div id="edit-order-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm hidden overflow-y-auto">
+    <div
+        class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative my-8 max-h-[92vh] flex flex-col">
         <!-- Encabezado Modal -->
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
             <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
                 <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>✏️</span> Editar Pedido <span id="edit-modal-order-id-label" class="text-primary font-black">#0</span>
+                    <span>✏️</span> Editar Pedido <span id="edit-modal-order-id-label"
+                        class="text-primary font-black">#0</span>
                 </h3>
-                <span id="edit-modal-client-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                <span id="edit-modal-client-badge"
+                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
                     Cliente
                 </span>
-                <span id="edit-modal-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                <span id="edit-modal-status-badge"
+                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                     Estado
                 </span>
             </div>
-            <button type="button" onclick="closeEditOrderModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl font-bold p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            <button type="button" onclick="closeEditOrderModal()"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl font-bold p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                 &times;
             </button>
         </div>
@@ -752,33 +950,44 @@
         <div class="overflow-y-auto flex-1 pr-1 sm:pr-2 py-4 space-y-6">
             <!-- 1. Datos Generales del Pedido -->
             <div class="bg-gray-50 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/70 dark:border-gray-800">
-                <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <h4
+                    class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <span>📋</span> 1. Información General del Pedido
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente *</label>
-                        <input type="text" id="edit-order-client-name" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del
+                            Cliente *</label>
+                        <input type="text" id="edit-order-client-name"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha del Pedido *</label>
-                        <input type="date" id="edit-order-date" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha del
+                            Pedido *</label>
+                        <input type="date" id="edit-order-date"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite / Entrega</label>
-                        <input type="date" id="edit-order-deadline" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha
+                            Límite / Entrega</label>
+                        <input type="date" id="edit-order-deadline"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado General</label>
-                        <select id="edit-order-status" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado
+                            General</label>
+                        <select id="edit-order-status"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             {% for st in status_choices %}
                             <option value="{{ st }}">{{ st }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
-                        <select id="edit-order-platform" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label
+                            class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
+                        <select id="edit-order-platform"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             <option value="">Selecciona plataforma...</option>
                             {% for code, label in platform_choices %}
                             <option value="{{ code }}">{{ label }}</option>
@@ -786,8 +995,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de Envío</label>
-                        <select id="edit-order-shipping" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de
+                            Envío</label>
+                        <select id="edit-order-shipping"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             <option value="">Selecciona envío...</option>
                             {% for code, label in shipping_choices %}
                             <option value="{{ code }}">{{ label }}</option>
@@ -795,8 +1006,46 @@
                         </select>
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas o Instrucciones</label>
-                        <textarea id="edit-order-notes" rows="2" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Detalles de personalización, colores, requisitos..."></textarea>
+                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas o
+                            Instrucciones</label>
+                        <textarea id="edit-order-notes" rows="2"
+                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            placeholder="Detalles de personalización, colores, requisitos..."></textarea>
+                    </div>
+
+                    <!-- Fiscalidad: Checkboxes de IVA e IRPF -->
+                    <div
+                        class="sm:col-span-3 p-3 rounded-xl bg-gray-100/70 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-6 flex-wrap">
+                            <!-- Checkbox IVA -->
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="edit-order-has-vat"
+                                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
+                                    onchange="onEditVatToggle(this)">
+                                <span
+                                    class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                    <span>🧾</span> Incluir IVA (+21%)
+                                </span>
+                                <span id="edit-vat-amount-label"
+                                    class="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60">(+0€)</span>
+                            </label>
+
+                            <!-- Checkbox IRPF -->
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="edit-order-has-irpf"
+                                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
+                                    onchange="recalcEditModalTotals()">
+                                <span
+                                    class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                    <span>📉</span> Descontar IRPF (-21%)
+                                </span>
+                                <span id="edit-irpf-amount-label"
+                                    class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">(IVA
+                                    + IRPF = 0€)</span>
+                            </label>
+                        </div>
+                        <div id="edit-tax-preview-badge" class="flex items-center gap-1.5 text-[10px] font-bold">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -805,12 +1054,15 @@
             <div>
                 <div class="flex items-center justify-between mb-3">
                     <div>
-                        <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                        <h4
+                            class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                             <span>🧩</span> 2. Piezas del Pedido
                         </h4>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400">Añade, modifica o elimina piezas. Los costes, precio y rentabilidad se recalculan en tiempo real.</p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400">Añade, modifica o elimina piezas. Los
+                            costes, precio y rentabilidad se recalculan en tiempo real.</p>
                     </div>
-                    <button type="button" onclick="addNewEditPieceRow()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-secondary text-white shadow transition flex items-center gap-1.5">
+                    <button type="button" onclick="addNewEditPieceRow()"
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-secondary text-white shadow transition flex items-center gap-1.5">
                         <span>➕</span> Añadir Pieza
                     </button>
                 </div>
@@ -830,42 +1082,53 @@
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Peso Total</p>
-                        <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400">0 g</p>
+                        <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400">0 g
+                        </p>
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Tiempo Fab.</p>
-                        <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400">0h 0m</p>
+                        <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400">0h
+                            0m</p>
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Coste Fab.</p>
                         <p id="edit-summary-cost" class="text-base font-black text-red-500">€0.00</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
+                    <div
+                        class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Total Pedido</p>
                         <p id="edit-summary-price" class="text-lg font-black text-primary">€0.00</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
+                    <div
+                        class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
                         <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Beneficio</p>
-                        <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400">€0.00</p>
+                        <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400">
+                            €0.00</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
+                    <div
+                        class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
                         <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Margen</p>
-                        <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400">0%</p>
+                        <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400">
+                            0%</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Pie y Botones de Acción -->
-        <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
-            <button type="button" onclick="deleteCurrentEditOrder()" class="text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition flex items-center gap-1.5 w-full sm:w-auto justify-center">
+        <div
+            class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+            <button type="button" onclick="deleteCurrentEditOrder()"
+                class="text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <span>🗑️</span> Eliminar Pedido
             </button>
             <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                <button type="button" onclick="closeEditOrderModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                <button type="button" onclick="closeEditOrderModal()"
+                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     Cancelar
                 </button>
-                <button type="button" id="btn-save-order-full" onclick="submitEditOrderModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white shadow-md transition flex items-center justify-center gap-2">
+                <button type="button" id="btn-save-order-full" onclick="submitEditOrderModal()"
+                    class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white shadow-md transition flex items-center justify-center gap-2">
                     <span>💾</span> Guardar Cambios
                 </button>
             </div>
@@ -875,61 +1138,64 @@
 
 <script>
     // Catálogo de productos para el autocompletado en el modal de edición
-    const catalogProducts = {{ products_json|safe }};
+    const catalogProducts = {{ products_json| safe }};
 
     // Datos estructurados completos de todos los pedidos y sus piezas para el modal de edición
     const allOrdersData = {
         {% for order in orders %}
-        "{{ order.id }}": {
-            id: {{ order.id }},
-            clientName: "{{ order.client_name|escapejs }}",
+    "{{ order.id }}": {
+        id: { { order.id } },
+        clientName: "{{ order.client_name|escapejs }}",
             orderDate: "{{ order.order_date|date:'Y-m-d' }}",
-            deadline: "{{ order.deadline|date:'Y-m-d'|default:'' }}",
-            status: "{{ order.status|escapejs }}",
-            platform: "{{ order.platform|default:''|escapejs }}",
-            shipping: "{{ order.shipping|default:''|escapejs }}",
-            notes: "{{ order.notes|default:''|escapejs }}",
-            price: {{ order.price|default:0|unlocalize }},
-            totalCost: {{ order.total_cost|default:0|unlocalize }},
-            profit: {{ order.profit|default:0|unlocalize }},
-            items: [
-                {% for item in order.items.all %}
-                {
-                    id: {{ item.id }},
-                    productId: {% if item.product %}{{ item.product.id }}{% else %}null{% endif %},
-                    description: "{{ item.description|escapejs }}",
-                    imageUrl: {% if item.product and item.product.main_image %}"{{ item.product.main_image.url }}"{% else %}null{% endif %},
-                    quantity: {{ item.quantity|default:1 }},
-                    weight: {{ item.weight_grams|default:0|unlocalize }},
-                    hours: {{ item.print_time_hours|default:0|unlocalize }},
-                    mins: {{ item.print_time_minutes|default:0 }},
-                    extra: {{ item.extra_costs|default:0|unlocalize }},
-                    unitCost: {{ item.unit_cost|default:0|unlocalize }},
-                    totalCost: {{ item.total_cost|default:0|unlocalize }},
-                    unitPrice: {{ item.unit_price|default:0|unlocalize }},
-                    totalPrice: {{ item.price|default:0|unlocalize }},
-                    status: "{{ item.status|default:order.status|escapejs }}"
-                }{% if not forloop.last %},{% endif %}
-                {% endfor %}
+                deadline: "{{ order.deadline|date:'Y-m-d'|default:'' }}",
+                    status: "{{ order.status|escapejs }}",
+                        platform: "{{ order.platform|default:''|escapejs }}",
+                            shipping: "{{ order.shipping|default:''|escapejs }}",
+                                notes: "{{ order.notes|default:''|escapejs }}",
+                                    hasVat: { { order.has_vat | yesno: "true,false" } },
+        hasIrpf: { { order.has_irpf | yesno: "true,false" } },
+        price: { { order.price |default: 0 | unlocalize } },
+        totalCost: { { order.total_cost |default: 0 | unlocalize } },
+        profit: { { order.profit |default: 0 | unlocalize } },
+        items: [
+            {% for item in order.items.all %}
+    {
+        id: { { item.id } },
+        productId: {% if item.product %} { { item.product.id } } {% else %} null{% endif %},
+        description: "{{ item.description|escapejs }}",
+            imageUrl: {% if item.product and item.product.main_image %} "{{ item.product.main_image.url }}"{% else %} null{% endif %},
+        quantity: { { item.quantity |default: 1 } },
+        weight: { { item.weight_grams |default: 0 | unlocalize } },
+        hours: { { item.print_time_hours |default: 0 | unlocalize } },
+        mins: { { item.print_time_minutes |default: 0 } },
+        extra: { { item.extra_costs |default: 0 | unlocalize } },
+        unitCost: { { item.unit_cost |default: 0 | unlocalize } },
+        totalCost: { { item.total_cost |default: 0 | unlocalize } },
+        unitPrice: { { item.unit_price |default: 0 | unlocalize } },
+        totalPrice: { { item.price |default: 0 | unlocalize } },
+        status: "{{ item.status|default:order.status|escapejs }}",
+            notes: "{{ item.notes|default:''|escapejs }}"
+    } {% if not forloop.last %}, {% endif %}
+    {% endfor %}
             ]
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
+        }{% if not forloop.last %}, {% endif %}
+    {% endfor %}
     };
 
     // Diccionario con los datos de cobro de cada pedido
     const ordersPaymentData = {
         {% for order in orders %}
-        "{{ order.id }}": {
-            id: {{ order.id }},
-            clientName: "{{ order.client_name|escapejs }}",
-            totalPrice: {{ order.price|default:0|unlocalize }},
-            depositAmount: {{ order.deposit_amount|default:0|unlocalize }},
-            depositMethod: "{{ order.deposit_method|default:''|escapejs }}",
+    "{{ order.id }}": {
+        id: { { order.id } },
+        clientName: "{{ order.client_name|escapejs }}",
+            totalPrice: { { order.price |default: 0 | unlocalize } },
+        depositAmount: { { order.deposit_amount |default: 0 | unlocalize } },
+        depositMethod: "{{ order.deposit_method|default:''|escapejs }}",
             finalMethod: "{{ order.final_payment_method|default:''|escapejs }}",
-            paymentNotes: "{{ order.payment_notes|default:''|escapejs }}",
-            status: "{{ order.status|escapejs }}"
-        },
-        {% endfor %}
+                paymentNotes: "{{ order.payment_notes|default:''|escapejs }}",
+                    status: "{{ order.status|escapejs }}"
+    },
+    {% endfor %}
     };
 
     // Estado del modal de cobro
@@ -1061,22 +1327,22 @@
                 payment_notes: notes
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closePaymentModal(true);
-                window.location.reload();
-            } else {
-                alert('Error al guardar señal: ' + (data.error || ''));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closePaymentModal(true);
+                    window.location.reload();
+                } else {
+                    alert('Error al guardar señal: ' + (data.error || ''));
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+            })
+            .catch(err => {
+                alert('Error de conexión');
                 btn.disabled = false;
                 btn.innerHTML = oldHtml;
-            }
-        })
-        .catch(err => {
-            alert('Error de conexión');
-            btn.disabled = false;
-            btn.innerHTML = oldHtml;
-        });
+            });
     }
 
     // Confirmar Cobro Total (Mueve el pedido a Cobrado)
@@ -1118,22 +1384,22 @@
                 payment_notes: notes
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closePaymentModal(true);
-                window.location.reload();
-            } else {
-                alert('Error al registrar cobro: ' + (data.error || ''));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closePaymentModal(true);
+                    window.location.reload();
+                } else {
+                    alert('Error al registrar cobro: ' + (data.error || ''));
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+            })
+            .catch(err => {
+                alert('Error de conexión');
                 btn.disabled = false;
                 btn.innerHTML = oldHtml;
-            }
-        })
-        .catch(err => {
-            alert('Error de conexión');
-            btn.disabled = false;
-            btn.innerHTML = oldHtml;
-        });
+            });
     }
 
     // ==========================================
@@ -1208,14 +1474,14 @@
                 },
                 body: JSON.stringify({ status: newStatus })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    alert('Error al actualizar pieza: ' + (data.error || ''));
-                }
-                window.location.reload();
-            })
-            .catch(() => window.location.reload());
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Error al actualizar pieza: ' + (data.error || ''));
+                    }
+                    window.location.reload();
+                })
+                .catch(() => window.location.reload());
         } else if (dragType === "order") {
             fetch(`/crm/api/order/${id}/status/`, {
                 method: 'POST',
@@ -1225,14 +1491,14 @@
                 },
                 body: JSON.stringify({ status: newStatus })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    alert('Error al actualizar pedido: ' + (data.error || ''));
-                }
-                window.location.reload();
-            })
-            .catch(() => window.location.reload());
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Error al actualizar pedido: ' + (data.error || ''));
+                    }
+                    window.location.reload();
+                })
+                .catch(() => window.location.reload());
         }
     }
 
@@ -1245,12 +1511,12 @@
             },
             body: JSON.stringify({ status: newStatus })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) alert('Error: ' + (data.error || ''));
-            window.location.reload();
-        })
-        .catch(() => window.location.reload());
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) alert('Error: ' + (data.error || ''));
+                window.location.reload();
+            })
+            .catch(() => window.location.reload());
     }
 
     function updateOrderStatus(orderId, newStatus) {
@@ -1262,12 +1528,12 @@
             },
             body: JSON.stringify({ status: newStatus })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) alert('Error: ' + (data.error || ''));
-            window.location.reload();
-        })
-        .catch(() => window.location.reload());
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) alert('Error: ' + (data.error || ''));
+                window.location.reload();
+            })
+            .catch(() => window.location.reload());
     }
 
     document.querySelectorAll('.kanban-col').forEach(col => {
@@ -1479,6 +1745,11 @@
         document.getElementById('edit-order-shipping').value = order.shipping || '';
         document.getElementById('edit-order-notes').value = order.notes || '';
 
+        const vatBox = document.getElementById('edit-order-has-vat');
+        const irpfBox = document.getElementById('edit-order-has-irpf');
+        if (vatBox) vatBox.checked = Boolean(order.hasVat);
+        if (irpfBox) irpfBox.checked = Boolean(order.hasIrpf);
+
         // Copia profunda de piezas
         if (order.items && order.items.length > 0) {
             editModalPieces = JSON.parse(JSON.stringify(order.items));
@@ -1497,7 +1768,8 @@
                 totalCost: 0,
                 unitPrice: order.price || 0,
                 totalPrice: order.price || 0,
-                status: order.status || 'Presupuestado'
+                status: order.status || 'Presupuestado',
+                notes: order.notes || ''
             }];
         }
 
@@ -1569,6 +1841,17 @@
                     </div>
                     <div id="edit-autocomplete-${index}" class="edit-autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1 z-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
                     </div>
+                </div>
+
+                <!-- Notas o Requisitos de la Pieza -->
+                <div class="mb-3">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5 flex items-center gap-1">
+                        <span>📝</span> Notas o Requisitos de la Pieza (opcional)
+                    </label>
+                    <input type="text" value="${escapeHtml(piece.notes || '')}"
+                        placeholder="Ej. Color gris espacial, acabado mate, relleno 40%..."
+                        oninput="onEditPieceFieldChange(${index}, 'notes', this.value)"
+                        class="w-full text-xs p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-1 focus:ring-primary">
                 </div>
 
                 <!-- Métricas de Fabricación -->
@@ -1652,7 +1935,8 @@
             totalCost: 0,
             unitPrice: 0,
             totalPrice: 0,
-            status: generalStatus
+            status: generalStatus,
+            notes: ''
         };
         editModalPieces.push(newPiece);
         renderEditPieces();
@@ -1669,6 +1953,10 @@
 
     function onEditPieceFieldChange(index, field, val) {
         if (!editModalPieces[index]) return;
+        if (field === 'notes') {
+            editModalPieces[index].notes = val;
+            return;
+        }
         editModalPieces[index][field] = parseFloat(val) || 0;
 
         const costData = calculateUnitCost(
@@ -1836,12 +2124,20 @@
         renderEditPieces();
     }
 
+    function onEditVatToggle(checkbox) {
+        if (checkbox.checked) {
+            const irpfBox = document.getElementById('edit-order-has-irpf');
+            if (irpfBox) irpfBox.checked = true;
+        }
+        recalcEditModalTotals();
+    }
+
     function recalcEditModalTotals() {
         let sumItems = 0;
         let sumWeight = 0;
         let sumMinutes = 0;
         let sumCost = 0;
-        let sumPrice = 0;
+        let sumBasePrice = 0;
 
         editModalPieces.forEach(p => {
             const qty = parseInt(p.quantity) || 1;
@@ -1855,13 +2151,45 @@
             sumWeight += w * qty;
             sumMinutes += ((h * 60) + m) * qty;
             sumCost += c;
-            sumPrice += pr;
+            sumBasePrice += pr;
         });
+
+        const hasVat = document.getElementById('edit-order-has-vat') ? document.getElementById('edit-order-has-vat').checked : false;
+        const hasIrpf = document.getElementById('edit-order-has-irpf') ? document.getElementById('edit-order-has-irpf').checked : false;
+
+        // Si incluye IVA, aumenta un 21% al total del pedido
+        const finalPrice = hasVat ? Math.round(sumBasePrice * 1.21 * 100) / 100 : Math.round(sumBasePrice * 100) / 100;
+
+        // La ganancia base no aumenta con el IVA (el IVA no es ganancia)
+        const baseProfit = Math.round((sumBasePrice - sumCost) * 100) / 100;
+
+        // Si descuenta IRPF, descuenta un 21% de la ganancia total
+        const finalProfit = hasIrpf ? (baseProfit > 0 ? Math.round(baseProfit * 0.79 * 100) / 100 : baseProfit) : baseProfit;
+
+        // Cuantías dinámicas de impuestos
+        const vatAmount = Math.round(sumBasePrice * 0.21 * 100) / 100;
+        const irpfAmount = baseProfit > 0 ? Math.round(baseProfit * 0.21 * 100) / 100 : Math.round(sumBasePrice * 0.21 * 100) / 100;
+        const totalTax = Math.round((vatAmount + irpfAmount) * 100) / 100;
+
+        function formatTaxEuro(num) {
+            if (isNaN(num)) return '0€';
+            const rounded = Math.round(num * 100) / 100;
+            return rounded % 1 === 0 ? `${rounded.toFixed(0)}€` : `${rounded.toFixed(2)}€`;
+        }
+
+        const vatLabel = document.getElementById('edit-vat-amount-label');
+        if (vatLabel) {
+            vatLabel.textContent = `(+${formatTaxEuro(vatAmount)})`;
+        }
+
+        const irpfLabel = document.getElementById('edit-irpf-amount-label');
+        if (irpfLabel) {
+            irpfLabel.textContent = `(IVA + IRPF = ${formatTaxEuro(totalTax)})`;
+        }
 
         const totH = Math.floor(sumMinutes / 60);
         const totM = Math.round(sumMinutes % 60);
-        const profit = sumPrice - sumCost;
-        const margin = sumPrice > 0 ? ((profit / sumPrice) * 100).toFixed(0) : '0';
+        const margin = finalPrice > 0 ? ((finalProfit / finalPrice) * 100).toFixed(1) : '0';
 
         const elItems = document.getElementById('edit-summary-items');
         const elWeight = document.getElementById('edit-summary-weight');
@@ -1870,14 +2198,25 @@
         const elPrice = document.getElementById('edit-summary-price');
         const elProfit = document.getElementById('edit-summary-profit');
         const elMargin = document.getElementById('edit-summary-margin');
+        const badgeEl = document.getElementById('edit-tax-preview-badge');
 
         if (elItems) elItems.textContent = `${sumItems} uds`;
         if (elWeight) elWeight.textContent = `${sumWeight.toFixed(1)} g`;
         if (elTime) elTime.textContent = `${totH}h ${totM}m`;
         if (elCost) elCost.textContent = `€${sumCost.toFixed(2)}`;
-        if (elPrice) elPrice.textContent = `€${sumPrice.toFixed(2)}`;
-        if (elProfit) elProfit.textContent = `€${profit.toFixed(2)}`;
+        if (elPrice) elPrice.textContent = `€${finalPrice.toFixed(2)}${hasVat ? ' (IVA)' : ''}`;
+        if (elProfit) {
+            elProfit.textContent = `€${finalProfit.toFixed(2)}${hasIrpf ? ' (IRPF)' : ''}`;
+            elProfit.className = `text-base font-black ${finalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`;
+        }
         if (elMargin) elMargin.textContent = `${margin}%`;
+
+        if (badgeEl) {
+            let badges = [];
+            if (hasVat) badges.push('<span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold">+21% IVA</span>');
+            if (hasIrpf) badges.push('<span class="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-bold">-21% IRPF</span>');
+            badgeEl.innerHTML = badges.join(' ');
+        }
     }
 
     function submitEditOrderModal() {
@@ -1916,6 +2255,9 @@
             }
         }
 
+        const hasVat = document.getElementById('edit-order-has-vat') ? document.getElementById('edit-order-has-vat').checked : false;
+        const hasIrpf = document.getElementById('edit-order-has-irpf') ? document.getElementById('edit-order-has-irpf').checked : false;
+
         const payload = {
             client_name: clientName,
             order_date: orderDate,
@@ -1924,6 +2266,8 @@
             platform: platform,
             shipping: shipping,
             notes: notes,
+            has_vat: hasVat,
+            has_irpf: hasIrpf,
             pieces: editModalPieces.map(p => ({
                 id: p.id || null,
                 product_id: p.productId || null,
@@ -1937,7 +2281,8 @@
                 total_cost: parseFloat(p.totalCost) || 0,
                 unit_price: parseFloat(p.unitPrice) || 0,
                 price: parseFloat(p.totalPrice) || 0,
-                status: p.status || status
+                status: p.status || status,
+                notes: p.notes ? p.notes.trim() : ''
             }))
         };
 
@@ -1954,22 +2299,22 @@
             },
             body: JSON.stringify(payload)
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closeEditOrderModal();
-                window.location.reload();
-            } else {
-                alert('Error al guardar pedido: ' + (data.error || ''));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeEditOrderModal();
+                    window.location.reload();
+                } else {
+                    alert('Error al guardar pedido: ' + (data.error || ''));
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+            })
+            .catch(err => {
+                alert('Error de conexión al guardar pedido.');
                 btn.disabled = false;
                 btn.innerHTML = oldHtml;
-            }
-        })
-        .catch(err => {
-            alert('Error de conexión al guardar pedido.');
-            btn.disabled = false;
-            btn.innerHTML = oldHtml;
-        });
+            });
     }
 
     function deleteCurrentEditOrder() {
@@ -1985,27 +2330,27 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             }
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closeEditOrderModal();
-                window.location.reload();
-            } else {
-                alert('Error al eliminar pedido: ' + (data.error || ''));
-            }
-        })
-        .catch(() => alert('Error de conexión al eliminar pedido.'));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeEditOrderModal();
+                    window.location.reload();
+                } else {
+                    alert('Error al eliminar pedido: ' + (data.error || ''));
+                }
+            })
+            .catch(() => alert('Error de conexión al eliminar pedido.'));
     }
 
     // Cerrar con Escape o clic exterior
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closePaymentModal();
             closeEditOrderModal();
         }
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!e.target.closest('.edit-autocomplete-wrap')) {
             document.querySelectorAll('.edit-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
         }

@@ -4,77 +4,94 @@
 
 {% block content %}
 <style>
-.of-input {
-  display: block;
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
-  color: #111827;
-  font-size: 0.875rem;
-  transition: all 0.15s ease-in-out;
-  outline: none;
-}
-.dark .of-input {
-  border-color: #374151;
-  background-color: #1f2937;
-  color: #f3f4f6;
-}
-.of-input:focus {
-  border-color: #06b6d4;
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-}
-.of-field input, .of-field select, .of-field textarea {
-  display: block;
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
-  color: #111827;
-  font-size: 0.875rem;
-  transition: all 0.15s ease-in-out;
-  outline: none;
-}
-.dark .of-field input, .dark .of-field select, .dark .of-field textarea {
-  border-color: #374151;
-  background-color: #1f2937;
-  color: #f3f4f6;
-}
-.of-field input:focus, .of-field select:focus, .of-field textarea:focus {
-  border-color: #06b6d4;
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-}
-.piece-card {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.piece-card:hover {
-  border-color: rgba(6, 182, 212, 0.4);
-}
-.custom-autocomplete-dropdown {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(6, 182, 212, 0.4) transparent;
-}
+  .of-input {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    color: #111827;
+    font-size: 0.875rem;
+    transition: all 0.15s ease-in-out;
+    outline: none;
+  }
+
+  .dark .of-input {
+    border-color: #374151;
+    background-color: #1f2937;
+    color: #f3f4f6;
+  }
+
+  .of-input:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+  }
+
+  .of-field input,
+  .of-field select,
+  .of-field textarea {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    color: #111827;
+    font-size: 0.875rem;
+    transition: all 0.15s ease-in-out;
+    outline: none;
+  }
+
+  .dark .of-field input,
+  .dark .of-field select,
+  .dark .of-field textarea {
+    border-color: #374151;
+    background-color: #1f2937;
+    color: #f3f4f6;
+  }
+
+  .of-field input:focus,
+  .of-field select:focus,
+  .of-field textarea:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+  }
+
+  .piece-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .piece-card:hover {
+    border-color: rgba(6, 182, 212, 0.4);
+  }
+
+  .custom-autocomplete-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(6, 182, 212, 0.4) transparent;
+  }
 </style>
 
 <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
   <!-- Breadcrumb & Tag -->
   <div class="mb-6 flex items-center justify-between">
-    <a href="{% url 'crm_dashboard' %}" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary transition-colors">
+    <a href="{% url 'crm_dashboard' %}"
+      class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary transition-colors">
       <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
       </svg>
       Volver al CRM de Pedidos
     </a>
-    <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300 font-medium">
+    <span
+      class="text-xs px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300 font-medium">
       Mini-CRM ProPrint3D
     </span>
   </div>
 
   <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl overflow-hidden">
     <!-- Header Card -->
-    <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-6 py-6 sm:px-8 text-white border-b border-gray-700">
+    <div
+      class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-6 py-6 sm:px-8 text-white border-b border-gray-700">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
@@ -86,7 +103,8 @@
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <span id="header-pieces-badge" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
+          <span id="header-pieces-badge"
+            class="px-3 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
             1 Pieza en el pedido
           </span>
         </div>
@@ -115,16 +133,21 @@
       </div>
 
       {% if form.errors %}
-      <div class="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
+      <div
+        class="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
         <div class="flex items-center gap-2 font-bold mb-1">
-          <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+          <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"></path>
+          </svg>
           Revisa los siguientes campos:
         </div>
         <ul class="list-disc pl-6 text-xs space-y-1">
           {% for field in form %}
-            {% for error in field.errors %}
-              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-            {% endfor %}
+          {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
           {% endfor %}
         </ul>
       </div>
@@ -132,24 +155,29 @@
 
       <!-- SECCIÓN 1: CLIENTE Y FECHA -->
       <div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <h3
+          class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
           1. Información del Pedido y Cliente
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="of-field sm:col-span-1">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente *</label>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente
+              *</label>
             {{ form.client_name }}
           </div>
           <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex justify-between items-center">
+            <label
+              class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex justify-between items-center">
               <span>Fecha de Pedido *</span>
-              <button type="button" id="btn-today" class="text-[11px] bg-gray-200 dark:bg-gray-700 hover:bg-primary hover:text-white px-2 py-0.5 rounded transition-colors text-gray-700 dark:text-gray-300">Hoy</button>
+              <button type="button" id="btn-today"
+                class="text-[11px] bg-gray-200 dark:bg-gray-700 hover:bg-primary hover:text-white px-2 py-0.5 rounded transition-colors text-gray-700 dark:text-gray-300">Hoy</button>
             </label>
             {{ form.order_date }}
           </div>
           <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite (Opcional)</label>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite
+              (Opcional)</label>
             {{ form.deadline }}
           </div>
         </div>
@@ -159,7 +187,8 @@
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <h3
+              class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
               2. Piezas y Fabricación del Pedido
             </h3>
@@ -167,8 +196,11 @@
               Busca en el catálogo con imagen en tiempo real o escribe un encargo personalizado a medida.
             </p>
           </div>
-          <button type="button" id="btn-add-piece" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white text-xs font-bold transition shadow-sm hover:shadow">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <button type="button" id="btn-add-piece"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white text-xs font-bold transition shadow-sm hover:shadow">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
             + Añadir Pieza
           </button>
         </div>
@@ -180,8 +212,11 @@
 
         <!-- Botón adicional al pie de la lista de piezas -->
         <div class="pt-2">
-          <button type="button" id="btn-add-piece-bottom" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <button type="button" id="btn-add-piece-bottom"
+            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary dark:hover:border-primary text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
             + Añadir otra pieza a este pedido
           </button>
         </div>
@@ -189,22 +224,26 @@
 
       <!-- SECCIÓN 3: RESUMEN GLOBAL DEL PEDIDO Y TOTALES -->
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <h3
+          class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           3. Resumen Global del Pedido y Rentabilidad
         </h3>
 
-        <div class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-5 shadow-sm">
+        <div
+          class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-5 shadow-sm">
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 items-center text-center">
-            
+
             <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
-              <p class="text-lg font-black text-gray-900 dark:text-white"><span id="summary-total-items">1</span> <span class="text-xs font-semibold text-gray-500">uds</span></p>
+              <p class="text-lg font-black text-gray-900 dark:text-white"><span id="summary-total-items">1</span> <span
+                  class="text-xs font-semibold text-gray-500">uds</span></p>
             </div>
 
             <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
-              <p class="text-lg font-black text-cyan-600 dark:text-cyan-400"><span id="summary-total-weight">0</span> <span class="text-xs font-semibold text-cyan-500">g</span></p>
+              <p class="text-lg font-black text-cyan-600 dark:text-cyan-400"><span id="summary-total-weight">0</span>
+                <span class="text-xs font-semibold text-cyan-500">g</span></p>
             </div>
 
             <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50">
@@ -217,28 +256,71 @@
               <p class="text-lg font-black text-red-500">€<span id="summary-total-cost">0.00</span></p>
             </div>
 
-            <div class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50 sm:col-span-2 lg:col-span-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Pedido</p>
+            <div
+              class="p-2 rounded-xl bg-white/60 dark:bg-dark/40 border border-gray-200/50 dark:border-gray-700/50 sm:col-span-2 lg:col-span-1">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Pedido
+              </p>
               <p class="text-xl font-black text-primary">€<span id="summary-total-price">0.00</span></p>
             </div>
 
-            <div class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
-              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
-              <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">€<span id="summary-net-profit">0.00</span></p>
+            <div
+              class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio
+              </p>
+              <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">€<span
+                  id="summary-net-profit">0.00</span></p>
             </div>
 
-            <div class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
-              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
-              <p class="text-lg font-black text-emerald-600 dark:text-emerald-400"><span id="summary-margin-percent">0</span>%</p>
+            <div
+              class="p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen
+              </p>
+              <p class="text-lg font-black text-emerald-600 dark:text-emerald-400"><span
+                  id="summary-margin-percent">0</span>%</p>
             </div>
 
+          </div>
+
+          <!-- Fiscalidad: Checkboxes de IVA e IRPF -->
+          <div
+            class="mt-4 p-3.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200 dark:border-gray-700/80 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-6 flex-wrap">
+              <!-- Checkbox IVA -->
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="order-has-vat" name="has_vat" value="true"
+                  class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
+                  onchange="onVatToggle(this)">
+                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                  <span>🧾</span> Incluir IVA (+21%)
+                </span>
+                <span id="order-vat-amount-label"
+                  class="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60">(+0€)</span>
+              </label>
+
+              <!-- Checkbox IRPF -->
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="order-has-irpf" name="has_irpf" value="true"
+                  class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
+                  onchange="updateOrderGrandTotals()">
+                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                  <span>📉</span> Descontar IRPF (-21%)
+                </span>
+                <span id="order-irpf-amount-label"
+                  class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">(IVA
+                  + IRPF = 0€)</span>
+              </label>
+            </div>
+
+            <div id="order-tax-preview-badge" class="flex items-center gap-1.5 text-[10px] font-bold">
+            </div>
           </div>
         </div>
       </div>
 
       <!-- SECCIÓN 4: LOGÍSTICA Y ESTADO -->
       <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <h3
+          class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-primary"></span>
           4. Logística y Estado del Pedido
         </h3>
@@ -260,8 +342,10 @@
         </div>
 
         <!-- Fechas de seguimiento manual (Opcionales) -->
-        <details class="mb-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-xl p-3.5">
-          <summary class="text-xs font-bold text-gray-700 dark:text-gray-300 cursor-pointer select-none flex items-center gap-1.5">
+        <details
+          class="mb-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-xl p-3.5">
+          <summary
+            class="text-xs font-bold text-gray-700 dark:text-gray-300 cursor-pointer select-none flex items-center gap-1.5">
             <span>📅 Fechas de Seguimiento Manuales (Opcional - Se asignan solas al mover en Kanban)</span>
           </summary>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
@@ -288,7 +372,8 @@
 
       <!-- BOTÓN SUBMIT -->
       <div class="pt-4">
-        <button type="submit" id="btn-submit" class="w-full bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
+        <button type="submit" id="btn-submit"
+          class="w-full bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
@@ -300,100 +385,100 @@
 </div>
 
 <script>
-// Lista completa de productos con fotos y datos del catálogo
-const productCatalogList = {{ products_json|safe }};
+  // Lista completa de productos con fotos y datos del catálogo
+  const productCatalogList = {{ products_json| safe }};
 
-// Diccionario indexado por título
-const productCatalogMap = {};
-productCatalogList.forEach(p => {
-  productCatalogMap[p.title.trim().toLowerCase()] = p;
-});
+  // Diccionario indexado por título
+  const productCatalogMap = {};
+  productCatalogList.forEach(p => {
+    productCatalogMap[p.title.trim().toLowerCase()] = p;
+  });
 
-// Estado global de las piezas
-let piecesState = [
-  {
-    uid: Date.now(),
-    productId: null,
-    description: '',
-    imageUrl: null,
-    quantity: 1,
-    weight: 0,
-    hours: 0,
-    mins: 0,
-    extra: 0,
-    unitCost: 0,
-    totalCost: 0,
-    unitPrice: 0,
-    totalPrice: 0,
-    isCatalog: false,
-    suggX25: 0,
-    suggX30: 0,
-    suggX40: 0
-  }
-];
+  // Estado global de las piezas
+  let piecesState = [
+    {
+      uid: Date.now(),
+      productId: null,
+      description: '',
+      imageUrl: null,
+      quantity: 1,
+      weight: 0,
+      hours: 0,
+      mins: 0,
+      extra: 0,
+      unitCost: 0,
+      totalCost: 0,
+      unitPrice: 0,
+      totalPrice: 0,
+      isCatalog: false,
+      suggX25: 0,
+      suggX30: 0,
+      suggX40: 0
+    }
+  ];
 
-// Cálculo de coste exacto por pieza
-function calculateUnitCost(w, h, m, extra) {
-  const totalHours = (parseFloat(h) || 0) + ((parseFloat(m) || 0) / 60);
-  const weight = parseFloat(w) || 0;
-  const extraVal = parseFloat(extra) || 0;
+  // Cálculo de coste exacto por pieza
+  function calculateUnitCost(w, h, m, extra) {
+    const totalHours = (parseFloat(h) || 0) + ((parseFloat(m) || 0) / 60);
+    const weight = parseFloat(w) || 0;
+    const extraVal = parseFloat(extra) || 0;
 
-  if (weight <= 0 && totalHours <= 0) {
+    if (weight <= 0 && totalHours <= 0) {
+      return {
+        unitCost: extraVal,
+        suggX25: extraVal * 2.5,
+        suggX30: extraVal * 3.0,
+        suggX40: extraVal * 4.0
+      };
+    }
+
+    const costFilament = 0.02 * weight;
+    const costEnergy = 0.15 * 0.12 * totalHours;
+    const costWear = 0.025 * totalHours;
+
+    const costSubtotal = costFilament + costEnergy + costWear;
+    const errorMargin = costSubtotal * 0.15;
+    const baseVar = costFilament + costEnergy;
+    const fixedCosts = costWear + errorMargin + extraVal;
+
+    const unitCost = costSubtotal + errorMargin + extraVal;
+
+    const suggX25 = (baseVar * 2.5) + fixedCosts;
+    const suggX30 = (baseVar * 3.0) + fixedCosts;
+    const suggX40 = (baseVar * 4.0) + fixedCosts;
+
     return {
-      unitCost: extraVal,
-      suggX25: extraVal * 2.5,
-      suggX30: extraVal * 3.0,
-      suggX40: extraVal * 4.0
+      unitCost: Math.round(unitCost * 100) / 100,
+      suggX25: Math.round(suggX25 * 100) / 100,
+      suggX30: Math.round(suggX30 * 100) / 100,
+      suggX40: Math.round(suggX40 * 100) / 100
     };
   }
 
-  const costFilament = 0.02 * weight;
-  const costEnergy = 0.15 * 0.12 * totalHours;
-  const costWear = 0.025 * totalHours;
+  // Renderizado completo del contenedor de piezas
+  function renderPieces() {
+    const container = document.getElementById('pieces-container');
+    if (!container) return;
 
-  const costSubtotal = costFilament + costEnergy + costWear;
-  const errorMargin = costSubtotal * 0.15;
-  const baseVar = costFilament + costEnergy;
-  const fixedCosts = costWear + errorMargin + extraVal;
+    container.innerHTML = '';
 
-  const unitCost = costSubtotal + errorMargin + extraVal;
+    piecesState.forEach((piece, index) => {
+      const card = document.createElement('div');
+      card.className = 'piece-card bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 relative shadow-sm';
+      card.dataset.index = index;
 
-  const suggX25 = (baseVar * 2.5) + fixedCosts;
-  const suggX30 = (baseVar * 3.0) + fixedCosts;
-  const suggX40 = (baseVar * 4.0) + fixedCosts;
+      // Calcular costes actuales
+      const costData = calculateUnitCost(piece.weight, piece.hours, piece.mins, piece.extra);
+      piece.unitCost = costData.unitCost;
+      piece.totalCost = Math.round((piece.unitCost * piece.quantity) * 100) / 100;
+      piece.suggX25 = costData.suggX25;
+      piece.suggX30 = costData.suggX30;
+      piece.suggX40 = costData.suggX40;
 
-  return {
-    unitCost: Math.round(unitCost * 100) / 100,
-    suggX25: Math.round(suggX25 * 100) / 100,
-    suggX30: Math.round(suggX30 * 100) / 100,
-    suggX40: Math.round(suggX40 * 100) / 100
-  };
-}
+      const pieceProfit = Math.round((piece.totalPrice - piece.totalCost) * 100) / 100;
+      const pieceMargin = piece.totalPrice > 0 ? ((pieceProfit / piece.totalPrice) * 100).toFixed(0) : '0';
 
-// Renderizado completo del contenedor de piezas
-function renderPieces() {
-  const container = document.getElementById('pieces-container');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  piecesState.forEach((piece, index) => {
-    const card = document.createElement('div');
-    card.className = 'piece-card bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 relative shadow-sm';
-    card.dataset.index = index;
-
-    // Calcular costes actuales
-    const costData = calculateUnitCost(piece.weight, piece.hours, piece.mins, piece.extra);
-    piece.unitCost = costData.unitCost;
-    piece.totalCost = Math.round((piece.unitCost * piece.quantity) * 100) / 100;
-    piece.suggX25 = costData.suggX25;
-    piece.suggX30 = costData.suggX30;
-    piece.suggX40 = costData.suggX40;
-
-    const pieceProfit = Math.round((piece.totalPrice - piece.totalCost) * 100) / 100;
-    const pieceMargin = piece.totalPrice > 0 ? ((pieceProfit / piece.totalPrice) * 100).toFixed(0) : '0';
-
-    card.innerHTML = `
+      card.innerHTML = `
       <!-- Cabecera de la Pieza con Miniatura si tiene foto -->
       <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-200 dark:border-gray-800">
         <div class="flex items-center gap-2.5">
@@ -445,6 +530,16 @@ function renderPieces() {
         <!-- Menú flotante de resultados con foto y estilo web -->
         <div id="autocomplete-dropdown-${index}" class="custom-autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1.5 z-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
         </div>
+      </div>
+
+      <!-- Notas o Requisitos de la Pieza (Opcional) -->
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
+          <span>📝</span> Notas o Requisitos de la Pieza (opcional)
+        </label>
+        <input type="text" class="of-input text-xs font-medium input-notes" data-index="${index}"
+          placeholder="Ej: Filamento PLA Madera, acabado mate, relleno 40%..."
+          value="${(piece.notes || '').replace(/"/g, '&quot;')}">
       </div>
 
       <!-- Fila 2: Fabricación (Peso, Horas, Minutos, Otros costes) -->
@@ -527,46 +622,46 @@ function renderPieces() {
       </div>
     `;
 
-    container.appendChild(card);
-  });
+      container.appendChild(card);
+    });
 
-  bindPieceEvents();
-  updateOrderGrandTotals();
-}
-
-// Búsqueda en vivo en el catálogo de productos con imagen
-function handleAutocompleteSearch(inputEl, index) {
-  const dropdown = document.getElementById(`autocomplete-dropdown-${index}`);
-  if (!dropdown) return;
-
-  const query = inputEl.value.trim().toLowerCase();
-  if (!query) {
-    dropdown.innerHTML = '';
-    dropdown.classList.add('hidden');
-    return;
+    bindPieceEvents();
+    updateOrderGrandTotals();
   }
 
-  const matches = productCatalogList.filter(p => p.title.toLowerCase().includes(query));
+  // Búsqueda en vivo en el catálogo de productos con imagen
+  function handleAutocompleteSearch(inputEl, index) {
+    const dropdown = document.getElementById(`autocomplete-dropdown-${index}`);
+    if (!dropdown) return;
 
-  if (matches.length === 0) {
-    dropdown.innerHTML = `
+    const query = inputEl.value.trim().toLowerCase();
+    if (!query) {
+      dropdown.innerHTML = '';
+      dropdown.classList.add('hidden');
+      return;
+    }
+
+    const matches = productCatalogList.filter(p => p.title.toLowerCase().includes(query));
+
+    if (matches.length === 0) {
+      dropdown.innerHTML = `
       <div class="p-3 text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-2">
         <span>✨</span> Encargo personalizado no catalogado: "${inputEl.value}"
       </div>
     `;
-    dropdown.classList.remove('hidden');
-    return;
-  }
+      dropdown.classList.remove('hidden');
+      return;
+    }
 
-  let html = '';
-  matches.forEach(item => {
-    // Resaltar coincidencia
-    const regex = new RegExp(`(${query})`, 'gi');
-    const highlightedTitle = item.title.replace(regex, '<span class="text-cyan-500 dark:text-cyan-400 font-extrabold underline">$1</span>');
+    let html = '';
+    matches.forEach(item => {
+      // Resaltar coincidencia
+      const regex = new RegExp(`(${query})`, 'gi');
+      const highlightedTitle = item.title.replace(regex, '<span class="text-cyan-500 dark:text-cyan-400 font-extrabold underline">$1</span>');
 
-    const effectivePrice = item.sale_price !== null && item.is_on_sale ? item.sale_price : item.price;
+      const effectivePrice = item.sale_price !== null && item.is_on_sale ? item.sale_price : item.price;
 
-    html += `
+      html += `
       <div class="p-2.5 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 cursor-pointer flex items-center gap-3 transition-colors catalog-option"
         data-index="${index}" data-prod-id="${item.id}">
         ${item.image_url ? `
@@ -584,386 +679,445 @@ function handleAutocompleteSearch(inputEl, index) {
         </div>
       </div>
     `;
-  });
-
-  dropdown.innerHTML = html;
-  dropdown.classList.remove('hidden');
-
-  // Event listener para las opciones sugeridas
-  dropdown.querySelectorAll('.catalog-option').forEach(opt => {
-    opt.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const pId = parseInt(this.dataset.prodId);
-      const catalogItem = productCatalogList.find(p => p.id === pId);
-      if (catalogItem) {
-        selectCatalogProduct(index, catalogItem);
-      }
-    });
-  });
-}
-
-// Al seleccionar producto del catálogo
-function selectCatalogProduct(index, catalogItem) {
-  const p = piecesState[index];
-  p.productId = catalogItem.id;
-  p.description = catalogItem.title;
-  p.imageUrl = catalogItem.image_url || null;
-  p.isCatalog = true;
-  p.weight = catalogItem.weight_grams || 0;
-  p.hours = catalogItem.print_time_hours || 0;
-  p.mins = catalogItem.print_time_minutes || 0;
-  p.extra = catalogItem.extra_costs || 0;
-
-  const effectivePrice = catalogItem.sale_price !== null && catalogItem.is_on_sale ? catalogItem.sale_price : catalogItem.price;
-  p.unitPrice = effectivePrice;
-  p.totalPrice = Math.round((effectivePrice * p.quantity) * 100) / 100;
-
-  renderPieces();
-}
-
-// Enlazar eventos de los inputs de las piezas
-function bindPieceEvents() {
-  document.querySelectorAll('.input-desc').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].description = this.value;
-
-      // Buscar coincidencia exacta
-      const exactMatch = productCatalogMap[this.value.trim().toLowerCase()];
-      if (exactMatch) {
-        piecesState[idx].productId = exactMatch.id;
-        piecesState[idx].imageUrl = exactMatch.image_url;
-        piecesState[idx].isCatalog = true;
-      } else {
-        piecesState[idx].isCatalog = false;
-        piecesState[idx].productId = null;
-        piecesState[idx].imageUrl = null;
-      }
-
-      handleAutocompleteSearch(this, idx);
-      updatePieceCalculations(idx);
     });
 
-    input.addEventListener('focus', function() {
-      const idx = parseInt(this.dataset.index);
-      if (this.value.trim()) {
-        handleAutocompleteSearch(this, idx);
-      }
-    });
-  });
+    dropdown.innerHTML = html;
+    dropdown.classList.remove('hidden');
 
-  // Métricas de fabricación
-  document.querySelectorAll('.input-weight').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].weight = parseFloat(this.value) || 0;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  document.querySelectorAll('.input-hours').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].hours = parseFloat(this.value) || 0;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  document.querySelectorAll('.input-mins').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].mins = parseInt(this.value) || 0;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  document.querySelectorAll('.input-extra').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].extra = parseFloat(this.value) || 0;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  // Cantidad
-  document.querySelectorAll('.input-qty').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].quantity = parseInt(this.value) || 1;
-      if (piecesState[idx].unitPrice > 0) {
-        piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
-      }
-      updatePieceCalculations(idx);
-    });
-  });
-
-  // Precio unitario
-  document.querySelectorAll('.input-uprice').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].unitPrice = parseFloat(this.value) || 0;
-      piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  // Total cobrado pieza
-  document.querySelectorAll('.input-tprice').forEach(input => {
-    input.addEventListener('input', function() {
-      const idx = parseInt(this.dataset.index);
-      piecesState[idx].totalPrice = parseFloat(this.value) || 0;
-      if (piecesState[idx].quantity > 0) {
-        piecesState[idx].unitPrice = Math.round((piecesState[idx].totalPrice / piecesState[idx].quantity) * 100) / 100;
-      }
-      updatePieceCalculations(idx);
-    });
-  });
-
-  // Botones de sugerencias de precio x2.5, x3.0, x4.0
-  document.querySelectorAll('.btn-sugg').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const idx = parseInt(this.dataset.index);
-      const val = parseFloat(this.dataset.val) || 0;
-      piecesState[idx].unitPrice = val;
-      piecesState[idx].totalPrice = Math.round((val * piecesState[idx].quantity) * 100) / 100;
-      updatePieceCalculations(idx);
-    });
-  });
-
-  // Botón duplicar pieza
-  document.querySelectorAll('.btn-duplicate-piece').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const idx = parseInt(this.dataset.index);
-      duplicatePiece(idx);
-    });
-  });
-
-  // Botón eliminar pieza
-  document.querySelectorAll('.btn-remove-piece').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const idx = parseInt(this.dataset.index);
-      removePiece(idx);
-    });
-  });
-}
-
-// Cerrar desplegables de autocompletado al hacer clic fuera
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.relative')) {
-    document.querySelectorAll('.custom-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
-  }
-});
-
-// Actualizar cálculos de una pieza sin perder el foco si es posible
-function updatePieceCalculations(index) {
-  const p = piecesState[index];
-  const costData = calculateUnitCost(p.weight, p.hours, p.mins, p.extra);
-  p.unitCost = costData.unitCost;
-  p.totalCost = Math.round((p.unitCost * p.quantity) * 100) / 100;
-  p.suggX25 = costData.suggX25;
-  p.suggX30 = costData.suggX30;
-  p.suggX40 = costData.suggX40;
-
-  const card = document.querySelector(`.piece-card[data-index="${index}"]`);
-  if (card) {
-    const uPriceInput = card.querySelector('.input-uprice');
-    const tPriceInput = card.querySelector('.input-tprice');
-    if (uPriceInput && document.activeElement !== uPriceInput) {
-      uPriceInput.value = p.unitPrice > 0 ? p.unitPrice.toFixed(2) : '';
-    }
-    if (tPriceInput && document.activeElement !== tPriceInput) {
-      tPriceInput.value = p.totalPrice > 0 ? p.totalPrice.toFixed(2) : '';
-    }
-
-    const suggBtns = card.querySelectorAll('.btn-sugg');
-    if (suggBtns.length >= 3) {
-      suggBtns[0].dataset.val = p.suggX25;
-      suggBtns[0].textContent = `x2.5 (€${p.suggX25.toFixed(2)})`;
-      suggBtns[1].dataset.val = p.suggX30;
-      suggBtns[1].textContent = `x3.0 (€${p.suggX30.toFixed(2)})`;
-      suggBtns[2].dataset.val = p.suggX40;
-      suggBtns[2].textContent = `x4.0 (€${p.suggX40.toFixed(2)})`;
-    }
-  }
-
-  updateOrderGrandTotals();
-}
-
-// Añadir nueva pieza
-function addPiece() {
-  piecesState.push({
-    uid: Date.now(),
-    productId: null,
-    description: '',
-    imageUrl: null,
-    quantity: 1,
-    weight: 0,
-    hours: 0,
-    mins: 0,
-    extra: 0,
-    unitCost: 0,
-    totalCost: 0,
-    unitPrice: 0,
-    totalPrice: 0,
-    isCatalog: false,
-    suggX25: 0,
-    suggX30: 0,
-    suggX40: 0
-  });
-  renderPieces();
-}
-
-// Duplicar pieza
-function duplicatePiece(index) {
-  const source = piecesState[index];
-  piecesState.splice(index + 1, 0, {
-    ...source,
-    uid: Date.now(),
-    description: source.description ? `${source.description} (Copia)` : ''
-  });
-  renderPieces();
-}
-
-// Eliminar pieza
-function removePiece(index) {
-  if (piecesState.length <= 1) return;
-  piecesState.splice(index, 1);
-  renderPieces();
-}
-
-// Actualizar totales generales del pedido
-function updateOrderGrandTotals() {
-  let totalItems = 0;
-  let totalWeight = 0;
-  let totalMinutes = 0;
-  let totalCost = 0;
-  let totalPrice = 0;
-
-  piecesState.forEach(p => {
-    const qty = parseInt(p.quantity) || 1;
-    totalItems += qty;
-    totalWeight += (parseFloat(p.weight) || 0) * qty;
-    totalMinutes += ((parseFloat(p.hours) || 0) * 60 + (parseInt(p.mins) || 0)) * qty;
-    totalCost += parseFloat(p.totalCost) || 0;
-    totalPrice += parseFloat(p.totalPrice) || 0;
-  });
-
-  const grandHours = Math.floor(totalMinutes / 60);
-  const grandMins = Math.round(totalMinutes % 60);
-  const netProfit = Math.round((totalPrice - totalCost) * 100) / 100;
-  const marginPercent = totalPrice > 0 ? ((netProfit / totalPrice) * 100).toFixed(1) : '0';
-
-  const elTotalItems = document.getElementById('summary-total-items');
-  const elTotalWeight = document.getElementById('summary-total-weight');
-  const elTotalTime = document.getElementById('summary-total-time');
-  const elTotalCost = document.getElementById('summary-total-cost');
-  const elTotalPrice = document.getElementById('summary-total-price');
-  const elNetProfit = document.getElementById('summary-net-profit');
-  const elMarginPercent = document.getElementById('summary-margin-percent');
-  const headerBadge = document.getElementById('header-pieces-badge');
-  const btnSubmitText = document.getElementById('btn-submit-text');
-
-  if (elTotalItems) elTotalItems.textContent = totalItems;
-  if (elTotalWeight) elTotalWeight.textContent = totalWeight.toFixed(0);
-  if (elTotalTime) elTotalTime.textContent = `${grandHours}h ${grandMins}m`;
-  if (elTotalCost) elTotalCost.textContent = totalCost.toFixed(2);
-  if (elTotalPrice) elTotalPrice.textContent = totalPrice.toFixed(2);
-  if (elNetProfit) {
-    elNetProfit.textContent = netProfit.toFixed(2);
-    elNetProfit.className = netProfit < 0 ? 'text-xl font-black text-red-500' : 'text-xl font-black text-emerald-600 dark:text-emerald-400';
-  }
-  if (elMarginPercent) elMarginPercent.textContent = marginPercent;
-
-  if (headerBadge) {
-    headerBadge.textContent = `${piecesState.length} ${piecesState.length === 1 ? 'Pieza' : 'Piezas'} (${totalItems} uds)`;
-  }
-  if (btnSubmitText) {
-    btnSubmitText.textContent = `Guardar Pedido (${piecesState.length} ${piecesState.length === 1 ? 'pieza' : 'piezas'} · €${totalPrice.toFixed(2)})`;
-  }
-
-  syncHiddenInputs(totalPrice, totalCost);
-}
-
-// Sincronizar campo JSON oculto y fallbacks de SmartOrderForm
-function syncHiddenInputs(totalPrice, totalCost) {
-  const jsonInput = document.getElementById('id_pieces_json');
-  if (jsonInput) {
-    const payload = piecesState.map(p => ({
-      product_id: p.productId,
-      description: p.description || 'Pieza a medida',
-      quantity: p.quantity || 1,
-      weight_grams: p.weight || 0,
-      print_time_hours: p.hours || 0,
-      print_time_minutes: p.mins || 0,
-      extra_costs: p.extra || 0,
-      unit_cost: p.unitCost || 0,
-      total_cost: p.totalCost || 0,
-      unit_price: p.unitPrice || 0,
-      price: p.totalPrice || 0
-    }));
-    jsonInput.value = JSON.stringify(payload);
-  }
-
-  if (piecesState.length > 0) {
-    const first = piecesState[0];
-    const fbName = document.getElementById('id_smart_product_name');
-    const fbQty = document.getElementById('id_quantity');
-    const fbWeight = document.getElementById('id_weight_grams');
-    const fbHours = document.getElementById('id_print_time_hours');
-    const fbMins = document.getElementById('id_print_time_minutes');
-    const fbExtra = document.getElementById('id_extra_costs');
-    const fbUnitCost = document.getElementById('id_unit_cost');
-    const fbTotalCost = document.getElementById('id_total_cost');
-    const fbUnitPrice = document.getElementById('id_unit_price');
-    const fbPrice = document.getElementById('id_price');
-
-    if (fbName) fbName.value = first.description || 'Pedido multi-pieza';
-    if (fbQty) fbQty.value = first.quantity || 1;
-    if (fbWeight) fbWeight.value = first.weight || 0;
-    if (fbHours) fbHours.value = first.hours || 0;
-    if (fbMins) fbMins.value = first.mins || 0;
-    if (fbExtra) fbExtra.value = first.extra || 0;
-    if (fbUnitCost) fbUnitCost.value = (first.unitCost || 0).toFixed(2);
-    if (fbTotalCost) fbTotalCost.value = (totalCost || 0).toFixed(2);
-    if (fbUnitPrice) fbUnitPrice.value = (first.unitPrice || 0).toFixed(2);
-    if (fbPrice) fbPrice.value = (totalPrice || 0).toFixed(2);
-  }
-}
-
-// Inicialización en DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-  const btnToday = document.getElementById('btn-today');
-  if (btnToday) {
-    btnToday.addEventListener('click', function() {
-      const today = new Date().toISOString().split('T')[0];
-      const dateInput = document.getElementById('id_order_date');
-      if (dateInput) dateInput.value = today;
-    });
-  }
-
-  const dateInput = document.getElementById('id_order_date');
-  if (dateInput && !dateInput.value) {
-    dateInput.value = new Date().toISOString().split('T')[0];
-  }
-
-  const btnAdd = document.getElementById('btn-add-piece');
-  const btnAddBottom = document.getElementById('btn-add-piece-bottom');
-  if (btnAdd) btnAdd.addEventListener('click', addPiece);
-  if (btnAddBottom) btnAddBottom.addEventListener('click', addPiece);
-
-  const form = document.getElementById('order-form');
-  if (form) {
-    form.addEventListener('submit', function() {
-      piecesState.forEach((p, idx) => {
-        if (!p.description || !p.description.trim()) {
-          p.description = `Pieza #${idx + 1}`;
+    // Event listener para las opciones sugeridas
+    dropdown.querySelectorAll('.catalog-option').forEach(opt => {
+      opt.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const pId = parseInt(this.dataset.prodId);
+        const catalogItem = productCatalogList.find(p => p.id === pId);
+        if (catalogItem) {
+          selectCatalogProduct(index, catalogItem);
         }
       });
-      syncHiddenInputs();
     });
   }
 
-  renderPieces();
-});
+  // Al seleccionar producto del catálogo
+  function selectCatalogProduct(index, catalogItem) {
+    const p = piecesState[index];
+    p.productId = catalogItem.id;
+    p.description = catalogItem.title;
+    p.imageUrl = catalogItem.image_url || null;
+    p.isCatalog = true;
+    p.weight = catalogItem.weight_grams || 0;
+    p.hours = catalogItem.print_time_hours || 0;
+    p.mins = catalogItem.print_time_minutes || 0;
+    p.extra = catalogItem.extra_costs || 0;
+
+    const effectivePrice = catalogItem.sale_price !== null && catalogItem.is_on_sale ? catalogItem.sale_price : catalogItem.price;
+    p.unitPrice = effectivePrice;
+    p.totalPrice = Math.round((effectivePrice * p.quantity) * 100) / 100;
+
+    renderPieces();
+  }
+
+  // Enlazar eventos de los inputs de las piezas
+  function bindPieceEvents() {
+    document.querySelectorAll('.input-desc').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].description = this.value;
+
+        // Buscar coincidencia exacta
+        const exactMatch = productCatalogMap[this.value.trim().toLowerCase()];
+        if (exactMatch) {
+          piecesState[idx].productId = exactMatch.id;
+          piecesState[idx].imageUrl = exactMatch.image_url;
+          piecesState[idx].isCatalog = true;
+        } else {
+          piecesState[idx].isCatalog = false;
+          piecesState[idx].productId = null;
+          piecesState[idx].imageUrl = null;
+        }
+
+        handleAutocompleteSearch(this, idx);
+        updatePieceCalculations(idx);
+      });
+
+      input.addEventListener('focus', function () {
+        const idx = parseInt(this.dataset.index);
+        if (this.value.trim()) {
+          handleAutocompleteSearch(this, idx);
+        }
+      });
+    });
+
+    // Métricas de fabricación
+    document.querySelectorAll('.input-weight').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].weight = parseFloat(this.value) || 0;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    document.querySelectorAll('.input-hours').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].hours = parseFloat(this.value) || 0;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    document.querySelectorAll('.input-mins').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].mins = parseInt(this.value) || 0;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    document.querySelectorAll('.input-extra').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].extra = parseFloat(this.value) || 0;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    // Notas de pieza
+    document.querySelectorAll('.input-notes').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].notes = this.value;
+      });
+    });
+
+    // Cantidad
+    document.querySelectorAll('.input-qty').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].quantity = parseInt(this.value) || 1;
+        if (piecesState[idx].unitPrice > 0) {
+          piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
+        }
+        updatePieceCalculations(idx);
+      });
+    });
+
+    // Precio unitario
+    document.querySelectorAll('.input-uprice').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].unitPrice = parseFloat(this.value) || 0;
+        piecesState[idx].totalPrice = Math.round((piecesState[idx].unitPrice * piecesState[idx].quantity) * 100) / 100;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    // Total cobrado pieza
+    document.querySelectorAll('.input-tprice').forEach(input => {
+      input.addEventListener('input', function () {
+        const idx = parseInt(this.dataset.index);
+        piecesState[idx].totalPrice = parseFloat(this.value) || 0;
+        if (piecesState[idx].quantity > 0) {
+          piecesState[idx].unitPrice = Math.round((piecesState[idx].totalPrice / piecesState[idx].quantity) * 100) / 100;
+        }
+        updatePieceCalculations(idx);
+      });
+    });
+
+    // Botones de sugerencias de precio x2.5, x3.0, x4.0
+    document.querySelectorAll('.btn-sugg').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const idx = parseInt(this.dataset.index);
+        const val = parseFloat(this.dataset.val) || 0;
+        piecesState[idx].unitPrice = val;
+        piecesState[idx].totalPrice = Math.round((val * piecesState[idx].quantity) * 100) / 100;
+        updatePieceCalculations(idx);
+      });
+    });
+
+    // Botón duplicar pieza
+    document.querySelectorAll('.btn-duplicate-piece').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const idx = parseInt(this.dataset.index);
+        duplicatePiece(idx);
+      });
+    });
+
+    // Botón eliminar pieza
+    document.querySelectorAll('.btn-remove-piece').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const idx = parseInt(this.dataset.index);
+        removePiece(idx);
+      });
+    });
+  }
+
+  // Cerrar desplegables de autocompletado al hacer clic fuera
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.relative')) {
+      document.querySelectorAll('.custom-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
+    }
+  });
+
+  // Actualizar cálculos de una pieza sin perder el foco si es posible
+  function updatePieceCalculations(index) {
+    const p = piecesState[index];
+    const costData = calculateUnitCost(p.weight, p.hours, p.mins, p.extra);
+    p.unitCost = costData.unitCost;
+    p.totalCost = Math.round((p.unitCost * p.quantity) * 100) / 100;
+    p.suggX25 = costData.suggX25;
+    p.suggX30 = costData.suggX30;
+    p.suggX40 = costData.suggX40;
+
+    const card = document.querySelector(`.piece-card[data-index="${index}"]`);
+    if (card) {
+      const uPriceInput = card.querySelector('.input-uprice');
+      const tPriceInput = card.querySelector('.input-tprice');
+      if (uPriceInput && document.activeElement !== uPriceInput) {
+        uPriceInput.value = p.unitPrice > 0 ? p.unitPrice.toFixed(2) : '';
+      }
+      if (tPriceInput && document.activeElement !== tPriceInput) {
+        tPriceInput.value = p.totalPrice > 0 ? p.totalPrice.toFixed(2) : '';
+      }
+
+      const suggBtns = card.querySelectorAll('.btn-sugg');
+      if (suggBtns.length >= 3) {
+        suggBtns[0].dataset.val = p.suggX25;
+        suggBtns[0].textContent = `x2.5 (€${p.suggX25.toFixed(2)})`;
+        suggBtns[1].dataset.val = p.suggX30;
+        suggBtns[1].textContent = `x3.0 (€${p.suggX30.toFixed(2)})`;
+        suggBtns[2].dataset.val = p.suggX40;
+        suggBtns[2].textContent = `x4.0 (€${p.suggX40.toFixed(2)})`;
+      }
+    }
+
+    updateOrderGrandTotals();
+  }
+
+  // Añadir nueva pieza
+  function addPiece() {
+    piecesState.push({
+      uid: Date.now(),
+      productId: null,
+      description: '',
+      imageUrl: null,
+      quantity: 1,
+      weight: 0,
+      hours: 0,
+      mins: 0,
+      extra: 0,
+      unitCost: 0,
+      totalCost: 0,
+      unitPrice: 0,
+      totalPrice: 0,
+      isCatalog: false,
+      suggX25: 0,
+      suggX30: 0,
+      suggX40: 0
+    });
+    renderPieces();
+  }
+
+  // Duplicar pieza
+  function duplicatePiece(index) {
+    const source = piecesState[index];
+    piecesState.splice(index + 1, 0, {
+      ...source,
+      uid: Date.now(),
+      description: source.description ? `${source.description} (Copia)` : ''
+    });
+    renderPieces();
+  }
+
+  // Eliminar pieza
+  function removePiece(index) {
+    if (piecesState.length <= 1) return;
+    piecesState.splice(index, 1);
+    renderPieces();
+  }
+
+  function onVatToggle(checkbox) {
+    if (checkbox.checked) {
+      const irpfBox = document.getElementById('order-has-irpf');
+      if (irpfBox) irpfBox.checked = true;
+    }
+    updateOrderGrandTotals();
+  }
+
+  // Actualizar totales generales del pedido
+  function updateOrderGrandTotals() {
+    let totalItems = 0;
+    let totalWeight = 0;
+    let totalMinutes = 0;
+    let totalCost = 0;
+    let sumBasePrice = 0;
+
+    piecesState.forEach(p => {
+      const qty = parseInt(p.quantity) || 1;
+      totalItems += qty;
+      totalWeight += (parseFloat(p.weight) || 0) * qty;
+      totalMinutes += ((parseFloat(p.hours) || 0) * 60 + (parseInt(p.mins) || 0)) * qty;
+      totalCost += parseFloat(p.totalCost) || 0;
+      sumBasePrice += parseFloat(p.totalPrice) || 0;
+    });
+
+    const vatBox = document.getElementById('order-has-vat');
+    const irpfBox = document.getElementById('order-has-irpf');
+    const hasVat = vatBox ? vatBox.checked : false;
+    const hasIrpf = irpfBox ? irpfBox.checked : false;
+
+    // Si incluye IVA, aumenta un 21% al total del pedido
+    const totalPrice = hasVat ? Math.round(sumBasePrice * 1.21 * 100) / 100 : Math.round(sumBasePrice * 100) / 100;
+
+    // La ganancia base no aumenta con el IVA (el IVA no es ganancia)
+    const baseProfit = Math.round((sumBasePrice - totalCost) * 100) / 100;
+
+    // Si descuenta IRPF, descuenta un 21% de la ganancia total
+    const netProfit = hasIrpf ? (baseProfit > 0 ? Math.round(baseProfit * 0.79 * 100) / 100 : baseProfit) : baseProfit;
+
+    // Cuantías dinámicas de impuestos
+    const vatAmount = Math.round(sumBasePrice * 0.21 * 100) / 100;
+    const irpfAmount = baseProfit > 0 ? Math.round(baseProfit * 0.21 * 100) / 100 : Math.round(sumBasePrice * 0.21 * 100) / 100;
+    const totalTax = Math.round((vatAmount + irpfAmount) * 100) / 100;
+
+    function formatTaxEuro(num) {
+      if (isNaN(num)) return '0€';
+      const rounded = Math.round(num * 100) / 100;
+      return rounded % 1 === 0 ? `${rounded.toFixed(0)}€` : `${rounded.toFixed(2)}€`;
+    }
+
+    const vatLabel = document.getElementById('order-vat-amount-label');
+    if (vatLabel) {
+      vatLabel.textContent = `(+${formatTaxEuro(vatAmount)})`;
+    }
+
+    const irpfLabel = document.getElementById('order-irpf-amount-label');
+    if (irpfLabel) {
+      irpfLabel.textContent = `(IVA + IRPF = ${formatTaxEuro(totalTax)})`;
+    }
+
+    const grandHours = Math.floor(totalMinutes / 60);
+    const grandMins = Math.round(totalMinutes % 60);
+    const marginPercent = totalPrice > 0 ? ((netProfit / totalPrice) * 100).toFixed(1) : '0';
+
+    const elTotalItems = document.getElementById('summary-total-items');
+    const elTotalWeight = document.getElementById('summary-total-weight');
+    const elTotalTime = document.getElementById('summary-total-time');
+    const elTotalCost = document.getElementById('summary-total-cost');
+    const elTotalPrice = document.getElementById('summary-total-price');
+    const elNetProfit = document.getElementById('summary-net-profit');
+    const elMarginPercent = document.getElementById('summary-margin-percent');
+    const headerBadge = document.getElementById('header-pieces-badge');
+    const btnSubmitText = document.getElementById('btn-submit-text');
+    const taxBadgeEl = document.getElementById('order-tax-preview-badge');
+
+    if (elTotalItems) elTotalItems.textContent = totalItems;
+    if (elTotalWeight) elTotalWeight.textContent = totalWeight.toFixed(0);
+    if (elTotalTime) elTotalTime.textContent = `${grandHours}h ${grandMins}m`;
+    if (elTotalCost) elTotalCost.textContent = totalCost.toFixed(2);
+    if (elTotalPrice) elTotalPrice.textContent = `${totalPrice.toFixed(2)}${hasVat ? ' (IVA)' : ''}`;
+    if (elNetProfit) {
+      elNetProfit.textContent = `${netProfit.toFixed(2)}${hasIrpf ? ' (IRPF)' : ''}`;
+      elNetProfit.className = netProfit < 0 ? 'text-xl font-black text-red-500' : 'text-xl font-black text-emerald-600 dark:text-emerald-400';
+    }
+    if (elMarginPercent) elMarginPercent.textContent = marginPercent;
+
+    if (taxBadgeEl) {
+      let badges = [];
+      if (hasVat) badges.push('<span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold">+21% IVA</span>');
+      if (hasIrpf) badges.push('<span class="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-bold">-21% IRPF</span>');
+      taxBadgeEl.innerHTML = badges.join(' ');
+    }
+
+    if (headerBadge) {
+      headerBadge.textContent = `${piecesState.length} ${piecesState.length === 1 ? 'Pieza' : 'Piezas'} (${totalItems} uds)`;
+    }
+    if (btnSubmitText) {
+      btnSubmitText.textContent = `Guardar Pedido (${piecesState.length} ${piecesState.length === 1 ? 'pieza' : 'piezas'} · €${totalPrice.toFixed(2)})`;
+    }
+
+    syncHiddenInputs(totalPrice, totalCost, hasVat, hasIrpf);
+  }
+
+  // Sincronizar campo JSON oculto y fallbacks de SmartOrderForm
+  function syncHiddenInputs(totalPrice, totalCost) {
+    const jsonInput = document.getElementById('id_pieces_json');
+    if (jsonInput) {
+      const payload = piecesState.map(p => ({
+        product_id: p.productId,
+        description: p.description || 'Pieza a medida',
+        quantity: p.quantity || 1,
+        weight_grams: p.weight || 0,
+        print_time_hours: p.hours || 0,
+        print_time_minutes: p.mins || 0,
+        extra_costs: p.extra || 0,
+        unit_cost: p.unitCost || 0,
+        total_cost: p.totalCost || 0,
+        unit_price: p.unitPrice || 0,
+        price: p.totalPrice || 0,
+        notes: p.notes ? p.notes.trim() : ''
+      }));
+      jsonInput.value = JSON.stringify(payload);
+    }
+
+    if (piecesState.length > 0) {
+      const first = piecesState[0];
+      const fbName = document.getElementById('id_smart_product_name');
+      const fbQty = document.getElementById('id_quantity');
+      const fbWeight = document.getElementById('id_weight_grams');
+      const fbHours = document.getElementById('id_print_time_hours');
+      const fbMins = document.getElementById('id_print_time_minutes');
+      const fbExtra = document.getElementById('id_extra_costs');
+      const fbUnitCost = document.getElementById('id_unit_cost');
+      const fbTotalCost = document.getElementById('id_total_cost');
+      const fbUnitPrice = document.getElementById('id_unit_price');
+      const fbPrice = document.getElementById('id_price');
+
+      if (fbName) fbName.value = first.description || 'Pedido multi-pieza';
+      if (fbQty) fbQty.value = first.quantity || 1;
+      if (fbWeight) fbWeight.value = first.weight || 0;
+      if (fbHours) fbHours.value = first.hours || 0;
+      if (fbMins) fbMins.value = first.mins || 0;
+      if (fbExtra) fbExtra.value = first.extra || 0;
+      if (fbUnitCost) fbUnitCost.value = (first.unitCost || 0).toFixed(2);
+      if (fbTotalCost) fbTotalCost.value = (totalCost || 0).toFixed(2);
+      if (fbUnitPrice) fbUnitPrice.value = (first.unitPrice || 0).toFixed(2);
+      if (fbPrice) fbPrice.value = (totalPrice || 0).toFixed(2);
+    }
+  }
+
+  // Inicialización en DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function () {
+    const btnToday = document.getElementById('btn-today');
+    if (btnToday) {
+      btnToday.addEventListener('click', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('id_order_date');
+        if (dateInput) dateInput.value = today;
+      });
+    }
+
+    const dateInput = document.getElementById('id_order_date');
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    const btnAdd = document.getElementById('btn-add-piece');
+    const btnAddBottom = document.getElementById('btn-add-piece-bottom');
+    if (btnAdd) btnAdd.addEventListener('click', addPiece);
+    if (btnAddBottom) btnAddBottom.addEventListener('click', addPiece);
+
+    const form = document.getElementById('order-form');
+    if (form) {
+      form.addEventListener('submit', function () {
+        piecesState.forEach((p, idx) => {
+          if (!p.description || !p.description.trim()) {
+            p.description = `Pieza #${idx + 1}`;
+          }
+        });
+        syncHiddenInputs();
+      });
+    }
+
+    renderPieces();
+  });
 </script>
 {% endblock %}

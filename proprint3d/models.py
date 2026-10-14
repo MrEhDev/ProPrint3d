@@ -382,6 +382,8 @@ class Order(models.Model):
     shipping = models.CharField(max_length=50, choices=SHIPPING_CHOICES, blank=True, null=True, default='', help_text="Método de envío")
     
     notes = models.TextField(blank=True, null=True, help_text="Notas adicionales")
+    has_vat = models.BooleanField(default=False, help_text="¿Incluye IVA (21%) en el precio total?")
+    has_irpf = models.BooleanField(default=False, help_text="¿Descontar IRPF (21%) de la ganancia?")
 
     # Gestión de Pagos y Paga y Señal
     deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Paga y señal / Adelanto cobrado (€)")
@@ -490,12 +492,24 @@ class Order(models.Model):
 
     @property
     def profit(self):
-        """Calcula la ganancia real descontando el coste de producción."""
+        """Calcula la ganancia real descontando el coste de producción, considerando IVA e IRPF si aplican."""
         import decimal
         if self.price is not None and self.total_cost is not None:
             p = decimal.Decimal(str(self.price))
             c = decimal.Decimal(str(self.total_cost))
-            return p - c
+            
+            # Si incluye IVA, la base imponible sobre la que se calcula la ganancia es p / 1.21
+            if self.has_vat:
+                base_p = p / decimal.Decimal('1.21')
+            else:
+                base_p = p
+                
+            base_profit = base_p - c
+            
+            # Si descuenta IRPF, descuenta un 21% de la ganancia total
+            if self.has_irpf:
+                return round(base_profit * decimal.Decimal('0.79'), 2) if base_profit > 0 else round(base_profit, 2)
+            return round(base_profit, 2)
         return decimal.Decimal('0.00')
 
     @property
@@ -593,7 +607,7 @@ class Order(models.Model):
             return
         
         total_qty = sum(i.quantity for i in items)
-        total_p = sum((i.price or decimal.Decimal('0.00')) for i in items)
+        sum_pieces_p = sum((i.price or decimal.Decimal('0.00')) for i in items)
         total_c = sum((i.total_cost or decimal.Decimal('0.00')) for i in items)
         total_w = sum((i.weight_grams or 0.0) for i in items)
         total_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) for i in items)
@@ -601,10 +615,16 @@ class Order(models.Model):
         h = total_mins // 60
         m = int(total_mins % 60)
         
+        # Si incluye IVA, aumenta un 21% al total del pedido
+        if self.has_vat:
+            total_p = round(sum_pieces_p * decimal.Decimal('1.21'), 2)
+        else:
+            total_p = sum_pieces_p
+
         if len(items) == 1:
             desc = items[0].description
             prod = items[0].product
-            u_price = items[0].unit_price
+            u_price = round(total_p / total_qty, 2) if total_qty > 0 else items[0].unit_price
             u_cost = items[0].unit_cost
         else:
             desc = " + ".join(i.description for i in items[:3]) + (f" (+{len(items)-3} más)" if len(items) > 3 else "")
@@ -654,7 +674,23 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Precio total cobrado (€)")
     
     status = models.CharField(max_length=20, choices=Order.STATUS_CHOICES, default='Presupuestado')
+    notes = models.TextField(blank=True, null=True, default='', help_text="Notas o especificaciones de la pieza")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def display_notes(self):
+        """Devuelve las notas de la pieza o del pedido si es pieza única."""
+        if self.notes and self.notes.strip():
+            return self.notes.strip()
+        if self.order and self.order.notes and self.order.notes.strip():
+            # Si el pedido tiene notas y es la única pieza del pedido
+            try:
+                if len(self.order.items.all()) <= 1:
+                    return self.order.notes.strip()
+            except Exception:
+                if self.order.items.count() <= 1:
+                    return self.order.notes.strip()
+        return ''
 
     def calculate_unit_cost(self):
         """Calcula el coste de producción por unidad según peso, tiempo y consumibles."""
