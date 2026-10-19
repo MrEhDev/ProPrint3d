@@ -79,15 +79,15 @@
     <!-- Encabezado -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
                 <span>📋</span> Panel de Pedidos
             </h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control de ventas, costes de producción,
+            <p class="mt-1 text-base text-gray-500 dark:text-gray-400">Control de ventas, costes de producción,
                 trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
             <a href="{% url 'order_create' %}"
-                class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5">
+                class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -104,10 +104,10 @@
                 class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                 <!-- DESDE -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Período
+                    <span class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Período
                         Desde:</span>
                     <select name="month_from" id="month_from" onchange="onDateFilterChange()"
-                        class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
                         <option value="1" {% if month_from == '1' %}selected{% endif %}>Enero</option>
                         <option value="2" {% if month_from == '2' %}selected{% endif %}>Febrero</option>
@@ -124,7 +124,7 @@
                     </select>
 
                     <select name="year_from" id="year_from" onchange="onDateFilterChange()"
-                        class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="">Año (Todo)</option>
                         <option value="2024" {% if year_from == '2024' %}selected{% endif %}>2024</option>
                         <option value="2025" {% if year_from == '2025' %}selected{% endif %}>2025</option>
@@ -133,14 +133,14 @@
                     </select>
                 </div>
 
-                <span class="text-gray-400 font-bold text-sm hidden sm:inline">→</span>
+                <span class="text-gray-400 font-bold text-base hidden sm:inline">→</span>
 
                 <!-- HASTA -->
                 <div class="flex items-center gap-2">
                     <span
-                        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hasta:</span>
+                        class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Hasta:</span>
                     <select name="month_to" id="month_to" onchange="onDateFilterChange()"
-                        class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="">Mes (Todo)</option>
                         <option value="1" {% if month_to == '1' %}selected{% endif %}>Enero</option>
                         <option value="2" {% if month_to == '2' %}selected{% endif %}>Febrero</option>
@@ -157,7 +157,7 @@
                     </select>
 
                     <select name="year_to" id="year_to" onchange="onDateFilterChange()"
-                        class="text-xs py-1.5 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-primary focus:border-primary">
+                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
                         <option value="">Año (Todo)</option>
                         <option value="2024" {% if year_to == '2024' %}selected{% endif %}>2024</option>
                         <option value="2025" {% if year_to == '2025' %}selected{% endif %}>2025</option>
@@ -168,7 +168,7 @@
 
                 {% if year_from or month_from or year_to or month_to %}
                 <button type="button" onclick="clearDateFilters()"
-                    class="text-xs text-red-500 hover:text-red-700 font-semibold px-2.5 py-1 rounded bg-red-50 dark:bg-red-900/30 ml-auto transition-colors"
+                    class="text-sm text-red-500 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 ml-auto transition-colors"
                     title="Restablecer filtro de fechas">
                     ✕
                 </button>
@@ -181,10 +181,10 @@
     {% if kanban_columns %}
     <div class="mb-10">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📌</span> Flujo de Pedidos (Tablero Kanban)
             </h2>
-            <span class="text-xs text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de
+            <span class="text-sm text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de
                 estado</span>
         </div>
 
@@ -201,7 +201,7 @@
                 {% endif %}" data-status="{{ status_name }}" ondragover="allowDrop(event)" ondrop="drop(event)">
 
                 <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                    <h3 class="font-bold text-base text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                         {% if status_name == 'Presupuestado' %}<span>📝</span>
                         {% elif status_name == 'En proceso' %}<span>⚙️</span>
                         {% elif status_name == 'Realizado' %}<span>✅</span>
@@ -211,7 +211,7 @@
                         {% endif %}
                         {{ status_name }}
                     </h3>
-                    <span class="text-xs px-2 py-0.5 rounded-full font-bold
+                    <span class="text-sm px-2.5 py-0.5 rounded-full font-bold
                         {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
                         {% elif status_name == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
                         {% elif status_name == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
@@ -245,24 +245,24 @@
                         <div class="kanban-compact-view select-none">
                             <div class="flex items-center justify-between gap-1.5 mb-2">
                                 <div class="flex items-center gap-1.5 min-w-0">
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 flex-shrink-0">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 flex-shrink-0">
                                         #{{ group.order.id }}
                                     </span>
-                                    <span class="text-xs font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
                                         {{ group.order.client_name }}
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-1 flex-shrink-0">
                                     {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
                                         💰 Cobrado
                                     </span>
                                     {% elif group.order.deposit_amount > 0 %}
-                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300/40" title="Señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300/40" title="Señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}">
                                         🤝 Señal €{{ group.order.deposit_amount|floatformat:0 }}
                                     </span>
                                     {% else %}
-                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">
                                         ⏳ Pte. cobro
                                     </span>
                                     {% endif %}
@@ -272,21 +272,21 @@
                             <!-- Títulos de las piezas -->
                             <div class="my-2 space-y-1 pl-1">
                                 {% for item in group.items %}
-                                <div class="text-[11px] text-gray-700 dark:text-gray-300 font-medium flex items-center gap-1.5 min-w-0" title="{{ item.description }}">
-                                    <span class="text-gray-400 text-[10px] select-none flex-shrink-0">•</span>
+                                <div class="text-sm text-gray-700 dark:text-gray-300 font-medium flex items-center gap-1.5 min-w-0" title="{{ item.description }}">
+                                    <span class="text-gray-400 text-xs select-none flex-shrink-0">•</span>
                                     <span class="truncate min-w-0">{{ item.description }}</span>
-                                    {% if item.quantity > 1 %}<span class="text-[10px] text-gray-400 dark:text-gray-500 font-bold flex-shrink-0">x{{ item.quantity }}</span>{% endif %}
+                                    {% if item.quantity > 1 %}<span class="text-xs text-gray-400 dark:text-gray-500 font-bold flex-shrink-0">x{{ item.quantity }}</span>{% endif %}
                                 </div>
                                 {% endfor %}
                             </div>
 
                             <!-- Total del pedido y llamada a desplegar -->
-                            <div class="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                            <div class="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800 mt-2 text-sm">
                                 <div class="flex items-baseline gap-1">
-                                    <span class="text-[10px] text-gray-400 uppercase font-semibold">Total:</span>
-                                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                    <span class="text-xs text-gray-400 uppercase font-semibold">Total:</span>
+                                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
                                 </div>
-                                <span class="text-[10px] text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline">
+                                <span class="text-xs text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline">
                                     Detalles ▾
                                 </span>
                             </div>
@@ -302,38 +302,38 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span
-                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
                                         #{{ group.order.id }}
                                     </span>
-                                    <span class="text-xs font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
                                         {{ group.order.client_name }}
                                     </span>
                                     {% if group.order.notes %}
-                                    <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
+                                    <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                         📝
                                         <span class="pointer-events-none absolute top-full left-0 mt-1 hidden group-hover/note:flex flex-col items-start z-[9999] min-w-[160px] max-w-[280px]">
                                             <span class="w-2 h-2 ml-3 -mb-1 bg-gray-900 border-l border-t border-gray-700/80 rotate-45 z-10"></span>
                                             <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
+                                                <span class="block text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                     <span>📝</span> Notas del Pedido
                                                 </span>
-                                                <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ group.order.notes }}</span>
+                                                <span class="block text-sm font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ group.order.notes }}</span>
                                             </span>
                                         </span>
                                     </span>
                                     {% endif %}
                                     {% if group.order.has_vat %}
                                     <span
-                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none flex-shrink-0"
+                                        class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none flex-shrink-0"
                                         title="IVA (21%) incluido en el total">IVA</span>
                                     {% endif %}
                                     {% if group.order.has_irpf %}
                                     <span
-                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none flex-shrink-0"
+                                        class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none flex-shrink-0"
                                         title="Retención IRPF (21%) aplicada a la ganancia">IRPF</span>
                                     {% endif %}
                                 </div>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     📅 {{ group.order.order_date|date:"d/m/Y" }}
                                     {% if group.order.platform %} · <span
                                         class="font-medium text-gray-600 dark:text-gray-300">{{ group.order.platform }}</span>{% endif %}
@@ -344,17 +344,17 @@
                             <div>
                                 {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                                 <span
-                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
+                                    class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
                                     💰 Cobrado
                                 </span>
                                 {% elif status_name == 'Realizado' and group.are_all_items_realizado %}
                                 <span
-                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
+                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30 animate-pulse">
                                     ✅ Completo
                                 </span>
                                 {% elif group.total_items_in_order > 1 %}
                                 <span
-                                    class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold whitespace-nowrap">
+                                    class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">
                                     {{ group.items|length }}/{{ group.total_items_in_order }} piezas
                                 </span>
                                 {% endif %}
@@ -366,10 +366,10 @@
                         <div class="mb-2">
                             <button type="button"
                                 onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
-                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
+                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
                                 title="Paga y señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}. Clic para editar">
                                 <span>🤝 Señal: €{{ group.order.deposit_amount|floatformat:2 }}{% if group.order.deposit_method %} ({{ group.order.deposit_method }}){% endif %}</span>
-                                <span class="text-[9px] text-amber-600 dark:text-amber-400">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
+                                <span class="text-xs text-amber-600 dark:text-amber-400 font-semibold">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
                             </button>
                         </div>
                         {% endif %}
@@ -382,23 +382,23 @@
                                 data-order-id="{{ group.order.id }}" title="{{ item.description }}">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-1.5 min-w-0">
-                                        <span class="text-xs font-bold text-gray-900 dark:text-white truncate min-w-0"
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0"
                                             title="{{ item.description }}">
                                             {{ item.description }}
                                         </span>
                                         <span
-                                            class="text-[10px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold flex-shrink-0">
+                                            class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
                                         {% if item.display_notes %}
-                                        <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
+                                        <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                             📝
                                             <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-[9999] min-w-[150px] max-w-[260px]">
                                                 <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
+                                                    <span class="block text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                         <span>📝</span> Notas de la Pieza
                                                     </span>
-                                                    <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
+                                                    <span class="block text-sm font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
                                                 </span>
                                                 <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                             </span>
@@ -406,13 +406,13 @@
                                         {% endif %}
                                     </div>
                                     <div
-                                        class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2 mt-0.5">
+                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
                                         {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
                                         {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <span class="text-xs font-bold text-primary">€{{ item.price }}</span>
+                                    <span class="text-sm font-bold text-primary">€{{ item.price }}</span>
                                 </div>
                             </div>
                             {% endfor %}
@@ -421,7 +421,7 @@
                         <!-- Fechas de seguimiento si existen -->
                         {% if group.order.shipped_date or group.order.delivered_date or group.order.paid_date %}
                         <div
-                            class="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                            class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
                             {% if group.order.shipped_date %}<div>🚚 Enviado: <span
                                     class="text-blue-600 dark:text-blue-400 font-medium">{{ group.order.shipped_date|date:"d/m/Y" }}</span></div>{% endif %}
                             {% if group.order.delivered_date %}<div>📦 Entregado: <span
@@ -433,42 +433,42 @@
 
                         <!-- Pie de la Tarjeta: Total, Rentabilidad y Accesos directos -->
                         <div
-                            class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                            class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-sm">
                             <div>
                                 {% if status_name == 'Realizado' and group.are_all_items_realizado or status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                                 <span
-                                    class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total
+                                    class="text-xs text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider block">Total
                                     Pedido</span>
-                                <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
                                 {% else %}
-                                <span class="font-bold text-primary">€{{ group.group_price|floatformat:2 }}</span>
+                                <span class="text-sm font-bold text-primary">€{{ group.group_price|floatformat:2 }}</span>
                                 {% if group.total_items_in_order > 1 and not group.all_items_in_this_col %}
-                                <span class="block text-[10px] text-gray-400">(de €{{ group.order.price }})</span>
+                                <span class="block text-xs text-gray-400">(de €{{ group.order.price }})</span>
                                 {% endif %}
                                 {% endif %}
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold"
+                                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold"
                                     title="Ganancia Neta Pedido">
                                     +€{{ group.order.profit }}
                                 </span>
                                 <!-- Acceso al modal de cobro/señal -->
                                 <button type="button"
                                     onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
-                                    class="p-1 rounded text-gray-400 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-[11px]"
+                                    class="p-1.5 rounded text-gray-400 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm"
                                     title="Gestionar Cobro o Paga y Señal">
                                     💳
                                 </button>
                                 <button type="button"
                                     onclick="event.stopPropagation(); openEditOrderModal({{ group.order.id }})"
-                                    class="text-[11px] text-gray-400 hover:text-primary transition-colors p-1"
+                                    class="text-sm text-gray-400 hover:text-primary transition-colors p-1.5"
                                     title="Editar pedido y piezas">✏️</button>
                             </div>
                         </div>
                     
                             {% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
                             <div class="mt-2 pt-1.5 border-t border-gray-100 dark:border-gray-800 flex justify-center">
-                                <span class="text-[10px] text-gray-400 hover:text-primary dark:hover:text-cyan-400 font-semibold flex items-center gap-1 select-none">
+                                <span class="text-xs text-gray-400 hover:text-primary dark:hover:text-cyan-400 font-semibold flex items-center gap-1 select-none">
                                     ▲ Comprimir tarjeta
                                 </span>
                             </div>
@@ -477,7 +477,7 @@
                     </div>
                     {% empty %}
                     <div
-                        class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center text-xs text-gray-400">
+                        class="h-20 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex items-center justify-center text-sm text-gray-400">
                         Sin pedidos
                     </div>
                     {% endfor %}
@@ -491,43 +491,43 @@
     <!-- Tarjetas de Resumen Global -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
-            <dd id="stat-total-sales" class="mt-1 text-2xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
+            <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
+            <dd id="stat-total-sales" class="mt-1 text-3xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
         </div>
         <div
             class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-green-500"></div>
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
-            <dd id="stat-total-profit" class="mt-1 text-2xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
+            <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
+            <dd id="stat-total-profit" class="mt-1 text-3xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
         </div>
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.
+            <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Coste Total Prod.
             </dt>
-            <dd id="stat-total-costs" class="mt-1 text-2xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
+            <dd id="stat-total-costs" class="mt-1 text-3xl font-black text-red-500 dark:text-red-400">€{{ total_costs|floatformat:2 }}</dd>
         </div>
         <div
             class="bg-white dark:bg-dark border border-cyan-200 dark:border-cyan-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-cyan-500"></div>
-            <dt class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media
+            <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media
                 Ganancia/Pedido</dt>
-            <dd id="stat-avg-profit" class="mt-1 text-2xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
+            <dd id="stat-avg-profit" class="mt-1 text-3xl font-black text-cyan-600 dark:text-cyan-400">€{{ avg_profit|floatformat:2 }}</dd>
         </div>
     </div>
 
     <!-- Cabecera de Sección y Buscador sobre la Tabla Principal -->
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4">
         <div>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>📦</span> Desglose de Pedidos (<span id="visible-orders-count">{{ orders.count }}</span>)
             </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Una fila por pedido con resumen global de
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Una fila por pedido con resumen global de
                 rentabilidad y acordeón desplegable de piezas.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
             <!-- Botón Ocultar / Mostrar Cobrados -->
             <button type="button" id="btn-toggle-hide-paid" onclick="toggleHidePaidOrders()"
-                class="px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
+                class="px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
                 title="Ocultar o mostrar pedidos que ya están en estado Cobrado">
                 <span id="hide-paid-icon">👁️</span>
                 <span id="hide-paid-label">Ocultar Cobrados</span>
@@ -538,7 +538,7 @@
                 <div class="relative">
                     <input type="text" id="table-search-input" placeholder="🔍 Buscar pedido, cliente o pieza..."
                         oninput="filterTableLive(this.value)"
-                        class="w-full pl-10 pr-10 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
+                        class="w-full pl-10 pr-10 py-2.5 text-base rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition-all">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -562,60 +562,60 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left">
                 <thead class="bg-gray-50 dark:bg-gray-800/60">
                     <tr>
-                        <th scope="col" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">
+                        <th scope="col" class="px-3 py-3 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">
                         </th>
-                        <th scope="col" onclick="sortTableBy('id')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Número de Pedido o Cliente">
+                        <th scope="col" onclick="sortTableBy('id')" class="px-4 py-3 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Número de Pedido o Cliente">
                             <div class="flex items-center gap-1.5">
                                 <span>Pedido / Cliente</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-id">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-id">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('date')" class="px-3 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Fecha">
+                        <th scope="col" onclick="sortTableBy('date')" class="px-3 py-3 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Fecha">
                             <div class="flex items-center gap-1.5">
                                 <span>Fechas</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-date">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-date">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('status')" class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Estado">
+                        <th scope="col" onclick="sortTableBy('status')" class="px-4 py-3 text-center text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Estado">
                             <div class="flex items-center justify-center gap-1.5">
                                 <span>Estado</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-status">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-status">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('items')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cantidad de Piezas">
+                        <th scope="col" onclick="sortTableBy('items')" class="px-4 py-3 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cantidad de Piezas">
                             <div class="flex items-center gap-1.5">
                                 <span>Fabricación</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-items">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-items">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('cost')" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Coste de Producción">
+                        <th scope="col" onclick="sortTableBy('cost')" class="px-4 py-3 text-right text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Coste de Producción">
                             <div class="flex items-center justify-end gap-1.5">
                                 <span>Coste Prod.</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-cost">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-cost">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('price')" class="px-4 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Total Venta">
+                        <th scope="col" onclick="sortTableBy('price')" class="px-4 py-3 text-right text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Total Venta">
                             <div class="flex items-center justify-end gap-1.5">
                                 <span>Total Venta</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-price">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-price">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('profit')" class="px-4 py-3 text-right text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Rentabilidad Neta">
+                        <th scope="col" onclick="sortTableBy('profit')" class="px-4 py-3 text-right text-sm font-bold text-green-600 dark:text-green-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Rentabilidad Neta">
                             <div class="flex items-center justify-end gap-1.5">
                                 <span>Rentabilidad</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-profit">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-profit">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('deposit')" class="px-4 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cobros">
+                        <th scope="col" onclick="sortTableBy('deposit')" class="px-4 py-3 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Cobros">
                             <div class="flex items-center gap-1.5">
                                 <span>Cobros</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-deposit">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-deposit">↕</span>
                             </div>
                         </th>
-                        <th scope="col" onclick="sortTableBy('logistics')" class="px-3 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Logística">
+                        <th scope="col" onclick="sortTableBy('logistics')" class="px-3 py-3 text-center text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-primary transition-colors select-none group/th" title="Ordenar por Logística">
                             <div class="flex items-center justify-center gap-1.5">
                                 <span>Logística</span>
-                                <span class="sort-icon text-[11px] text-gray-400 group-hover/th:text-primary" id="sort-icon-logistics">↕</span>
+                                <span class="sort-icon text-xs text-gray-400 group-hover/th:text-primary" id="sort-icon-logistics">↕</span>
                             </div>
                         </th>
                         <th scope="col" class="relative px-3 py-3"><span class="sr-only">Acciones</span></th>
@@ -641,41 +641,41 @@
                         <!-- Icono toggle acordeón -->
                         <td class="px-3 py-3 whitespace-nowrap text-center text-gray-400 group-hover:text-primary">
                             <span id="accordion-arrow-{{ order.id }}"
-                                class="inline-block transition-transform duration-150 text-xs font-bold">▶</span>
+                                class="inline-block transition-transform duration-150 text-sm font-bold">▶</span>
                         </td>
 
                         <!-- Pedido / Cliente -->
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-base font-medium">
                             <div class="flex items-center gap-2">
                                 <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                    class="inline-flex items-center px-2.5 py-1 rounded text-sm font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
                                     #{{ order.id }}
                                 </span>
                                 <div>
-                                    <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                    <div class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>{{ order.client_name }}</span>
                                         <span
-                                            class="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
+                                            class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold">
                                             {{ order.total_items_count }} uds · {{ order.items.count }} ref
                                         </span>
                                     </div>
                                     {% if order.notes %}
-                                    <p class="text-[11px] text-gray-400 truncate max-w-xs">{{ order.notes }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ order.notes }}</p>
                                     {% endif %}
                                 </div>
                             </div>
                         </td>
 
                         <!-- Fechas -->
-                        <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                        <td class="px-3 py-3.5 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             <div>📅 {{ order.order_date|date:"d/m/Y" }}</div>
                             {% if order.deadline %}
-                            <div class="text-amber-600 dark:text-amber-400 font-medium text-[11px] mt-0.5">⏳ {{ order.deadline|date:"d/m/Y" }}</div>
+                            <div class="text-amber-600 dark:text-amber-400 font-semibold text-xs mt-0.5">⏳ {{ order.deadline|date:"d/m/Y" }}</div>
                             {% endif %}
                         </td>
 
                         <!-- Estado con Selector Interactivo -->
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center" onclick="event.stopPropagation()">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-base text-center" onclick="event.stopPropagation()">
                             <div class="flex items-center justify-center gap-1.5">
                                 <span class="w-2.5 h-2.5 rounded-full flex-shrink-0
                                     {% if order.status == 'Presupuestado' %}bg-indigo-500
@@ -687,7 +687,7 @@
                                     {% else %}bg-gray-400{% endif %}"></span>
                                 <select onchange="onOrderStatusSelectChange({{ order.id }}, this.value, this)"
                                     data-current-status="{{ order.status }}"
-                                    class="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-primary focus:border-primary px-2 py-1 font-semibold">
+                                    class="text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-primary focus:border-primary px-2.5 py-1.5 font-semibold">
                                     {% for s in status_choices %}
                                     <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
                                     {% endfor %}
@@ -696,56 +696,56 @@
                         </td>
 
                         <!-- Métricas de Fabricación -->
-                        <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             <div class="font-semibold">{{ order.total_items_count }} uds · ⚖️ {{ order.total_weight_calc|floatformat:0 }}g</div>
-                            <div class="text-[11px] text-gray-400 mt-0.5">⏱️ {{ order.total_print_time_str }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">⏱️ {{ order.total_print_time_str }}</div>
                         </td>
 
                         <!-- Coste de Fabricación -->
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-base text-right text-gray-500 dark:text-gray-400">
                             <span class="font-bold text-red-500">€{{ order.total_cost|floatformat:2 }}</span>
                         </td>
 
                         <!-- Total Venta -->
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-base text-right">
                             <div class="flex items-center justify-end gap-1.5">
                                 <span class="font-black text-gray-900 dark:text-white">€{{ order.price|floatformat:2 }}</span>
                                 {% if order.has_vat %}
                                 <span
-                                    class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none"
+                                    class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 select-none"
                                     title="Incluye 21% IVA">+IVA</span>
                                 {% endif %}
                             </div>
                         </td>
 
                         <!-- Rentabilidad y Margen -->
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-base text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <span class="font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|floatformat:2 }}</span>
                                 {% if order.has_irpf %}
                                 <span
-                                    class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none"
+                                    class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 select-none"
                                     title="Retención 21% IRPF aplicada a la ganancia">-IRPF</span>
                                 {% endif %}
                             </div>
                             <span
-                                class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                 {{ order.profit_margin_percent }}%
                             </span>
                         </td>
 
                         <!-- Cobros -->
-                        <td class="px-4 py-3 whitespace-nowrap text-xs" onclick="event.stopPropagation()">
+                        <td class="px-4 py-3.5 whitespace-nowrap text-sm" onclick="event.stopPropagation()">
                             <div class="flex items-center gap-1.5">
                                 {% if order.status == 'Cobrado' %}
                                 <button type="button" onclick="openPaymentModal({{ order.id }})"
-                                    class="px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition text-left"
+                                    class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition text-left text-sm"
                                     title="Pedido cobrado. Clic para ver o modificar">
                                     💰 {{ order.payment_summary_text }}
                                 </button>
                                 {% elif order.deposit_amount > 0 %}
                                 <button type="button" onclick="openPaymentModal({{ order.id }})"
-                                    class="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-semibold hover:bg-amber-200 dark:hover:bg-amber-900/60 transition text-left"
+                                    class="px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-semibold hover:bg-amber-200 dark:hover:bg-amber-900/60 transition text-left text-sm"
                                     title="Señal registrada: €{{ order.deposit_amount }} ({{ order.deposit_method }}). Clic para gestionar">
                                     🤝 Señal: €{{ order.deposit_amount }} ({{ order.deposit_method }})
                                 </button>
@@ -753,7 +753,7 @@
                                 <span class="text-gray-400 dark:text-gray-500 italic">Pendiente</span>
                                 {% endif %}
                                 <button type="button" onclick="openPaymentModal({{ order.id }})"
-                                    class="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-emerald-600 transition"
+                                    class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-emerald-600 transition text-base"
                                     title="Gestionar Cobro / Paga y Señal">
                                     💳
                                 </button>
@@ -761,15 +761,15 @@
                         </td>
 
                         <!-- Logística -->
-                        <td class="px-3 py-3 whitespace-nowrap text-xs text-center text-gray-500 dark:text-gray-400">
+                        <td class="px-3 py-3.5 whitespace-nowrap text-sm text-center text-gray-600 dark:text-gray-300">
                             <div>{{ order.platform|default:"-" }}</div>
-                            <div class="text-[10px] text-gray-400">{{ order.shipping|default:"" }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ order.shipping|default:"" }}</div>
                         </td>
 
                         <!-- Acciones -->
-                        <td class="px-3 py-3 whitespace-nowrap text-right text-xs" onclick="event.stopPropagation()">
+                        <td class="px-3 py-3.5 whitespace-nowrap text-right text-sm" onclick="event.stopPropagation()">
                             <button type="button" onclick="openEditOrderModal({{ order.id }})"
-                                class="text-gray-400 hover:text-primary transition-colors text-sm p-1"
+                                class="text-gray-400 hover:text-primary transition-colors text-base p-1.5"
                                 title="Editar pedido y piezas">✏️</button>
                         </td>
                     </tr>
@@ -783,32 +783,30 @@
                                 <div
                                     class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">
                                     <h4
-                                        class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        class="text-sm sm:text-base font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                         <span>🧩</span> Piezas incluidas en el Pedido #{{ order.id }} ({{ order.items.count }} referencias)
                                     </h4>
                                     <div class="flex items-center gap-3">
                                         <button type="button"
                                             onclick="event.stopPropagation(); openEditOrderModal({{ order.id }})"
-                                            class="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 hover:bg-primary text-primary hover:text-white dark:bg-primary/20 dark:hover:bg-primary dark:text-cyan-300 dark:hover:text-white transition flex items-center gap-1.5"
+                                            class="px-3 py-1.5 rounded-lg text-sm font-bold bg-primary/10 hover:bg-primary text-primary hover:text-white dark:bg-primary/20 dark:hover:bg-primary dark:text-cyan-300 dark:hover:text-white transition flex items-center gap-1.5"
                                             title="Editar este pedido y gestionar piezas">
                                             <span>✏️</span> Editar Pedido
                                         </button>
-                                        <span class="text-[11px] text-gray-500">
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">
                                             Total piezas: <strong class="text-gray-800 dark:text-gray-200">{{ order.total_items_count }} uds</strong> · Coste prod: <strong
                                                 class="text-red-500">€{{ order.total_cost }}</strong> · Total venta:
-                                            <strong class="text-primary">€{{ order.price }}</strong>{% if order.has_vat %} <span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold">(IVA
-                                                incl.)</span>{% endif %}{% if order.has_irpf %} <span
-                                                class="text-[10px] text-amber-600 dark:text-amber-400 font-bold">(-21%
-                                                IRPF)</span>{% endif %}
+                                            <strong class="text-primary">€{{ order.price }}</strong>{% if order.has_vat %} <span class="text-xs text-blue-600 dark:text-blue-400 font-bold">(IVA
+                                                incl.)</span>{% endif %}{% if order.has_irpf %} <span class="text-xs text-amber-600 dark:text-amber-400 font-bold">(-21% IRPF)</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div class="overflow-x-auto">
                                     <table
-                                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-xs">
+                                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-sm">
                                         <thead
-                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30">
+                                            class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-800/30">
                                             <tr>
                                                 <th class="py-2 px-3">Pieza / Producto</th>
                                                 <th class="py-2 px-2 text-center">Cant</th>
@@ -836,17 +834,17 @@
                                                         {% endif %}
                                                         <div>
                                                             <div
-                                                                class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                                                class="font-bold text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-1.5">
                                                                 <span>{{ item.description }}</span>
                                                                 {% if item.display_notes %}
-                                                                <span class="relative group/note inline-flex items-center text-xs text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
+                                                                <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                                                     📝
                                                                     <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/note:flex flex-col items-center z-[9999] min-w-[150px] max-w-[260px]">
                                                                         <span class="bg-gray-900 text-white rounded-lg p-2 shadow-2xl border border-gray-700/80 w-full text-left leading-tight">
-                                                                            <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
+                                                                            <span class="block text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-gray-700/80 pb-1 mb-1 flex items-center gap-1">
                                                                                 <span>📝</span> Notas de la Pieza
                                                                             </span>
-                                                                            <span class="block text-[11px] font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
+                                                                            <span class="block text-sm font-normal text-gray-200 whitespace-pre-line break-words leading-snug">{{ item.display_notes }}</span>
                                                                         </span>
                                                                         <span class="w-2 h-2 -mt-1 bg-gray-900 border-r border-b border-gray-700/80 rotate-45"></span>
                                                                     </span>
@@ -855,7 +853,7 @@
                                                                 {% if item.product %}
                                                                 <a href="{% url 'product_detail' item.product.slug %}"
                                                                     target="_blank"
-                                                                    class="text-primary hover:underline text-[11px]"
+                                                                    class="text-primary hover:underline text-xs"
                                                                     title="Ver en catálogo">🔗</a>
                                                                 {% endif %}
                                                             </div>
@@ -874,27 +872,27 @@
                                                     <span>⚖️ {{ item.weight_grams|default:0 }}g</span> ·
                                                     <span>⏱️ {{ item.print_time_hours|default:0 }}h {{ item.print_time_minutes|default:0 }}m</span>
                                                     {% if item.extra_costs %}<span
-                                                        class="block text-[10px] text-gray-400">+€{{ item.extra_costs }}
+                                                        class="block text-xs text-gray-400">+€{{ item.extra_costs }}
                                                         extras</span>{% endif %}
                                                 </td>
 
                                                 <!-- Coste -->
                                                 <td class="py-2.5 px-3 text-right text-gray-500">
                                                     <span class="font-semibold text-red-500">€{{ item.total_cost }}</span>
-                                                    <span class="block text-[10px] text-gray-400">(€{{ item.unit_cost }}/ud)</span>
+                                                    <span class="block text-xs text-gray-400">(€{{ item.unit_cost }}/ud)</span>
                                                 </td>
 
                                                 <!-- Precio -->
                                                 <td
                                                     class="py-2.5 px-3 text-right font-bold text-gray-900 dark:text-white">
                                                     <span>€{{ item.price }}</span>
-                                                    <span class="block text-[10px] font-normal text-gray-400">(€{{ item.unit_price }}/ud)</span>
+                                                    <span class="block text-xs font-normal text-gray-400">(€{{ item.unit_price }}/ud)</span>
                                                 </td>
 
                                                 <!-- Estado individual -->
                                                 <td class="py-2.5 px-3 text-center">
                                                     <select onchange="updateItemStatus({{ item.id }}, this.value)"
-                                                        class="text-[11px] py-0.5 px-1.5 rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                                                        class="text-xs py-1 px-2.5 rounded font-semibold border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                                         {% for s in status_choices %}
                                                         <option value="{{ s }}" {% if item.status == s %}selected{% endif %}>{{ s }}</option>
                                                         {% endfor %}
@@ -916,13 +914,13 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 text-base">
                             No hay pedidos en el período seleccionado.
                         </td>
                     </tr>
                     {% endfor %}
                     <tr id="no-search-results-row" class="hidden">
-                        <td colspan="11" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        <td colspan="11" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-base">
                             No se encontraron pedidos ni piezas que coincidan con la búsqueda.
                         </td>
                     </tr>
@@ -941,10 +939,10 @@
         <div
             class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-5 text-white flex justify-between items-center">
             <div>
-                <h3 class="text-lg font-black flex items-center gap-2">
+                <h3 class="text-xl font-black flex items-center gap-2">
                     <span>💳</span> Gestión de Cobros - Pedido <span id="modal-order-id-label">#--</span>
                 </h3>
-                <p class="text-xs text-emerald-100 mt-0.5" id="modal-client-label">Cliente: --</p>
+                <p class="text-sm text-emerald-100 mt-0.5" id="modal-client-label">Cliente: --</p>
             </div>
             <button type="button" onclick="closePaymentModal(false)"
                 class="text-white/80 hover:text-white p-1 rounded-lg text-lg">✕</button>
@@ -958,53 +956,53 @@
             <div
                 class="bg-gray-50 dark:bg-gray-800/60 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-2 text-center">
                 <div>
-                    <span class="text-[10px] text-gray-500 uppercase font-bold">Total Pedido</span>
-                    <p class="text-base font-black text-gray-900 dark:text-white">€<span
+                    <span class="text-xs text-gray-500 uppercase font-bold">Total Pedido</span>
+                    <p class="text-lg font-black text-gray-900 dark:text-white">€<span
                             id="modal-total-price">0.00</span></p>
                 </div>
                 <div>
-                    <span class="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Adelanto /
+                    <span class="text-xs text-amber-600 dark:text-amber-400 uppercase font-bold">Adelanto /
                         Señal</span>
-                    <p class="text-base font-black text-amber-600 dark:text-amber-400">€<span
+                    <p class="text-lg font-black text-amber-600 dark:text-amber-400">€<span
                             id="modal-deposit-display">0.00</span></p>
                 </div>
                 <div>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Restante</span>
-                    <p class="text-base font-black text-emerald-600 dark:text-emerald-400">€<span
+                    <span class="text-xs text-emerald-600 dark:text-emerald-400 uppercase font-bold">Restante</span>
+                    <p class="text-lg font-black text-emerald-600 dark:text-emerald-400">€<span
                             id="modal-remaining-display">0.00</span></p>
                 </div>
             </div>
 
             <!-- Estado actual del pedido -->
-            <div class="flex items-center justify-between text-xs px-1 text-gray-500 dark:text-gray-400">
-                <span>Estado actual del pedido:</span>
+            <div class="flex items-center justify-between text-sm px-1 text-gray-600 dark:text-gray-400">
+                <span class="font-medium">Estado actual del pedido:</span>
                 <span id="modal-current-status-badge"
-                    class="px-2.5 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">--</span>
+                    class="px-3 py-1 rounded-full font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm">--</span>
             </div>
 
             <!-- Sección 1: Paga y Señal Previa (Adelanto) -->
             <div
                 class="border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 bg-amber-50/20 dark:bg-amber-950/10">
                 <div class="flex items-center justify-between mb-2">
-                    <label class="block text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <label class="block text-sm font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                         <span>🤝</span> 1. Paga y Señal / Adelanto
                     </label>
-                    <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier
+                    <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier
                         momento</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Importe Señal (€)</label>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Importe Señal (€)</label>
                         <input type="number" step="0.01" min="0" id="modal-deposit-amount"
                             oninput="recalcModalAmounts()"
-                            class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
                             placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de la
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Método de la
                             Señal</label>
                         <select id="modal-deposit-method"
-                            class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium">
                             <option value="">(Selecciona método...)</option>
                             {% for m in payment_methods %}
                             <option value="{{ m }}">{{ m }}</option>
@@ -1018,16 +1016,16 @@
             <div
                 class="border border-emerald-300 dark:border-emerald-800/80 rounded-xl p-3.5 bg-emerald-50/30 dark:bg-emerald-950/20">
                 <label
-                    class="block text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
+                    class="block text-sm font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
                     <span class="flex items-center gap-1.5"><span>💵</span> 2. Cobro Restante / Final</span>
-                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">€<span
+                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">€<span
                             id="modal-remaining-calc">0.00</span></span>
                 </label>
                 <div>
-                    <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Método de Cobro del Restante
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Método de Cobro del Restante
                         (para cerrar y cobrar)</label>
                     <select id="modal-final-method"
-                        class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                        class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
                         <option value="">Selecciona cómo se ha cobrado el resto...</option>
                         {% for m in payment_methods %}
                         <option value="{{ m }}">{{ m }}</option>
@@ -1038,30 +1036,30 @@
 
             <!-- Notas -->
             <div>
-                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Notas o comentarios de cobro
+                <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1 font-medium">Notas o comentarios de cobro
                     (opcional)</label>
                 <input type="text" id="modal-payment-notes"
                     placeholder="Ej. 20€ Bizum señal el 10/10, restante en mano en efectivo"
-                    class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                    class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-medium">
             </div>
 
             <!-- Botones de Acción -->
             <div
                 class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
                 <button type="button" onclick="closePaymentModal(false)"
-                    class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     Cerrar
                 </button>
                 <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <!-- Botón 1: Guardar solo señal (en cualquier momento) -->
                     <button type="button" id="btn-save-deposit-only" onclick="submitDepositOnly()"
-                        class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition flex items-center justify-center gap-1.5"
                         title="Guarda la señal/adelanto sin cambiar el estado actual del pedido">
                         <span>🤝</span> Guardar Señal
                     </button>
                     <!-- Botón 2: Confirmar cobro completo -->
                     <button type="button" id="btn-save-full-payment" onclick="submitFullPayment()"
-                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white shadow-md transition flex items-center justify-center gap-1.5">
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white shadow-md transition flex items-center justify-center gap-1.5">
                         <span>✅</span> Confirmar Cobro Total
                     </button>
                 </div>
@@ -1081,16 +1079,16 @@
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
             <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
-                <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
                     <span>✏️</span> Editar Pedido <span id="edit-modal-order-id-label"
                         class="text-primary font-black">#0</span>
                 </h3>
                 <span id="edit-modal-client-badge"
-                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                    class="px-3 py-1 rounded-full text-sm font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
                     Cliente
                 </span>
                 <span id="edit-modal-status-badge"
-                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                    class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                     Estado
                 </span>
             </div>
@@ -1105,33 +1103,33 @@
             <!-- 1. Datos Generales del Pedido -->
             <div class="bg-gray-50 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/70 dark:border-gray-800">
                 <h4
-                    class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <span>📋</span> 1. Información General del Pedido
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del
                             Cliente *</label>
                         <input type="text" id="edit-order-client-name"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha del
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha del
                             Pedido *</label>
                         <input type="date" id="edit-order-date"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha
                             Límite / Entrega</label>
                         <input type="date" id="edit-order-deadline"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Estado
                             General</label>
                         <select id="edit-order-status"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             {% for st in status_choices %}
                             <option value="{{ st }}">{{ st }}</option>
                             {% endfor %}
@@ -1139,9 +1137,9 @@
                     </div>
                     <div>
                         <label
-                            class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Plataforma</label>
                         <select id="edit-order-platform"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             <option value="">Selecciona plataforma...</option>
                             {% for code, label in platform_choices %}
                             <option value="{{ code }}">{{ label }}</option>
@@ -1149,10 +1147,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de
                             Envío</label>
                         <select id="edit-order-shipping"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                             <option value="">Selecciona envío...</option>
                             {% for code, label in shipping_choices %}
                             <option value="{{ code }}">{{ label }}</option>
@@ -1160,10 +1158,10 @@
                         </select>
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-[11px] font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas o
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Notas o
                             Instrucciones</label>
                         <textarea id="edit-order-notes" rows="2"
-                            class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             placeholder="Detalles de personalización, colores, requisitos..."></textarea>
                     </div>
 
@@ -1177,11 +1175,11 @@
                                     class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
                                     onchange="onEditVatToggle(this)">
                                 <span
-                                    class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                    class="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                                     <span>🧾</span> Incluir IVA (+21%)
                                 </span>
                                 <span id="edit-vat-amount-label"
-                                    class="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60">(+0€)</span>
+                                    class="text-sm font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60">(+0€)</span>
                             </label>
 
                             <!-- Checkbox IRPF -->
@@ -1190,15 +1188,15 @@
                                     class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
                                     onchange="recalcEditModalTotals()">
                                 <span
-                                    class="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                    class="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                                     <span>📉</span> Descontar IRPF (-21%)
                                 </span>
                                 <span id="edit-irpf-amount-label"
-                                    class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">(IVA
+                                    class="text-sm font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">(IVA
                                     + IRPF = 0€)</span>
                             </label>
                         </div>
-                        <div id="edit-tax-preview-badge" class="flex items-center gap-1.5 text-[10px] font-bold">
+                        <div id="edit-tax-preview-badge" class="flex items-center gap-1.5 text-xs font-bold">
                         </div>
                     </div>
                 </div>
@@ -1209,14 +1207,14 @@
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <h4
-                            class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                             <span>🧩</span> 2. Piezas del Pedido
                         </h4>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400">Añade, modifica o elimina piezas. Los
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Añade, modifica o elimina piezas. Los
                             costes, precio y rentabilidad se recalculan en tiempo real.</p>
                     </div>
                     <button type="button" onclick="addNewEditPieceRow()"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-secondary text-white shadow transition flex items-center gap-1.5">
+                        class="px-4 py-2.5 rounded-xl text-sm font-bold bg-primary hover:bg-secondary text-white shadow transition flex items-center gap-1.5">
                         <span>➕</span> Añadir Pieza
                     </button>
                 </div>
@@ -1231,37 +1229,37 @@
             <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800">
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-center">
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Piezas</p>
+                        <p class="text-xs text-gray-400 font-bold uppercase">Piezas</p>
                         <p id="edit-summary-items" class="text-base font-black text-gray-900 dark:text-white">0 uds</p>
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Peso Total</p>
+                        <p class="text-xs text-gray-400 font-bold uppercase">Peso Total</p>
                         <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400">0 g
                         </p>
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Tiempo Fab.</p>
+                        <p class="text-xs text-gray-400 font-bold uppercase">Tiempo Fab.</p>
                         <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400">0h
                             0m</p>
                     </div>
                     <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Coste Fab.</p>
+                        <p class="text-xs text-gray-400 font-bold uppercase">Coste Fab.</p>
                         <p id="edit-summary-cost" class="text-base font-black text-red-500">€0.00</p>
                     </div>
                     <div
                         class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Total Pedido</p>
+                        <p class="text-xs text-gray-400 font-bold uppercase">Total Pedido</p>
                         <p id="edit-summary-price" class="text-lg font-black text-primary">€0.00</p>
                     </div>
                     <div
                         class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
-                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Beneficio</p>
+                        <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase">Beneficio</p>
                         <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400">
                             €0.00</p>
                     </div>
                     <div
                         class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
-                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase">Margen</p>
+                        <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase">Margen</p>
                         <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400">
                             0%</p>
                     </div>
@@ -1273,16 +1271,16 @@
         <div
             class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
             <button type="button" onclick="deleteCurrentEditOrder()"
-                class="text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition flex items-center gap-1.5 w-full sm:w-auto justify-center">
+                class="text-sm font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <span>🗑️</span> Eliminar Pedido
             </button>
             <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                 <button type="button" onclick="closeEditOrderModal()"
-                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     Cancelar
                 </button>
                 <button type="button" id="btn-save-order-full" onclick="submitEditOrderModal()"
-                    class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white shadow-md transition flex items-center justify-center gap-2">
+                    class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-primary to-cyan-600 hover:from-cyan-600 hover:to-primary text-white shadow-md transition flex items-center justify-center gap-2">
                     <span>💾</span> Guardar Cambios
                 </button>
             </div>
@@ -1743,12 +1741,12 @@
         if (!btn || !icon || !label) return;
 
         if (hidePaidOrders) {
-            btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700/60 ring-2 ring-emerald-500/20";
+            btn.className = "px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700/60 ring-2 ring-emerald-500/20";
             icon.textContent = '🚫';
             label.textContent = 'Cobrados Ocultos';
             btn.title = "Clic para volver a mostrar los pedidos cobrados";
         } else {
-            btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600";
+            btn.className = "px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600";
             icon.textContent = '👁️';
             label.textContent = 'Ocultar Cobrados';
             btn.title = "Clic para ocultar los pedidos que ya están cobrados";
@@ -2110,15 +2108,15 @@
                         ` : `
                             <span class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs flex-shrink-0">🧩</span>
                         `}
-                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200">Pieza #${index + 1}</span>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${piece.productId ? 'bg-primary/20 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}">
+                        <span class="text-sm font-bold text-gray-800 dark:text-gray-200">Pieza #${index + 1}</span>
+                        <span class="text-xs px-2 py-0.5 rounded font-semibold ${piece.productId ? 'bg-primary/20 text-primary' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}">
                             ${piece.productId ? 'Catálogo' : 'A medida'}
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 text-[11px]">
-                            <span class="text-gray-400">Estado:</span>
-                            <select onchange="onEditPieceStatusChange(${index}, this.value)" class="text-[11px] font-bold p-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                        <div class="flex items-center gap-1.5 text-xs">
+                            <span class="text-gray-400 font-medium">Estado:</span>
+                            <select onchange="onEditPieceStatusChange(${index}, this.value)" class="text-xs font-bold py-1 px-2 p-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                                 ${statusOptionsHtml(piece.status || document.getElementById('edit-order-status').value || 'Presupuestado')}
                             </select>
                         </div>
@@ -2130,13 +2128,13 @@
 
                 <!-- Buscador / Catálogo -->
                 <div class="mb-3 relative edit-autocomplete-wrap">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">Descripción / Producto *</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-0.5">Descripción / Producto *</label>
                     <div class="relative">
                         <input type="text" value="${escapeHtml(piece.description || '')}"
                             placeholder="Escribe para buscar en catálogo o un encargo a medida..."
                             oninput="handleEditAutocomplete(this, ${index})"
                             autocomplete="off"
-                            class="w-full text-xs p-2 pr-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            class="w-full text-sm p-2.5 pr-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary">
                         <span class="absolute right-2.5 top-2.5 text-xs text-gray-400 pointer-events-none">🔍</span>
                     </div>
                     <div id="edit-autocomplete-${index}" class="edit-autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1 z-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -2145,69 +2143,69 @@
 
                 <!-- Notas o Requisitos de la Pieza -->
                 <div class="mb-3">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5 flex items-center gap-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-0.5 flex items-center gap-1">
                         <span>📝</span> Notas o Requisitos de la Pieza (opcional)
                     </label>
                     <input type="text" value="${escapeHtml(piece.notes || '')}"
                         placeholder="Ej. Color gris espacial, acabado mate, relleno 40%..."
                         oninput="onEditPieceFieldChange(${index}, 'notes', this.value)"
-                        class="w-full text-xs p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-1 focus:ring-primary">
+                        class="w-full text-sm p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-1 focus:ring-primary">
                 </div>
 
                 <!-- Métricas de Fabricación -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 bg-gray-50/70 dark:bg-gray-900/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800">
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Peso (g)</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Peso (g)</label>
                         <input type="number" step="0.1" min="0" value="${piece.weight || 0}"
                             oninput="onEditPieceFieldChange(${index}, 'weight', this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Horas Impresión</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Horas Impresión</label>
                         <input type="number" step="0.1" min="0" value="${piece.hours || 0}"
                             oninput="onEditPieceFieldChange(${index}, 'hours', this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Minutos Impresión</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Minutos Impresión</label>
                         <input type="number" step="1" min="0" max="59" value="${piece.mins || 0}"
                             oninput="onEditPieceFieldChange(${index}, 'mins', this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Costes Extras (€)</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Costes Extras (€)</label>
                         <input type="number" step="0.01" min="0" value="${piece.extra || 0}"
                             oninput="onEditPieceFieldChange(${index}, 'extra', this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     </div>
                 </div>
 
                 <!-- Cantidad, Precio y Rentabilidad -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Cantidad *</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Cantidad *</label>
                         <input type="number" min="1" step="1" value="${piece.quantity || 1}"
                             oninput="onEditPieceQtyChange(${index}, this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Precio Unitario (€)</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Precio Unitario (€)</label>
                         <input type="number" step="0.01" min="0" value="${piece.unitPrice || 0}"
                             oninput="onEditPieceUnitPriceChange(${index}, this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold edit-piece-uprice">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold edit-piece-uprice">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Total Pieza (€) *</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Total Pieza (€) *</label>
                         <input type="number" step="0.01" min="0" value="${piece.totalPrice || 0}"
                             oninput="onEditPieceTotalPriceChange(${index}, this.value)"
-                            class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-black edit-piece-tprice">
+                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-black edit-piece-tprice">
                     </div>
                     <div class="bg-gray-100 dark:bg-gray-700/60 p-2 rounded-lg flex items-center justify-between text-xs">
                         <div>
-                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Ganancia</span>
+                            <span class="block text-xs text-gray-400 uppercase font-bold">Ganancia</span>
                             <span class="piece-profit-val font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">€${profit.toFixed(2)}</span>
                         </div>
-                        <span class="piece-margin-badge px-1.5 py-0.5 rounded text-[10px] font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
+                        <span class="piece-margin-badge px-2 py-0.5 rounded text-xs font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
                             ${margin}%
                         </span>
                     </div>
@@ -2346,7 +2344,7 @@
         }
         if (marginEl) {
             marginEl.textContent = `${margin}%`;
-            marginEl.className = `piece-margin-badge px-1.5 py-0.5 rounded text-[10px] font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}`;
+            marginEl.className = `piece-margin-badge px-2 py-0.5 rounded text-xs font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}`;
         }
     }
 
@@ -2390,8 +2388,8 @@
                         <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-sm flex-shrink-0">📦</div>
                     `}
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-gray-900 dark:text-white truncate">${highlightedTitle}</p>
-                        <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">${highlightedTitle}</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             <span>⚖️ ${item.weight_grams}g</span>
                             <span>⏱️ ${item.print_time_hours}h ${item.print_time_minutes}m</span>
                             <span class="px-1 py-0.2 rounded bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300 font-bold">€${Number(effectivePrice).toFixed(2)}</span>
