@@ -201,26 +201,39 @@
                 {% endif %}" data-status="{{ status_name }}" ondragover="allowDrop(event)" ondrop="drop(event)">
 
                 <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="font-bold text-base text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
-                        {% if status_name == 'Presupuestado' %}<span>📝</span>
-                        {% elif status_name == 'En proceso' %}<span>⚙️</span>
-                        {% elif status_name == 'Realizado' %}<span>✅</span>
-                        {% elif status_name == 'Enviado' %}<span>🚚</span>
-                        {% elif status_name == 'Entregado' %}<span>📦</span>
-                        {% elif status_name == 'Cobrado' %}<span>💰</span>
-                        {% endif %}
-                        {{ status_name }}
-                    </h3>
-                    <span class="text-sm px-2.5 py-0.5 rounded-full font-bold
-                        {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
-                        {% elif status_name == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
-                        {% elif status_name == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
-                        {% elif status_name == 'Enviado' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
-                        {% elif status_name == 'Entregado' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
-                        {% elif status_name == 'Cobrado' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
-                        {% else %}bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
-                        {{ group_orders|length }}
-                    </span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <label class="relative inline-flex items-center justify-center cursor-pointer select-none group/chk"
+                               title="Marcar o desmarcar para tener en cuenta o no esta columna en el Total Facturado y Ganancia Neta">
+                            <input type="checkbox"
+                                   class="kanban-col-metric-checkbox w-4 h-4 rounded text-primary focus:ring-primary/40 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 cursor-pointer transition shadow-sm"
+                                   data-status="{{ status_name }}"
+                                   checked
+                                   onchange="onKanbanMetricCheckboxChange()">
+                        </label>
+                        <h3 class="font-bold text-base text-gray-800 dark:text-gray-200 flex items-center gap-1.5 truncate kanban-col-title"
+                            data-status="{{ status_name }}">
+                            {% if status_name == 'Presupuestado' %}<span>📝</span>
+                            {% elif status_name == 'En proceso' %}<span>⚙️</span>
+                            {% elif status_name == 'Realizado' %}<span>✅</span>
+                            {% elif status_name == 'Enviado' %}<span>🚚</span>
+                            {% elif status_name == 'Entregado' %}<span>📦</span>
+                            {% elif status_name == 'Cobrado' %}<span>💰</span>
+                            {% endif %}
+                            <span class="truncate">{{ status_name }}</span>
+                        </h3>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <span class="text-sm px-2.5 py-0.5 rounded-full font-bold
+                            {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
+                            {% elif status_name == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
+                            {% elif status_name == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
+                            {% elif status_name == 'Enviado' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
+                            {% elif status_name == 'Entregado' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
+                            {% elif status_name == 'Cobrado' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
+                            {% else %}bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
+                            {{ group_orders|length }}
+                        </span>
+                    </div>
                 </div>
 
                 <div class="space-y-3 kanban-items min-h-[140px]">
@@ -244,14 +257,20 @@
                         <!-- VISTA COMPRIMIDA (Enviado, Entregado, Cobrado) -->
                         <div class="kanban-compact-view select-none">
                             <div class="flex items-center justify-between gap-1.5 mb-2">
-                                <div class="flex items-center gap-1.5 min-w-0">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 flex-shrink-0">
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openOrderSummaryModal({{ group.order.id }});"
+                                    class="kanban-order-title-btn flex items-center gap-1.5 min-w-0 text-left hover:opacity-85 transition group/title cursor-pointer p-0.5 -m-0.5 rounded-lg hover:bg-cyan-50/80 dark:hover:bg-cyan-950/40 select-text"
+                                    title="Clic para ver el Resumen Global y Rentabilidad del Pedido #{{ group.order.id }}">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 flex-shrink-0 group-hover/title:bg-primary group-hover/title:text-white transition">
                                         #{{ group.order.id }}
                                     </span>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0 group-hover/title:text-primary transition underline-offset-2 hover:underline">
                                         {{ group.order.client_name }}
                                     </span>
-                                </div>
+                                    <span class="text-[11px] text-primary dark:text-cyan-400 opacity-0 group-hover/title:opacity-100 transition select-none flex-shrink-0">
+                                        📊
+                                    </span>
+                                </button>
                                 <div class="flex items-center gap-1 flex-shrink-0">
                                     {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
@@ -301,13 +320,21 @@
                         <div class="flex items-start justify-between gap-1.5 mb-1.5">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
-                                        #{{ group.order.id }}
-                                    </span>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0" title="{{ group.order.client_name }}">
-                                        {{ group.order.client_name }}
-                                    </span>
+                                    <button type="button"
+                                        onclick="event.stopPropagation(); openOrderSummaryModal({{ group.order.id }});"
+                                        class="kanban-order-title-btn flex items-center gap-1.5 min-w-0 text-left hover:opacity-85 transition group/title cursor-pointer p-0.5 -m-0.5 rounded-lg hover:bg-cyan-50/80 dark:hover:bg-cyan-950/40 select-text"
+                                        title="Clic para ver el Resumen Global y Rentabilidad del Pedido #{{ group.order.id }}">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 group-hover/title:bg-primary group-hover/title:text-white transition">
+                                            #{{ group.order.id }}
+                                        </span>
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0 group-hover/title:text-primary transition underline-offset-2 hover:underline">
+                                            {{ group.order.client_name }}
+                                        </span>
+                                        <span class="text-[11px] text-primary dark:text-cyan-400 opacity-0 group-hover/title:opacity-100 transition select-none flex-shrink-0">
+                                            📊
+                                        </span>
+                                    </button>
                                     {% if group.order.notes %}
                                     <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                         📝
@@ -485,8 +512,57 @@
             </div>
             {% endfor %}
         </div>
+        <!-- Restauración instantánea del scroll horizontal del panel Kanban y checkboxes de métricas (evita parpadeo) -->
+        <script>
+            (function() {
+                try {
+                    const savedLeft = sessionStorage.getItem('kanban_board_scroll_left');
+                    const board = document.querySelector('.kanban-board');
+                    if (savedLeft !== null && board) {
+                        board.scrollLeft = parseInt(savedLeft, 10);
+                    }
+                    const savedStatuses = localStorage.getItem('proprint3d_kanban_active_metric_columns');
+                    if (savedStatuses !== null) {
+                        const activeList = JSON.parse(savedStatuses);
+                        if (Array.isArray(activeList)) {
+                            document.querySelectorAll('.kanban-col-metric-checkbox').forEach(function(cb) {
+                                const st = cb.getAttribute('data-status');
+                                cb.checked = activeList.includes(st);
+                            });
+                        }
+                    }
+                } catch(e) {}
+            })();
+        </script>
     </div>
     {% endif %}
+
+    <!-- Barra informativa y selector de columnas computadas en métricas -->
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-dark p-3.5 sm:px-5 sm:py-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                <span>📊</span> Columnas computadas en totales:
+            </span>
+            <div id="metrics-active-columns-badges" class="flex items-center gap-1.5 flex-wrap">
+                <!-- Badges generados dinámicamente -->
+            </div>
+            <span id="metrics-computed-count-label" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                Calculando...
+            </span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+            <button type="button" onclick="setAllKanbanMetricCheckboxes(true)"
+                class="font-bold text-primary hover:text-secondary dark:text-cyan-400 hover:underline transition">
+                Marcar todas
+            </button>
+            <span class="text-gray-300 dark:text-gray-700">•</span>
+            <button type="button" onclick="setExcludePresupuestadoMetricCheckboxes()"
+                class="font-bold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:underline transition"
+                title="Desmarcar Presupuestados y computar solo pedidos confirmados/en curso">
+                Excluir Presupuestados
+            </button>
+        </div>
+    </div>
 
     <!-- Tarjetas de Resumen Global -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -930,6 +1006,171 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL DE RESUMEN GLOBAL Y RENTABILIDAD DEL PEDIDO (POPUP KANBAN) -->
+<!-- ========================================== -->
+<div id="order-summary-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm hidden overflow-y-auto"
+    onclick="if(event.target === this) closeOrderSummaryModal()">
+    <div
+        class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl max-w-4xl w-full shadow-2xl relative my-6 max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+        
+        <!-- Encabezado del Modal con Gradiente -->
+        <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-5 sm:px-6 text-white border-b border-gray-700/80 flex-shrink-0 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/40" id="sm-modal-order-id-badge">
+                        #<span id="sm-modal-order-id">--</span>
+                    </span>
+                    <h3 class="text-xl sm:text-2xl font-black text-white truncate" id="sm-modal-client-name">
+                        Cliente
+                    </h3>
+                    <span id="sm-modal-status-badge" class="px-3 py-0.5 rounded-full text-xs font-black bg-indigo-500 text-white">
+                        Presupuestado
+                    </span>
+                </div>
+                <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-300 mt-1 flex-wrap">
+                    <span>📅 <span id="sm-modal-date">--</span></span>
+                    <span id="sm-modal-deadline-container" class="text-amber-300 font-semibold hidden">⏳ Límite: <span id="sm-modal-deadline">--</span></span>
+                    <span>🛒 <span id="sm-modal-platform">--</span></span>
+                    <span>🚚 <span id="sm-modal-shipping">--</span></span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <button type="button" onclick="openEditFromSummaryModal()"
+                    class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-primary hover:bg-secondary text-white transition shadow-sm inline-flex items-center gap-1.5"
+                    title="Abrir editor completo de este pedido">
+                    <span>✏️</span> Editar Pedido
+                </button>
+                <button type="button" onclick="closeOrderSummaryModal()"
+                    class="text-gray-400 hover:text-white text-2xl font-bold p-1 rounded-lg hover:bg-white/10 transition leading-none">
+                    &times;
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido Desplazable del Modal -->
+        <div class="p-5 sm:p-6 overflow-y-auto space-y-6">
+            
+            <!-- SECCIÓN: RESUMEN GLOBAL Y RENTABILIDAD (7 KPIS) -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    Rentabilidad y Métricas Globales (Como en Nuevo Pedido)
+                </h4>
+
+                <div class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-4 sm:p-5 shadow-sm">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
+                        <!-- Piezas -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
+                            <p class="text-lg font-black text-gray-900 dark:text-white mt-0.5"><span id="sm-kpi-items">0</span> <span class="text-xs font-semibold text-gray-500">uds</span></p>
+                        </div>
+                        <!-- Peso Total -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
+                            <p class="text-lg font-black text-cyan-600 dark:text-cyan-400 mt-0.5"><span id="sm-kpi-weight">0</span> <span class="text-xs font-semibold text-cyan-500">g</span></p>
+                        </div>
+                        <!-- Tiempo Fab. -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Tiempo Fab.</p>
+                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400 mt-0.5" id="sm-kpi-time">0h 0m</p>
+                        </div>
+                        <!-- Coste Fab. -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
+                            <p class="text-lg font-black text-red-500 mt-0.5">€<span id="sm-kpi-cost">0.00</span></p>
+                        </div>
+                        <!-- Total Pedido -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 sm:col-span-2 lg:col-span-1">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Venta</p>
+                            <p class="text-xl font-black text-primary mt-0.5">€<span id="sm-kpi-price">0.00</span></p>
+                        </div>
+                        <!-- Beneficio -->
+                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50">
+                            <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
+                            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">€<span id="sm-kpi-profit">0.00</span></p>
+                        </div>
+                        <!-- Margen -->
+                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50">
+                            <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
+                            <p class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5"><span id="sm-kpi-margin">0</span>%</p>
+                        </div>
+                    </div>
+
+                    <!-- Fila de Fiscalidad y Cobros -->
+                    <div class="mt-4 pt-3.5 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div id="sm-modal-tax-badges" class="flex items-center gap-2 flex-wrap">
+                            <!-- Badges IVA / IRPF -->
+                        </div>
+                        <div id="sm-modal-payment-info" class="font-medium text-gray-700 dark:text-gray-300">
+                            <!-- Información de cobro / señal -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: DESGLOSE DE PIEZAS -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span>🧩</span> Piezas del Pedido (<span id="sm-modal-pieces-count">0</span> referencias)
+                </h4>
+
+                <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-left text-sm">
+                            <thead class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50/80 dark:bg-gray-800/50">
+                                <tr>
+                                    <th class="py-2.5 px-3">Pieza / Producto</th>
+                                    <th class="py-2.5 px-2 text-center">Cant</th>
+                                    <th class="py-2.5 px-3">Fabricación</th>
+                                    <th class="py-2.5 px-3 text-right">Coste (U / Tot)</th>
+                                    <th class="py-2.5 px-3 text-right">Precio (U / Tot)</th>
+                                    <th class="py-2.5 px-3 text-center">Estado Kanban</th>
+                                    <th class="py-2.5 px-3 text-right">Rentabilidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sm-modal-pieces-tbody" class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <!-- Filas de piezas generadas dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: NOTAS DEL PEDIDO (Opcional) -->
+            <div id="sm-modal-notes-container" class="hidden">
+                <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs">
+                    <div class="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5 mb-1">
+                        <span>📝</span> Notas del Pedido
+                    </div>
+                    <div class="text-amber-900 dark:text-amber-200 whitespace-pre-line" id="sm-modal-notes-text"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer con Acciones -->
+        <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 flex items-center justify-between gap-3 flex-shrink-0">
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+                Pulsa ESC o haz clic fuera para cerrar
+            </span>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="closeOrderSummaryModal()"
+                    class="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    Cerrar
+                </button>
+                <button type="button" onclick="openEditFromSummaryModal()"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-primary hover:bg-secondary text-white transition shadow-sm inline-flex items-center gap-1.5">
+                    <span>✏️</span> Editar Pedido Completo
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <!-- Modal Emergente de Gestión de Cobros -->
 <div id="payment-modal"
     class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
@@ -1292,30 +1533,38 @@
     // Catálogo de productos para el autocompletado en el modal de edición
     const catalogProducts = {{ products_json|safe }};
 
-    // Datos estructurados completos de todos los pedidos y sus piezas para el modal de edición
+    // Datos estructurados completos de todos los pedidos y sus piezas para el modal de edición y resumen
     const allOrdersData = {
         {% for order in orders %}
     "{{ order.id }}": {
         id: {{ order.id }},
         clientName: "{{ order.client_name|escapejs }}",
-            orderDate: "{{ order.order_date|date:'Y-m-d' }}",
-                deadline: "{{ order.deadline|date:'Y-m-d'|default:'' }}",
-                    status: "{{ order.status|escapejs }}",
-                        platform: "{{ order.platform|default:''|escapejs }}",
-                            shipping: "{{ order.shipping|default:''|escapejs }}",
-                                notes: "{{ order.notes|default:''|escapejs }}",
-                                    hasVat: {{ order.has_vat|yesno:"true,false" }},
+        orderDate: "{{ order.order_date|date:'d/m/Y' }}",
+        deadline: "{{ order.deadline|date:'d/m/Y'|default:'' }}",
+        rawOrderDate: "{{ order.order_date|date:'Y-m-d' }}",
+        rawDeadline: "{{ order.deadline|date:'Y-m-d'|default:'' }}",
+        status: "{{ order.status|escapejs }}",
+        platform: "{{ order.platform|default:''|escapejs }}",
+        shipping: "{{ order.shipping|default:''|escapejs }}",
+        notes: "{{ order.notes|default:''|escapejs }}",
+        hasVat: {{ order.has_vat|yesno:"true,false" }},
         hasIrpf: {{ order.has_irpf|yesno:"true,false" }},
         price: {{ order.price|default:0|unlocalize }},
         totalCost: {{ order.total_cost|default:0|unlocalize }},
         profit: {{ order.profit|default:0|unlocalize }},
+        totalWeight: {{ order.total_weight_calc|default:0|unlocalize }},
+        totalPrintTimeStr: "{{ order.total_print_time_str|escapejs }}",
+        totalItemsCount: {{ order.total_items_count|default:1 }},
+        depositAmount: {{ order.deposit_amount|default:0|unlocalize }},
+        depositMethod: "{{ order.deposit_method|default:''|escapejs }}",
+        finalPaymentMethod: "{{ order.final_payment_method|default:''|escapejs }}",
         items: [
             {% for item in order.items.all %}
     {
         id: {{ item.id }},
         productId: {% if item.product %} {{ item.product.id }} {% else %} null{% endif %},
         description: "{{ item.description|escapejs }}",
-            imageUrl: {% if item.product and item.product.main_image %} "{{ item.product.main_image.url }}"{% else %} null{% endif %},
+        imageUrl: {% if item.product and item.product.main_image %} "{{ item.product.main_image.url }}"{% else %} null{% endif %},
         quantity: {{ item.quantity|default:1 }},
         weight: {{ item.weight_grams|default:0|unlocalize }},
         hours: {{ item.print_time_hours|default:0|unlocalize }},
@@ -1326,7 +1575,7 @@
         unitPrice: {{ item.unit_price|default:0|unlocalize }},
         totalPrice: {{ item.price|default:0|unlocalize }},
         status: "{{ item.status|default:order.status|escapejs }}",
-            notes: "{{ item.notes|default:''|escapejs }}"
+        notes: "{{ item.notes|default:''|escapejs }}"
     } {% if not forloop.last %}, {% endif %}
     {% endfor %}
             ]
@@ -1483,7 +1732,7 @@
             .then(data => {
                 if (data.success) {
                     closePaymentModal(true);
-                    window.location.reload();
+                    reloadDashboardPreservingScroll();
                 } else {
                     alert('Error al guardar señal: ' + (data.error || ''));
                     btn.disabled = false;
@@ -1540,7 +1789,7 @@
             .then(data => {
                 if (data.success) {
                     closePaymentModal(true);
-                    window.location.reload();
+                    reloadDashboardPreservingScroll();
                 } else {
                     alert('Error al registrar cobro: ' + (data.error || ''));
                     btn.disabled = false;
@@ -1650,9 +1899,9 @@
                     if (!data.success) {
                         alert('Error al actualizar pieza: ' + (data.error || ''));
                     }
-                    window.location.reload();
+                    reloadDashboardPreservingScroll(newStatus);
                 })
-                .catch(() => window.location.reload());
+                .catch(() => reloadDashboardPreservingScroll(newStatus));
         } else if (dragType === "order") {
             fetch(`/crm/api/order/${id}/status/`, {
                 method: 'POST',
@@ -1667,9 +1916,9 @@
                     if (!data.success) {
                         alert('Error al actualizar pedido: ' + (data.error || ''));
                     }
-                    window.location.reload();
+                    reloadDashboardPreservingScroll(newStatus);
                 })
-                .catch(() => window.location.reload());
+                .catch(() => reloadDashboardPreservingScroll(newStatus));
         }
     }
 
@@ -1685,9 +1934,9 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) alert('Error: ' + (data.error || ''));
-                window.location.reload();
+                reloadDashboardPreservingScroll(newStatus);
             })
-            .catch(() => window.location.reload());
+            .catch(() => reloadDashboardPreservingScroll(newStatus));
     }
 
     function updateOrderStatus(orderId, newStatus) {
@@ -1702,9 +1951,9 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) alert('Error: ' + (data.error || ''));
-                window.location.reload();
+                reloadDashboardPreservingScroll(newStatus);
             })
-            .catch(() => window.location.reload());
+            .catch(() => reloadDashboardPreservingScroll(newStatus));
     }
 
     document.querySelectorAll('.kanban-col').forEach(col => {
@@ -1715,6 +1964,203 @@
             document.querySelectorAll('.kanban-card, .kanban-piece').forEach(c => c.classList.remove('opacity-50'));
         });
     });
+
+    // ==========================================
+    // PRESERVACIÓN DE SCROLL DEL TABLERO KANBAN
+    // ==========================================
+    let isReloadingDashboard = false;
+
+    function reloadDashboardPreservingScroll(targetStatus) {
+        isReloadingDashboard = true;
+        try {
+            const board = document.querySelector('.kanban-board');
+            if (board) {
+                sessionStorage.setItem('kanban_board_scroll_left', String(board.scrollLeft));
+            }
+            const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+            sessionStorage.setItem('kanban_window_scroll_top', String(scrollY));
+
+            if (targetStatus) {
+                sessionStorage.setItem('kanban_target_column', targetStatus);
+            }
+            sessionStorage.setItem('kanban_is_reloading', '1');
+        } catch (e) {
+            console.error('Error saving kanban scroll before reload:', e);
+        }
+
+        window.location.reload();
+    }
+
+    function restoreKanbanScrollPosition() {
+        try {
+            const board = document.querySelector('.kanban-board');
+            const savedLeft = sessionStorage.getItem('kanban_board_scroll_left');
+            const savedTop = sessionStorage.getItem('kanban_window_scroll_top');
+            const targetCol = sessionStorage.getItem('kanban_target_column');
+
+            if (savedTop !== null) {
+                const topVal = parseInt(savedTop, 10);
+                if (!isNaN(topVal)) {
+                    window.scrollTo({ top: topVal, behavior: 'instant' });
+                }
+            }
+
+            if (board) {
+                if (savedLeft !== null) {
+                    const leftVal = parseInt(savedLeft, 10);
+                    if (!isNaN(leftVal)) {
+                        board.scrollLeft = leftVal;
+                    }
+                } else if (targetCol) {
+                    const colEl = board.querySelector(`[data-status="${targetCol}"]`);
+                    if (colEl) {
+                        colEl.scrollIntoView({ behavior: 'instant', inline: 'nearest', block: 'nearest' });
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error restoring kanban scroll:', e);
+        }
+    }
+
+    function initKanbanScrollPreservation() {
+        try {
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+        } catch (e) {}
+
+        const board = document.querySelector('.kanban-board');
+        if (board) {
+            board.addEventListener('scroll', function () {
+                if (!isReloadingDashboard && sessionStorage.getItem('kanban_is_reloading') !== '1') {
+                    sessionStorage.setItem('kanban_board_scroll_left', String(board.scrollLeft));
+                }
+            }, { passive: true });
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!isReloadingDashboard && sessionStorage.getItem('kanban_is_reloading') !== '1') {
+                const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+                sessionStorage.setItem('kanban_window_scroll_top', String(scrollY));
+            }
+        }, { passive: true });
+
+        restoreKanbanScrollPosition();
+        requestAnimationFrame(restoreKanbanScrollPosition);
+        setTimeout(restoreKanbanScrollPosition, 50);
+        setTimeout(restoreKanbanScrollPosition, 150);
+        setTimeout(() => {
+            sessionStorage.removeItem('kanban_is_reloading');
+        }, 500);
+    }
+
+    // ==========================================
+    // GESTIÓN Y PERSISTENCIA DE COLUMNAS EN MÉTRICAS
+    // ==========================================
+    const ALL_KANBAN_STATUSES = ['Presupuestado', 'En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'];
+    const STORAGE_KEY_METRIC_STATUSES = 'proprint3d_kanban_active_metric_columns';
+
+    function getActiveMetricStatuses() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY_METRIC_STATUSES);
+            if (saved !== null) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    return parsed;
+                }
+            }
+        } catch (e) {
+            console.error('Error al leer columnas activas de métricas:', e);
+        }
+        return [...ALL_KANBAN_STATUSES];
+    }
+
+    function saveActiveMetricStatuses(statuses) {
+        try {
+            localStorage.setItem(STORAGE_KEY_METRIC_STATUSES, JSON.stringify(statuses));
+        } catch (e) {
+            console.error('Error al guardar columnas activas de métricas:', e);
+        }
+    }
+
+    function onKanbanMetricCheckboxChange() {
+        const active = [];
+        document.querySelectorAll('.kanban-col-metric-checkbox').forEach(cb => {
+            if (cb.checked) {
+                const st = cb.getAttribute('data-status');
+                if (st) active.push(st);
+            }
+        });
+        saveActiveMetricStatuses(active);
+        updateDashboardMetrics();
+    }
+
+    function setAllKanbanMetricCheckboxes(enableAll = true) {
+        const statuses = enableAll ? [...ALL_KANBAN_STATUSES] : [];
+        document.querySelectorAll('.kanban-col-metric-checkbox').forEach(cb => {
+            cb.checked = enableAll;
+        });
+        saveActiveMetricStatuses(statuses);
+        updateDashboardMetrics();
+    }
+
+    function setExcludePresupuestadoMetricCheckboxes() {
+        const statuses = ALL_KANBAN_STATUSES.filter(s => s !== 'Presupuestado');
+        document.querySelectorAll('.kanban-col-metric-checkbox').forEach(cb => {
+            cb.checked = statuses.includes(cb.getAttribute('data-status'));
+        });
+        saveActiveMetricStatuses(statuses);
+        updateDashboardMetrics();
+    }
+
+    function updateDashboardMetrics() {
+        const activeStatuses = getActiveMetricStatuses();
+
+        // 1. Sincronizar checkboxes en cabeceras de columnas Kanban
+        document.querySelectorAll('.kanban-col-metric-checkbox').forEach(cb => {
+            const st = cb.getAttribute('data-status');
+            cb.checked = activeStatuses.includes(st);
+        });
+
+        // 2. Estilizar visualmente columnas Kanban incluidas vs excluidas
+        document.querySelectorAll('.kanban-col').forEach(col => {
+            const st = col.getAttribute('data-status');
+            const isIncluded = activeStatuses.includes(st);
+            if (isIncluded) {
+                col.classList.remove('opacity-60');
+            } else {
+                col.classList.add('opacity-60');
+            }
+        });
+
+        // 3. Renderizar badges en la barra informativa
+        const badgesContainer = document.getElementById('metrics-active-columns-badges');
+        if (badgesContainer) {
+            if (activeStatuses.length === 0) {
+                badgesContainer.innerHTML = '<span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-300 dark:border-rose-800">⚠️ Ninguna columna (totales en €0,00)</span>';
+            } else if (activeStatuses.length === ALL_KANBAN_STATUSES.length) {
+                badgesContainer.innerHTML = '<span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Todas las columnas</span>';
+            } else {
+                const badgeStyles = {
+                    'Presupuestado': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700',
+                    'En proceso': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border-amber-300 dark:border-amber-700',
+                    'Realizado': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300 border-teal-300 dark:border-teal-700',
+                    'Enviado': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-300 dark:border-blue-700',
+                    'Entregado': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border-purple-300 dark:border-purple-700',
+                    'Cobrado': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                };
+                badgesContainer.innerHTML = activeStatuses.map(st => {
+                    const cls = badgeStyles[st] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-300';
+                    return `<span class="text-[11px] px-2 py-0.5 rounded-md font-bold border ${cls}">${escapeHtml(st)}</span>`;
+                }).join('');
+            }
+        }
+
+        // 4. Delegar en filterTableLive para recalcular totales y actualizar la tabla con el buscador actual
+        const searchInput = document.getElementById('table-search-input');
+        filterTableLive(searchInput ? searchInput.value : '');
+    }
 
     // ==========================================
     // BUSCADOR EN VIVO DE LA TABLA
@@ -1852,13 +2298,17 @@
         const clearBtn = document.getElementById('btn-clear-table-search');
         const noResultsRow = document.getElementById('no-search-results-row');
         const countSpan = document.getElementById('visible-orders-count');
+        const countMetricLabel = document.getElementById('metrics-computed-count-label');
 
         const statSales = document.getElementById('stat-total-sales');
         const statProfit = document.getElementById('stat-total-profit');
         const statCosts = document.getElementById('stat-total-costs');
         const statAvgProfit = document.getElementById('stat-avg-profit');
 
+        const activeStatuses = getActiveMetricStatuses();
+
         let visibleCount = 0;
+        let countedMetricOrders = 0;
         let sumSales = 0;
         let sumProfit = 0;
         let sumCosts = 0;
@@ -1884,13 +2334,21 @@
                 row.style.display = '';
                 visibleCount++;
 
-                const p = parseFloat(row.dataset.price) || 0;
-                const pr = parseFloat(row.dataset.profit) || 0;
-                const c = parseFloat(row.dataset.cost) || 0;
+                // Solo sumar a las tarjetas métricas (Total Facturado, Ganancia Neta, etc.)
+                // si la columna de este estado está marcada en los checkboxes
+                if (activeStatuses.includes(status)) {
+                    const p = parseFloat(row.dataset.price) || 0;
+                    const pr = parseFloat(row.dataset.profit) || 0;
+                    const c = parseFloat(row.dataset.cost) || 0;
 
-                sumSales += p;
-                sumProfit += pr;
-                sumCosts += c;
+                    sumSales += p;
+                    sumProfit += pr;
+                    sumCosts += c;
+                    countedMetricOrders++;
+                    row.classList.remove('opacity-60');
+                } else {
+                    row.classList.add('opacity-60');
+                }
             } else {
                 row.style.display = 'none';
                 if (accordionRow) accordionRow.classList.add('hidden');
@@ -1907,7 +2365,11 @@
 
         if (countSpan) countSpan.textContent = visibleCount;
 
-        const avgProfit = visibleCount > 0 ? (sumProfit / visibleCount) : 0;
+        if (countMetricLabel) {
+            countMetricLabel.textContent = `${countedMetricOrders} pedidos en totales`;
+        }
+
+        const avgProfit = countedMetricOrders > 0 ? (sumProfit / countedMetricOrders) : 0;
         if (statSales) statSales.textContent = formatStatCurrency(sumSales);
         if (statProfit) statProfit.textContent = formatStatCurrency(sumProfit);
         if (statCosts) statCosts.textContent = formatStatCurrency(sumCosts);
@@ -2017,6 +2479,262 @@
         };
     }
 
+    // ==========================================
+    // MODAL DE RESUMEN GLOBAL Y RENTABILIDAD DEL PEDIDO (POPUP KANBAN)
+    // ==========================================
+    let currentSummaryOrderId = null;
+
+    function openOrderSummaryModal(orderId) {
+        const order = allOrdersData[orderId];
+        if (!order) {
+            alert('No se encontraron los datos del pedido #' + orderId);
+            return;
+        }
+        currentSummaryOrderId = orderId;
+
+        // Encabezado
+        const elId = document.getElementById('sm-modal-order-id');
+        const elClient = document.getElementById('sm-modal-client-name');
+        const elDate = document.getElementById('sm-modal-date');
+        const elDeadlineCont = document.getElementById('sm-modal-deadline-container');
+        const elDeadline = document.getElementById('sm-modal-deadline');
+        const elStatus = document.getElementById('sm-modal-status-badge');
+        const elPlatform = document.getElementById('sm-modal-platform');
+        const elShipping = document.getElementById('sm-modal-shipping');
+
+        if (elId) elId.textContent = order.id;
+        if (elClient) elClient.textContent = order.clientName;
+        if (elDate) elDate.textContent = order.orderDate || '-';
+
+        if (order.deadline) {
+            if (elDeadline) elDeadline.textContent = order.deadline;
+            if (elDeadlineCont) elDeadlineCont.classList.remove('hidden');
+        } else {
+            if (elDeadlineCont) elDeadlineCont.classList.add('hidden');
+        }
+
+        if (elStatus) {
+            elStatus.textContent = order.status;
+            elStatus.className = 'px-3 py-0.5 rounded-full text-xs font-black ' + getStatusBadgeClass(order.status);
+        }
+
+        if (elPlatform) elPlatform.textContent = order.platform || 'Directo / Taller';
+        if (elShipping) elShipping.textContent = order.shipping || 'Estándar';
+
+        // Cálculos del pedido y piezas
+        const items = order.items || [];
+        let totalQty = 0;
+        let totalWeight = 0;
+        let totalMins = 0;
+        let totalCost = 0;
+        let totalPrice = 0;
+
+        if (items.length > 0) {
+            items.forEach(it => {
+                const q = it.quantity || 1;
+                totalQty += q;
+                totalWeight += (it.weight || 0) * q;
+                totalMins += ((it.hours || 0) * 60 + (it.mins || 0)) * q;
+                totalCost += (it.totalCost || 0);
+                totalPrice += (it.totalPrice || 0);
+            });
+        } else {
+            totalQty = order.totalItemsCount || 1;
+            totalCost = order.totalCost || 0;
+            totalPrice = order.price || 0;
+            totalWeight = order.totalWeight || 0;
+        }
+
+        const finalPrice = order.price || totalPrice;
+        const finalCost = order.totalCost || totalCost;
+        let finalProfit = order.profit;
+        if (finalProfit === undefined || finalProfit === null) {
+            let baseP = order.hasVat ? (finalPrice / 1.21) : finalPrice;
+            let grossP = baseP - finalCost;
+            finalProfit = order.hasIrpf ? (grossP > 0 ? grossP * 0.79 : grossP) : grossP;
+        }
+
+        const margin = finalPrice > 0 ? ((finalProfit / finalPrice) * 100).toFixed(1) : '0';
+        const totH = Math.floor(totalMins / 60);
+        const totM = Math.round(totalMins % 60);
+
+        // Rellenar 7 KPIs
+        const kpiItems = document.getElementById('sm-kpi-items');
+        const kpiWeight = document.getElementById('sm-kpi-weight');
+        const kpiTime = document.getElementById('sm-kpi-time');
+        const kpiCost = document.getElementById('sm-kpi-cost');
+        const kpiPrice = document.getElementById('sm-kpi-price');
+        const kpiProfit = document.getElementById('sm-kpi-profit');
+        const kpiMargin = document.getElementById('sm-kpi-margin');
+
+        if (kpiItems) kpiItems.textContent = totalQty;
+        if (kpiWeight) kpiWeight.textContent = totalWeight > 0 ? totalWeight.toFixed(0) : (order.totalWeight ? Number(order.totalWeight).toFixed(0) : '0');
+        if (kpiTime) kpiTime.textContent = (totH > 0 || totM > 0) ? `${totH}h ${totM}m` : (order.totalPrintTimeStr || '0h 0m');
+        if (kpiCost) kpiCost.textContent = finalCost.toFixed(2);
+        if (kpiPrice) kpiPrice.textContent = finalPrice.toFixed(2);
+        if (kpiProfit) {
+            kpiProfit.textContent = finalProfit.toFixed(2);
+            kpiProfit.className = `text-xl font-black ${finalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`;
+        }
+        if (kpiMargin) kpiMargin.textContent = margin;
+
+        // Badges Fiscales (IVA e IRPF)
+        const taxBadgesEl = document.getElementById('sm-modal-tax-badges');
+        if (taxBadgesEl) {
+            let badges = [];
+            if (order.hasVat) {
+                badges.push('<span class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">🧾 IVA (+21%) Incluido</span>');
+            }
+            if (order.hasIrpf) {
+                badges.push('<span class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">📉 Retención IRPF (-21%)</span>');
+            }
+            if (badges.length === 0) {
+                badges.push('<span class="text-xs text-gray-400">Sin retenciones especiales</span>');
+            }
+            taxBadgesEl.innerHTML = badges.join(' ');
+        }
+
+        // Información de Cobros / Señal
+        const payInfoEl = document.getElementById('sm-modal-payment-info');
+        if (payInfoEl) {
+            const payData = (typeof ordersPaymentData !== 'undefined' && ordersPaymentData[orderId]) ? ordersPaymentData[orderId] : {};
+            const depAmount = payData.depositAmount || order.depositAmount || 0;
+            const depMethod = payData.depositMethod || order.depositMethod || 'Señal';
+            const finalMethod = payData.finalMethod || order.finalPaymentMethod || 'Cobro';
+
+            let payHtml = '';
+            if (order.status === 'Cobrado') {
+                if (depAmount > 0) {
+                    const rem = Math.max(0, finalPrice - depAmount);
+                    payHtml = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">💰 Cobrado 100%:</span> Señal €${depAmount.toFixed(2)} (${escapeHtml(depMethod)}) + Cobro final €${rem.toFixed(2)} (${escapeHtml(finalMethod)})`;
+                } else {
+                    payHtml = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">💰 Cobrado 100%:</span> Total €${finalPrice.toFixed(2)} (${escapeHtml(finalMethod || 'Directo')})`;
+                }
+            } else if (depAmount > 0) {
+                const rem = Math.max(0, finalPrice - depAmount);
+                payHtml = `<span class="text-amber-600 dark:text-amber-400 font-bold">🤝 Señal recibida:</span> €${depAmount.toFixed(2)} (${escapeHtml(depMethod)}) · <span class="font-bold text-gray-800 dark:text-gray-200">Pendiente: €${rem.toFixed(2)}</span>`;
+            } else {
+                payHtml = `<span class="text-gray-400 dark:text-gray-500 italic">⏳ Pendiente de cobro (€${finalPrice.toFixed(2)})</span>`;
+            }
+            payInfoEl.innerHTML = payHtml;
+        }
+
+        // Tabla de Desglose de Piezas
+        const tbody = document.getElementById('sm-modal-pieces-tbody');
+        const countBadge = document.getElementById('sm-modal-pieces-count');
+        if (countBadge) countBadge.textContent = items.length;
+
+        if (tbody) {
+            tbody.innerHTML = '';
+            items.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition border-b border-gray-100 dark:border-gray-800';
+
+                const itH = Math.floor(((item.hours || 0) * 60 + (item.mins || 0)) / 60);
+                const itM = Math.round(((item.hours || 0) * 60 + (item.mins || 0)) % 60);
+                const itProfit = (item.totalPrice || 0) - (item.totalCost || 0);
+
+                let imgHtml = item.imageUrl
+                    ? `<img src="${item.imageUrl}" class="w-9 h-9 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">`
+                    : `<div class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-sm flex-shrink-0">🧩</div>`;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3">
+                        <div class="flex items-center gap-2.5">
+                            ${imgHtml}
+                            <div class="min-w-0">
+                                <div class="font-bold text-gray-900 dark:text-white truncate">${escapeHtml(item.description)}</div>
+                                ${item.notes ? `<div class="text-xs text-amber-600 dark:text-amber-400 truncate max-w-xs">📝 ${escapeHtml(item.notes)}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-2 text-center font-bold text-gray-800 dark:text-gray-200">
+                        ${item.quantity || 1}
+                    </td>
+                    <td class="py-2.5 px-3 text-xs text-gray-500 dark:text-gray-400">
+                        <div>⚖️ ${((item.weight || 0) * (item.quantity || 1)).toFixed(0)}g <span class="text-[10px]">(${item.weight || 0}g/u)</span></div>
+                        <div>⏱️ ${itH}h ${itM}m</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                        <div class="font-bold text-red-500">€${(item.totalCost || 0).toFixed(2)}</div>
+                        <div class="text-[11px] text-gray-400">€${(item.unitCost || 0).toFixed(2)}/u</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                        <div class="font-black text-gray-900 dark:text-white">€${(item.totalPrice || 0).toFixed(2)}</div>
+                        <div class="text-[11px] text-gray-400">€${(item.unitPrice || 0).toFixed(2)}/u</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold ${getStatusBadgeClass(item.status)}">
+                            ${escapeHtml(item.status || order.status)}
+                        </span>
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                        <span class="font-bold ${itProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">
+                            €${itProfit.toFixed(2)}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Notas del Pedido
+        const notesContainer = document.getElementById('sm-modal-notes-container');
+        const notesText = document.getElementById('sm-modal-notes-text');
+        if (order.notes && order.notes.trim()) {
+            if (notesText) notesText.textContent = order.notes;
+            if (notesContainer) notesContainer.classList.remove('hidden');
+        } else {
+            if (notesContainer) notesContainer.classList.add('hidden');
+        }
+
+        const modal = document.getElementById('order-summary-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeOrderSummaryModal() {
+        const modal = document.getElementById('order-summary-modal');
+        if (modal) modal.classList.add('hidden');
+        currentSummaryOrderId = null;
+    }
+
+    function openEditFromSummaryModal() {
+        const oid = currentSummaryOrderId;
+        closeOrderSummaryModal();
+        if (oid) {
+            openEditOrderModal(oid);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'Presupuestado':
+                return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300';
+            case 'En proceso':
+                return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
+            case 'Realizado':
+                return 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300';
+            case 'Enviado':
+                return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
+            case 'Entregado':
+                return 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300';
+            case 'Cobrado':
+                return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30';
+            default:
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+        }
+    }
+
     function openEditOrderModal(orderId) {
         const order = allOrdersData[orderId];
         if (!order) {
@@ -2036,8 +2754,8 @@
 
         // Formulario
         document.getElementById('edit-order-client-name').value = order.clientName || '';
-        document.getElementById('edit-order-date').value = order.orderDate || '';
-        document.getElementById('edit-order-deadline').value = order.deadline || '';
+        document.getElementById('edit-order-date').value = order.rawOrderDate || order.orderDate || '';
+        document.getElementById('edit-order-deadline').value = order.rawDeadline || order.deadline || '';
         document.getElementById('edit-order-status').value = order.status || 'Presupuestado';
         document.getElementById('edit-order-platform').value = order.platform || '';
         document.getElementById('edit-order-shipping').value = order.shipping || '';
@@ -2601,7 +3319,7 @@
             .then(data => {
                 if (data.success) {
                     closeEditOrderModal();
-                    window.location.reload();
+                    reloadDashboardPreservingScroll();
                 } else {
                     alert('Error al guardar pedido: ' + (data.error || ''));
                     btn.disabled = false;
@@ -2632,7 +3350,7 @@
             .then(data => {
                 if (data.success) {
                     closeEditOrderModal();
-                    window.location.reload();
+                    reloadDashboardPreservingScroll();
                 } else {
                     alert('Error al eliminar pedido: ' + (data.error || ''));
                 }
@@ -2645,6 +3363,7 @@
         if (e.key === 'Escape') {
             closePaymentModal();
             closeEditOrderModal();
+            closeOrderSummaryModal();
         }
     });
 
@@ -2673,6 +3392,10 @@
                 window.location.replace(window.location.pathname + '?' + params.toString());
             }
         }
+
+        // Inicializar preservación de scroll del Kanban y cálculo de métricas
+        initKanbanScrollPreservation();
+        updateDashboardMetrics();
     });
 </script>
 {% endblock %}
