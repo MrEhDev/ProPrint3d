@@ -356,6 +356,7 @@ class Order(models.Model):
     description = models.CharField(max_length=250, blank=True, null=True, help_text="Descripción del Pedido (Ej. Fiat Panda Rally)")
     
     client_name = models.CharField(max_length=150, help_text="Nombre de la Persona")
+    client_contact = models.CharField(max_length=150, blank=True, null=True, default='', help_text="Email, teléfono o usuario de contacto")
     
     # Métricas de fabricación y costes por unidad
     weight_grams = models.FloatField(null=True, blank=True, help_text="Peso estimado en gramos por unidad")

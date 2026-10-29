@@ -172,19 +172,37 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in quote.items.all %}
-            <tr>
-                <td>
-                    <strong>{{ item.custom_title }}</strong>
-                    {% if item.product.dimensions %}
-                    <br><span style="font-size: 9pt; color: #64748b;">Medidas: {{ item.product.dimensions }}</span>
-                    {% endif %}
-                </td>
-                <td class="text-center">{{ item.quantity }}</td>
-                <td class="text-right">€{{ item.unit_price }}</td>
-                <td class="text-right">€{{ item.calculated_cost }}</td>
-            </tr>
-            {% endfor %}
+            {% if quote.items.all %}
+                {% for item in quote.items.all %}
+                <tr>
+                    <td>
+                        <strong>{{ item.custom_title }}</strong>
+                        {% if item.product.dimensions %}
+                        <br><span style="font-size: 9pt; color: #64748b;">Medidas: {{ item.product.dimensions }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-right">€{{ item.unit_price }}</td>
+                    <td class="text-right">€{{ item.calculated_cost }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                {% for item in quote.items %}
+                <tr>
+                    <td>
+                        <strong>{{ item.custom_title }}</strong>
+                        {% if item.dimensions %}
+                        <br><span style="font-size: 9pt; color: #64748b;">Medidas: {{ item.dimensions }}</span>
+                        {% elif item.product.dimensions %}
+                        <br><span style="font-size: 9pt; color: #64748b;">Medidas: {{ item.product.dimensions }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-right">€{{ item.unit_price }}</td>
+                    <td class="text-right">€{{ item.calculated_cost }}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 

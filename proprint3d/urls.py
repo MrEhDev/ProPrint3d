@@ -31,6 +31,7 @@ urlpatterns = [
     # CRM de Pedidos
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
     path('crm/order/new/', views.order_create_view, name='order_create'),
+    path('crm/order/<int:order_id>/quote-pdf/', views.generate_order_quote_pdf_view, name='generate_order_quote_pdf'),
     path('crm/api/order/<int:order_id>/status/', views.update_order_status_api, name='update_order_status_api'),
     path('crm/api/order/<int:order_id>/cost/', views.update_order_cost_api, name='update_order_cost_api'),
     path('crm/api/order/<int:order_id>/dates/', views.update_order_dates_api, name='update_order_dates_api'),

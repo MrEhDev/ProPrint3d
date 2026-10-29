@@ -271,11 +271,38 @@ def quote_builder_view(request):
 # =====================================================================
 from django.template.loader import render_to_string
 from weasyprint import HTML
+import unicodedata
+import re
+import datetime
+
+def get_quote_pdf_filename(client_name, date_val=None):
+    """
+    Genera el nombre de archivo con formato: Presupuesto_Nombre_AÑOMESDIA.pdf
+    Ejemplo: Presupuesto_Juan_20261030.pdf
+    """
+    if not date_val:
+        date_str = datetime.date.today().strftime('%Y%m%d')
+    elif isinstance(date_val, (datetime.date, datetime.datetime)):
+        date_str = date_val.strftime('%Y%m%d')
+    else:
+        try:
+            date_str = datetime.date.fromisoformat(str(date_val)).strftime('%Y%m%d')
+        except Exception:
+            date_str = datetime.date.today().strftime('%Y%m%d')
+
+    # Normalizar acentos a ASCII y sanitizar caracteres no válidos en filenames
+    normalized = unicodedata.normalize('NFKD', str(client_name or '')).encode('ASCII', 'ignore').decode('utf-8')
+    clean_name = re.sub(r'[^\w\-]', '_', normalized).strip('_')
+    clean_name = re.sub(r'_+', '_', clean_name)
+    if not clean_name:
+        clean_name = 'Cliente'
+
+    return f"Presupuesto_{clean_name}_{date_str}.pdf"
 
 def generate_quote_pdf_view(request, quote_id):
     """
     Busca el presupuesto, genera un PDF en memoria usando una plantilla HTML
-    y lo devuelve como archivo descargable.
+    y lo devuelve como archivo descargable con el nombre: Presupuesto_Nombre_AÑOMESDIA.pdf
     """
     quote = get_object_or_404(Quote, id=quote_id)
     
@@ -289,10 +316,88 @@ def generate_quote_pdf_view(request, quote_id):
     # Crear PDF con WeasyPrint
     pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
     
-    # Retornar como respuesta HTTP
+    filename = get_quote_pdf_filename(quote.client_name, quote.created_at)
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Presupuesto_{quote.id}_{quote.client_name}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
+    return response
+
+@staff_member_required
+def generate_order_quote_pdf_view(request, order_id):
+    """
+    Genera el PDF del presupuesto directamente desde los detalles de un Pedido (Order) del CRM.
+    Nombre de archivo: Presupuesto_Nombre_AÑOMESDIA.pdf (ej: Presupuesto_Juan_20261030.pdf)
+    """
+    order = get_object_or_404(Order.objects.prefetch_related('items', 'items__product'), id=order_id)
+    
+    items = []
+    order_items = list(order.items.all())
+    if order_items:
+        for item in order_items:
+            unit_price_val = float(item.unit_price or 0.00)
+            qty_val = int(item.quantity or 1)
+            line_price_val = float(item.price or (unit_price_val * qty_val))
+            items.append({
+                'custom_title': item.description or (item.product.title if item.product else 'Pieza a medida'),
+                'product': item.product,
+                'quantity': qty_val,
+                'unit_price': f"{unit_price_val:.2f}",
+                'calculated_cost': f"{line_price_val:.2f}",
+                'dimensions': item.product.dimensions if (item.product and item.product.dimensions) else None
+            })
+    else:
+        unit_price_val = float(order.unit_price or order.price or 0.00)
+        qty_val = int(order.quantity or 1)
+        line_price_val = float(order.price or (unit_price_val * qty_val))
+        items.append({
+            'custom_title': order.description or (order.product.title if order.product else 'Pieza a medida'),
+            'product': order.product,
+            'quantity': qty_val,
+            'unit_price': f"{unit_price_val:.2f}",
+            'calculated_cost': f"{line_price_val:.2f}",
+            'dimensions': order.product.dimensions if (order.product and order.product.dimensions) else None
+        })
+
+    total_val = float(order.price or 0.00)
+    include_tax = order.has_vat
+    if include_tax:
+        subtotal_val = round(total_val / 1.21, 2)
+        tax_amount_val = round(total_val - subtotal_val, 2)
+        tax_name = "IVA incl."
+        tax_percentage = 21.00
+    else:
+        subtotal_val = total_val
+        tax_amount_val = 0.00
+        tax_name = "Sin IVA"
+        tax_percentage = 0.00
+
+    quote_data = {
+        'id': order.id,
+        'client_name': order.client_name,
+        'client_contact': order.client_contact or 'No especificado',
+        'created_at': order.order_date or datetime.date.today(),
+        'notes': order.notes,
+        'items': items,
+        'subtotal': f"{subtotal_val:.2f}",
+        'include_tax': include_tax,
+        'tax_name': tax_name,
+        'tax_percentage': tax_percentage,
+        'tax_amount': f"{tax_amount_val:.2f}",
+        'total_price': f"{total_val:.2f}"
+    }
+
+    context = {
+        'quote': quote_data,
+        'order': order,
+        'request': request,
+    }
+    
+    html_string = render_to_string('quote_pdf.html', context)
+    pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
+    
+    filename = get_quote_pdf_filename(order.client_name, order.order_date or datetime.date.today())
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 # =====================================================================
@@ -687,6 +792,8 @@ def update_order_full_api(request, order_id):
             # 1. Cabecera del pedido
             if 'client_name' in data and data['client_name'].strip():
                 order.client_name = data['client_name'].strip()
+            if 'client_contact' in data:
+                order.client_contact = data['client_contact'].strip() if data['client_contact'] else ''
             if 'order_date' in data and data['order_date']:
                 order.order_date = datetime.date.fromisoformat(data['order_date'])
             if 'deadline' in data:
@@ -918,7 +1025,7 @@ class SmartOrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
-            'client_name', 'order_date', 'deadline', 'status', 'quantity', 
+            'client_name', 'client_contact', 'order_date', 'deadline', 'status', 'quantity', 
             'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs',
             'unit_cost', 'total_cost', 'unit_price', 'price',
             'shipped_date', 'delivered_date', 'paid_date',
@@ -927,6 +1034,7 @@ class SmartOrderForm(forms.ModelForm):
             'deposit_amount', 'deposit_method', 'final_payment_method', 'payment_notes'
         ]
         widgets = {
+            'client_contact': forms.TextInput(attrs={'placeholder': 'Email, teléfono o usuario de contacto'}),
             'order_date': forms.DateInput(attrs={'type': 'date'}),
             'deadline': forms.DateInput(attrs={'type': 'date'}),
             'shipped_date': forms.DateInput(attrs={'type': 'date'}),
@@ -947,6 +1055,7 @@ class SmartOrderForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['client_contact'].required = False
         self.fields['price'].required = False
         self.fields['unit_price'].required = False
         self.fields['weight_grams'].required = False
@@ -978,6 +1087,7 @@ def order_create_view(request):
     if request.method == 'POST':
         pieces_json = request.POST.get('pieces_json', '').strip()
         client_name = request.POST.get('client_name', '').strip()
+        client_contact = request.POST.get('client_contact', '').strip()
         order_date = request.POST.get('order_date')
         deadline = request.POST.get('deadline') or None
         platform = request.POST.get('platform', '').strip()
@@ -1010,6 +1120,7 @@ def order_create_view(request):
         if client_name and order_date and parsed_pieces:
             order = Order.objects.create(
                 client_name=client_name,
+                client_contact=client_contact,
                 order_date=order_date,
                 deadline=deadline,
                 platform=platform,
@@ -1087,6 +1198,8 @@ def order_create_view(request):
             order.payment_notes = payment_notes_val
             order.has_vat = has_vat
             order.has_irpf = has_irpf
+            if client_contact:
+                order.client_contact = client_contact
             order.save()
             OrderItem.objects.create(
                 order=order,
