@@ -72,7 +72,7 @@ class Category(models.Model):
 # de presupuestos (peso, tiempo de impresión).
 # =====================================================================
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
+    categories = models.ManyToManyField(Category, blank=True, related_name='products')
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
@@ -118,6 +118,16 @@ class Product(models.Model):
             _, ext = os.path.splitext(self.model_file.name)
             return ext.lower().replace('.', '')
         return ''
+
+    @property
+    def category(self):
+        """Devuelve la primera categoría asignada para compatibilidad regresiva."""
+        return self.categories.first()
+
+    @property
+    def category_names(self):
+        """Devuelve los nombres de las categorías separados por comas."""
+        return ", ".join(c.name for c in self.categories.all())
 
     def save(self, *args, **kwargs):
         """

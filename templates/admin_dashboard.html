@@ -74,15 +74,24 @@
                     {{ product_form.title }}
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría</label>
-                        {{ product_form.category }}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                        <label class="block text-sm font-semibold text-gray-200 mb-2">Categorías <span class="text-xs font-normal text-gray-400">(selecciona varias)</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                            {% for choice in product_form.categories %}
+                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-800 cursor-pointer transition-colors text-sm text-gray-300">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% empty %}
+                            <p class="text-xs text-gray-500">Sin categorías previas</p>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">o Nueva
-                            Categoría</label>
+                        <label class="block text-sm font-semibold text-gray-200 mb-2">o Nueva(s) Categoría(s)</label>
                         {{ product_form.new_category }}
+                        <p class="text-xs text-gray-400 mt-1">{{ product_form.new_category.help_text }}</p>
                     </div>
                 </div>
 

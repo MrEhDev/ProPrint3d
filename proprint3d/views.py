@@ -23,9 +23,9 @@ def catalog_view(request):
     """Renderiza la vista principal pública con productos y filtros."""
     # Admins ven todos los productos (activos e inactivos), el público solo los activos
     if request.user.is_staff:
-        products = Product.objects.all().order_by('-created_at')
+        products = Product.objects.all().prefetch_related('categories').order_by('-created_at')
     else:
-        products = Product.objects.filter(is_active=True).order_by('-created_at')
+        products = Product.objects.filter(is_active=True).prefetch_related('categories').order_by('-created_at')
     categories = Category.objects.all()
     
     # Manejo de búsqueda por texto y categoría
@@ -42,7 +42,7 @@ def catalog_view(request):
         if category_slug == 'ofertas':
             products = products.filter(is_on_sale=True)
         else:
-            products = products.filter(category__slug=category_slug)
+            products = products.filter(categories__slug=category_slug).distinct()
         
     context = {
         'products': products,
@@ -66,16 +66,16 @@ def product_detail_view(request, slug):
     """Muestra detalles extendidos de una pieza del catálogo."""
     # Admins pueden ver productos ocultos (is_active=False)
     if request.user.is_staff:
-        product = get_object_or_404(Product, slug=slug)
+        product = get_object_or_404(Product.objects.prefetch_related('categories'), slug=slug)
     else:
-        product = get_object_or_404(Product, slug=slug, is_active=True)
+        product = get_object_or_404(Product.objects.prefetch_related('categories'), slug=slug, is_active=True)
         
     related_products = []
-    if product.category:
+    if product.categories.exists():
         related_products = Product.objects.filter(
-            category=product.category, 
+            categories__in=product.categories.all(), 
             is_active=True
-        ).exclude(id=product.id).order_by('?')[:5]
+        ).exclude(id=product.id).distinct().order_by('?')[:5]
     
     absolute_url = request.build_absolute_uri()
     wa_message = f"Hola ProPrint3d, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
@@ -101,13 +101,15 @@ def product_edit_view(request, slug):
         form = ProductFromCalcForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save(commit=False)
-            new_category_name = form.cleaned_data.get('new_category')
-            
-            if new_category_name:
-                cat, _ = Category.objects.get_or_create(name=new_category_name)
-                product.category = cat
-            
             product.save()
+            form.save_m2m()
+            
+            new_category_str = form.cleaned_data.get('new_category', '')
+            if new_category_str:
+                names = [c.strip() for c in new_category_str.split(',') if c.strip()]
+                for name in names:
+                    cat, _ = Category.objects.get_or_create(name=name)
+                    product.categories.add(cat)
             
             # Manejar nuevas imágenes
             gallery_images = request.FILES.getlist('gallery_images')
@@ -184,14 +186,15 @@ def admin_dashboard_view(request):
             product_form_post = ProductFromCalcForm(request.POST, request.FILES)
             if product_form_post.is_valid():
                 product = product_form_post.save(commit=False)
-                new_category_name = product_form_post.cleaned_data.get('new_category')
-                
-                # Si escribió una nueva categoría, crearla y asignarla
-                if new_category_name:
-                    cat, _ = Category.objects.get_or_create(name=new_category_name)
-                    product.category = cat
-                
                 product.save()
+                product_form_post.save_m2m()
+                
+                new_category_str = product_form_post.cleaned_data.get('new_category', '')
+                if new_category_str:
+                    names = [c.strip() for c in new_category_str.split(',') if c.strip()]
+                    for name in names:
+                        cat, _ = Category.objects.get_or_create(name=name)
+                        product.categories.add(cat)
                 
                 # Manejar múltiples imágenes para ProductImage
                 gallery_images = request.FILES.getlist('gallery_images')
@@ -574,7 +577,7 @@ def crm_dashboard_view(request):
     if orders_for_stats.count() > 0:
         avg_profit = total_profit / orders_for_stats.count()
         
-    products_qs = Product.objects.filter(is_active=True).select_related('category')
+    products_qs = Product.objects.filter(is_active=True).prefetch_related('categories')
     products_with_id = []
     for p in products_qs:
         products_with_id.append({
@@ -588,7 +591,7 @@ def crm_dashboard_view(request):
             'print_time_minutes': p.print_time_minutes or 0,
             'extra_costs': float(p.extra_costs or 0.0),
             'image_url': p.main_image.url if p.main_image else None,
-            'category_name': p.category.name if p.category else 'Catálogo'
+            'category_name': p.category_names or 'Catálogo'
         })
 
     context = {
@@ -1221,7 +1224,7 @@ def order_create_view(request):
     else:
         form = SmartOrderForm()
     
-    products_qs = Product.objects.filter(is_active=True).select_related('category')
+    products_qs = Product.objects.filter(is_active=True).prefetch_related('categories')
     products_with_id = []
     for p in products_qs:
         products_with_id.append({
@@ -1235,7 +1238,7 @@ def order_create_view(request):
             'print_time_minutes': p.print_time_minutes or 0,
             'extra_costs': float(p.extra_costs or 0.0),
             'image_url': p.main_image.url if p.main_image else None,
-            'category_name': p.category.name if p.category else 'Catálogo'
+            'category_name': p.category_names or 'Catálogo'
         })
     products = [p['title'] for p in products_with_id]
     

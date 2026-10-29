@@ -64,17 +64,22 @@ class ProductFromCalcForm(forms.ModelForm):
     directamente en la base de datos del catálogo.
     """
     new_category = forms.CharField(
-        max_length=100, 
+        max_length=200, 
         required=False, 
-        label="Nueva Categoría",
-        help_text="Si seleccionas una existente, esto se ignorará.",
-        widget=forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'})
+        label="Nueva(s) Categoría(s)",
+        help_text="Añade una o varias separadas por coma (ej: Navidad, Decoración).",
+        widget=forms.TextInput(attrs={
+            'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500',
+            'placeholder': 'Ej: Navidad, Decoración'
+        })
     )
     
-    category = forms.ModelChoiceField(
+    categories = forms.ModelMultipleChoiceField(
         queryset=Category.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'})
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-checkbox h-4 w-4 text-cyan-600 bg-gray-800 border-gray-600 rounded focus:ring-cyan-500'
+        })
     )
     
     gallery_images = MultipleFileField(
@@ -84,10 +89,9 @@ class ProductFromCalcForm(forms.ModelForm):
     
     class Meta:
         model = Product
-        fields = ['title', 'category', 'new_category', 'description', 'price', 'is_on_sale', 'sale_price', 'is_active', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs', 'dimensions', 'makerworld_url', 'main_image', 'model_file']
+        fields = ['title', 'categories', 'new_category', 'description', 'price', 'is_on_sale', 'sale_price', 'is_active', 'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs', 'dimensions', 'makerworld_url', 'main_image', 'model_file']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500'}),
-            'category': forms.Select(attrs={'class': 'form-select w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'required': False}),
             'description': forms.Textarea(attrs={'class': 'form-textarea w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'rows': 3, 'required': False}),
             'price': forms.NumberInput(attrs={'class': 'form-input w-full rounded-md bg-gray-800 text-white border-gray-600 focus:border-cyan-500', 'step': '0.01'}),
             'is_on_sale': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-cyan-600 bg-gray-800 border-gray-600 rounded focus:ring-cyan-500 focus:ring-offset-gray-900', 'required': False}),

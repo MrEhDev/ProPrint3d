@@ -36,14 +36,27 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría Existente</label>
-                    {{ form.category }}
+                <div class="bg-gray-50 dark:bg-gray-800/60 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        Categorías Existentes <span class="text-xs font-normal text-gray-400">(puedes marcar varias)</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {% for choice in form.categories %}
+                        <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600 text-sm text-gray-800 dark:text-gray-200">
+                            {{ choice.tag }}
+                            <span class="font-medium">{{ choice.choice_label }}</span>
+                        </label>
+                        {% empty %}
+                        <p class="text-xs text-gray-500">No hay categorías creadas aún.</p>
+                        {% endfor %}
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">O Nueva Categoría</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        + Añadir Nueva(s) Categoría(s)
+                    </label>
                     {{ form.new_category }}
-                    <p class="text-xs text-gray-500 mt-1">{{ form.new_category.help_text }}</p>
+                    <p class="text-xs text-gray-500 mt-1.5">{{ form.new_category.help_text }}</p>
                 </div>
             </div>
             

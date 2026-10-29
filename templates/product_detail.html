@@ -107,7 +107,17 @@
 
             <!-- Info -->
             <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                <div class="uppercase tracking-wide text-sm text-primary font-bold mb-2">{{          product.category.name|default:"General" }}</div>
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    {% for cat in product.categories.all %}
+                    <a href="{% url 'catalog' %}?category={{ cat.slug }}" class="inline-flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors duration-200 shadow-sm" title="Ver más productos en {{ cat.name }}">
+                        {{ cat.name }}
+                    </a>
+                    {% empty %}
+                    <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                        General
+                    </span>
+                    {% endfor %}
+                </div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">{{ product.title }}
                 </h2>
 

@@ -7,11 +7,16 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'price', 'is_on_sale', 'is_active')
-    list_filter = ('category', 'is_on_sale', 'is_active')
+    list_display = ('title', 'display_categories', 'price', 'is_on_sale', 'is_active')
+    list_filter = ('categories', 'is_on_sale', 'is_active')
     search_fields = ('title', 'description')
+    filter_horizontal = ('categories',)
     prepopulated_fields = {'slug': ('title',)}
     inlines = [ProductImageInline]
+
+    def display_categories(self, obj):
+        return ", ".join([c.name for c in obj.categories.all()]) or "-"
+    display_categories.short_description = 'Categorías'
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

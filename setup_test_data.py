@@ -26,25 +26,25 @@ cat_func, _ = Category.objects.get_or_create(
 
 # Create Products
 if not Product.objects.filter(title='Maceta Minimalista Low-Poly').exists():
-    Product.objects.create(
+    p1 = Product.objects.create(
         title='Maceta Minimalista Low-Poly',
-        category=cat_deco,
         description='Maceta geométrica con diseño low poly moderno. Ideal para plantas pequeñas o suculentas. Impresa en PLA biodegradable.',
         price=18.50,
         weight_grams=110.0,
         print_time_hours=4.5,
         is_active=True
     )
+    p1.categories.add(cat_deco)
     print("Producto de prueba 1 creado.")
 
 if not Product.objects.filter(title='Soporte para Auriculares de Mesa').exists():
-    Product.objects.create(
+    p2 = Product.objects.create(
         title='Soporte para Auriculares de Mesa',
-        category=cat_func,
         description='Soporte de escritorio muy estable y resistente. Mantiene tus auriculares seguros y tu mesa organizada. Impreso en PETG de alta resistencia.',
         price=24.90,
         weight_grams=165.0,
         print_time_hours=7.2,
         is_active=True
     )
+    p2.categories.add(cat_func)
     print("Producto de prueba 2 creado.")
