@@ -426,7 +426,7 @@ checked
             if (w > 0 && totalHours > 0) {
                 const cost_filament = 0.02 * w;
                 const cost_energy = 0.15 * 0.12 * totalHours;
-                const cost_wear = 0.025 * totalHours;
+                const cost_wear = 0.30 * totalHours;
 
                 const cost_subtotal = cost_filament + cost_energy + cost_wear;
                 const error_margin = cost_subtotal * 0.15;

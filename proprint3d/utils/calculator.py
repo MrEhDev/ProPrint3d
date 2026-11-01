@@ -33,7 +33,7 @@ def calculate_print_costs(weight_grams, hours, minutes, other_materials_cost=0.0
     # -------------------------------------------------------------
     cost_filament = 0.02 * float(weight_grams)
     cost_energy = 0.15 * 0.12 * total_hours
-    cost_wear = 0.025 * total_hours
+    cost_wear = 0.30 * total_hours
     
     # Subtotal directo sin margen de error
     cost_subtotal = cost_filament + cost_energy + cost_wear + float(other_materials_cost)

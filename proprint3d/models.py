@@ -111,6 +111,7 @@ class Product(models.Model):
             return os.path.basename(self.model_file.name)
         return None
 
+
     @property
     def model_file_extension(self):
         if self.model_file:
@@ -180,7 +181,7 @@ class Product(models.Model):
         if w > 0 and total_hours > 0:
             cost_filament = 0.02 * w
             cost_energy = 0.15 * 0.12 * total_hours
-            cost_wear = 0.025 * total_hours
+            cost_wear = 0.30 * total_hours
             
             cost_subtotal = cost_filament + cost_energy + cost_wear
             error_margin = cost_subtotal * 0.15
@@ -435,7 +436,7 @@ class Order(models.Model):
         if w > 0 and total_hours > 0:
             cost_filament = 0.02 * w
             cost_energy = 0.15 * 0.12 * total_hours
-            cost_wear = 0.025 * total_hours
+            cost_wear = 0.30 * total_hours
             cost_subtotal = cost_filament + cost_energy + cost_wear
             error_margin = cost_subtotal * 0.15
             return round(cost_subtotal + error_margin + extra, 2)
@@ -502,6 +503,35 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def hourly_rate_info(self):
+        """Ratio de rentabilidad horaria de la pieza individual (€/h)."""
+        h = float(self.print_time_hours or 0) + (float(self.print_time_minutes or 0) / 60.0)
+        total_item_hours = h * (self.quantity or 1)
+        if total_item_hours <= 0:
+            return None
+        try:
+            p = float(self.profit)
+        except Exception:
+            return None
+        rate = round(p / total_item_hours, 2)
+        rate_str = f"{rate:.2f} €/h"
+        if rate >= 6.0:
+            badge_css = 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+            icon = '⚡'
+        elif rate >= 3.0:
+            badge_css = 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+            icon = '⚡'
+        else:
+            badge_css = 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30 font-bold'
+            icon = '⚠️'
+        return {
+            'rate': rate,
+            'rate_str': rate_str,
+            'icon': icon,
+            'badge_css': badge_css
+        }
+
+    @property
     def profit(self):
         """Calcula la ganancia real descontando el coste de producción, considerando IVA e IRPF si aplican."""
         import decimal
@@ -540,6 +570,122 @@ class Order(models.Model):
         if not items:
             return False
         return all(i.status in ['Realizado', 'Enviado', 'Entregado', 'Cobrado'] for i in items)
+
+    @property
+    def whatsapp_url(self):
+        """
+        Si el contacto del cliente contiene un número móvil (ej. 6XXXXXXXX, 7XXXXXXXX, +34..., 0034...),
+        devuelve la URL de WhatsApp (https://wa.me/34XXXXXXXXX). Si no es un teléfono, devuelve None.
+        """
+        import re
+        if not self.client_contact:
+            return None
+        raw = str(self.client_contact).strip()
+        if '@' in raw:
+            return None
+        digits = re.sub(r'\D', '', raw)
+        if not digits:
+            return None
+        # Teléfono móvil español de 9 dígitos empezando por 6 o 7
+        if len(digits) == 9 and digits[0] in ('6', '7'):
+            return f"https://wa.me/34{digits}"
+        # Si ya incluye prefijo 34 (11 dígitos) y empieza por 6 o 7
+        elif len(digits) == 11 and digits.startswith('34') and digits[2] in ('6', '7'):
+            return f"https://wa.me/{digits}"
+        # Si incluye prefijo 0034 (13 dígitos)
+        elif len(digits) == 13 and digits.startswith('0034') and digits[4] in ('6', '7'):
+            return f"https://wa.me/{digits[2:]}"
+        # Otros teléfonos internacionales de al menos 9 dígitos
+        elif len(digits) >= 9:
+            if raw.startswith('+'):
+                return f"https://wa.me/{digits}"
+            if len(digits) == 9:
+                return f"https://wa.me/34{digits}"
+            return f"https://wa.me/{digits}"
+        return None
+
+    @property
+    def deadline_info(self):
+        """
+        Calcula el estado y código de color de la fecha límite según el tiempo restante
+        y la duración acumulada de impresión.
+        Cuando el pedido pasa a 'Enviado', 'Entregado' o 'Cobrado', ya no se muestra la fecha límite.
+        """
+        import datetime
+        if not self.deadline:
+            return None
+        
+        # Si el pedido ya ha sido enviado, entregado o cobrado, ya no se muestra
+        if self.status in ['Enviado', 'Entregado', 'Cobrado']:
+            return None
+        
+        today = datetime.date.today()
+        days_left = (self.deadline - today).days
+
+        # Duración acumulada de impresión en horas
+        items = list(self.items.all())
+        if items:
+            total_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in items)
+        else:
+            total_mins = ((self.print_time_hours or 0.0) * 60 + (self.print_time_minutes or 0)) * (self.quantity or 1)
+        print_hours = total_mins / 60.0
+
+        h_int = int(total_mins // 60)
+        m_int = int(total_mins % 60)
+        duration_str = f"{h_int}h {m_int}m" if total_mins > 0 else "0h"
+
+        # Lógica de color según tiempo restante y horas de impresión requeridas
+        # 1. Vencido: fecha límite ya superada
+        if days_left < 0:
+            level = 'overdue'
+            color = 'red'
+            icon = '🚨'
+            days_abs = abs(days_left)
+            text = f"Vencido hace {days_abs}d" if days_abs > 1 else "Vencido ayer"
+            css = "bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/40 ring-1 ring-red-500/30 animate-pulse font-bold"
+            tooltip = f"¡Límite superado! Vencido hace {days_abs} días. Impresión estimada: {duration_str}"
+        # 2. Crítico / Urgente: vence hoy, o queda <= 1 día, o las horas de impresión superan el tiempo disponible (asumiendo ~12h productivas/día)
+        elif days_left == 0 or (print_hours > 0 and (days_left * 12) < print_hours) or days_left <= 1:
+            level = 'critical'
+            color = 'rose'
+            icon = '🔥'
+            if days_left == 0:
+                text = "¡Vence hoy!"
+            elif days_left == 1:
+                text = "Queda 1 día"
+            else:
+                text = f"Quedan {days_left}d (Impr: {duration_str})"
+            css = "bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-500/40 font-bold"
+            tooltip = f"¡Urgente! Margen crítico frente a {duration_str} de impresión necesaria."
+        # 3. Advertencia: quedan 2 o 3 días, o el margen de impresión es moderadamente ajustado
+        elif days_left <= 3 or (print_hours > 0 and (days_left * 16) < (print_hours * 1.8)):
+            level = 'warning'
+            color = 'amber'
+            icon = '⏳'
+            text = f"Quedan {days_left} días"
+            css = "bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 font-semibold"
+            tooltip = f"Atención: Quedan {days_left} días para la entrega. Impresión estimada: {duration_str}"
+        # 4. En plazo holgado
+        else:
+            level = 'safe'
+            color = 'emerald'
+            icon = '📅'
+            text = f"Quedan {days_left} días"
+            css = "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30 font-medium"
+            tooltip = f"En plazo: Quedan {days_left} días. Impresión estimada: {duration_str}"
+
+        return {
+            'level': level,
+            'color': color,
+            'icon': icon,
+            'text': text,
+            'css': css,
+            'tooltip': tooltip,
+            'days_left': days_left,
+            'duration_str': duration_str,
+            'formatted_date': self.deadline.strftime('%d/%m/%Y'),
+            'short_date': self.deadline.strftime('%d/%m'),
+        }
 
     @property
     def remaining_amount(self):
@@ -581,6 +727,70 @@ class Order(models.Model):
         if items:
             return sum((i.weight_grams or 0.0) * (i.quantity or 1) for i in items)
         return (self.weight_grams or 0.0) * (self.quantity or 1)
+
+    @property
+    def total_print_time_hours(self):
+        """Horas totales de impresión acumuladas (en decimal)."""
+        items = list(self.items.all())
+        if items:
+            mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in items)
+        else:
+            mins = ((self.print_time_hours or 0.0) * 60 + (self.print_time_minutes or 0)) * (self.quantity or 1)
+        return round(mins / 60.0, 2)
+
+    @property
+    def hourly_rate_info(self):
+        """
+        Ratio de Eficiencia Horaria: Beneficio neto por hora de máquina ocupada (€/h).
+        Clasificación de rendimiento:
+          - >= 6.00 €/h: Excelente rentabilidad (verde)
+          - 3.00 - 5.99 €/h: Rentabilidad estándar / aceptable (ámbar)
+          - < 3.00 €/h: Alerta de baja rentabilidad horaria (rojo)
+        """
+        h = self.total_print_time_hours
+        if h <= 0:
+            return None
+        
+        try:
+            p = float(self.profit)
+        except Exception:
+            return None
+
+        rate = p / h
+        rate_rounded = round(rate, 2)
+        rate_str = f"{rate_rounded:.2f} €/h"
+
+        if rate >= 6.0:
+            level = 'excellent'
+            color = 'emerald'
+            icon = '⚡'
+            badge_css = 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30'
+            tooltip = f"Eficiencia horaria excelente: genera {rate_str} de beneficio neto por hora de máquina ocupada ({self.total_print_time_str} en total)."
+        elif rate >= 3.0:
+            level = 'normal'
+            color = 'amber'
+            icon = '⚡'
+            badge_css = 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
+            tooltip = f"Eficiencia horaria estándar: genera {rate_str} por hora de máquina ocupada ({self.total_print_time_str} en total)."
+        else:
+            level = 'low'
+            color = 'red'
+            icon = '⚠️'
+            badge_css = 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30 font-bold'
+            tooltip = f"¡Alerta de baja rentabilidad horaria! Solo genera {rate_str} ocupando la máquina durante {self.total_print_time_str}."
+
+        return {
+            'rate': rate_rounded,
+            'rate_str': rate_str,
+            'text': rate_str,
+            'level': level,
+            'color': color,
+            'icon': icon,
+            'badge_css': badge_css,
+            'tooltip': tooltip,
+            'print_hours': h,
+            'print_time_str': self.total_print_time_str,
+        }
 
     @property
     def total_print_time_str(self):
@@ -714,7 +924,7 @@ class OrderItem(models.Model):
         if w > 0 and total_hours > 0:
             cost_filament = 0.02 * w
             cost_energy = 0.15 * 0.12 * total_hours
-            cost_wear = 0.025 * total_hours
+            cost_wear = 0.30 * total_hours
             cost_subtotal = cost_filament + cost_energy + cost_wear
             error_margin = cost_subtotal * 0.15
             return round(cost_subtotal + error_margin + extra, 2)

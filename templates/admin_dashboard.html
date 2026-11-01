@@ -8,206 +8,148 @@
   1. Calculadora Dinámica de Costes.
   2. Scraping MakerWorld.
   3. Formulario para guardar el resultado directamente al Catálogo.
+  Completamente optimizado para móvil (responsive, táctil y ergonómico).
 ====================================================================== -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 lg:pb-10">
 
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Panel de Control / Herramientas</h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">Calcula costes de impresión y añade productos al catálogo
-            fácilmente.</p>
+    <!-- Encabezado de Página -->
+    <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="p-2 rounded-xl bg-primary/10 text-primary">⚙️</span>
+                <span>Añadir Producto / Herramientas</span>
+            </h1>
+            <p class="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                Calcula costes de impresión y publica productos en el catálogo cómodamente desde el móvil o PC.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'catalog' %}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                <span>🛍️</span> Ver Catálogo
+            </a>
+            <a href="{% url 'crm_dashboard' %}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition">
+                <span>📋</span> Ir a CRM
+            </a>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Selector de Modo Móvil (Pestañas para pantallas pequeñas) -->
+    <div class="lg:hidden mb-6 flex rounded-2xl bg-gray-100 dark:bg-gray-800/80 p-1 border border-gray-200 dark:border-gray-700 shadow-inner">
+        <button type="button" id="tab-btn-product" onclick="switchAdminTab('product')"
+            class="flex-1 py-2.5 px-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white dark:bg-dark text-primary shadow-sm">
+            <span>➕</span> Formulario Catálogo
+        </button>
+        <button type="button" id="tab-btn-scraper" onclick="switchAdminTab('scraper')"
+            class="flex-1 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <span>🌐</span> MakerWorld
+        </button>
+    </div>
 
-        <!-- Columna Izquierda: Entradas de Herramientas -->
-        <div class="space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+        <!-- Columna Izquierda: Scraper de MakerWorld -->
+        <div id="admin-col-scraper" class="space-y-6">
 
             <!-- Tarjeta: Scraper de MakerWorld -->
-            <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-lg rounded-2xl p-6">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center mb-4">
-                    <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                        </path>
-                    </svg>
-                    Extraer desde MakerWorld
-                </h2>
+            <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-5 sm:p-6 transition-all">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-base font-bold">🌐</span>
+                        <span>Extraer desde MakerWorld</span>
+                    </h2>
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold">
+                        Auto-relleno
+                    </span>
+                </div>
+
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                    Pega el enlace de un modelo de MakerWorld para importar automáticamente título, descripción e imagen.
+                </p>
+
                 <form method="POST" class="space-y-4">
                     {% csrf_token %}
                     <div>
-                        {{ scraper_form.url.label_tag }}
-                        {{ scraper_form.url }}
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                            URL del Modelo MakerWorld
+                        </label>
+                        <div class="relative">
+                            {{ scraper_form.url }}
+                        </div>
                     </div>
                     <button type="submit" name="scrape_url"
-                        class="w-full bg-secondary hover:bg-primary text-white font-bold py-2 px-4 rounded-xl transition-colors shadow-md">
-                        Extraer Metadatos
+                        class="w-full bg-gradient-to-r from-secondary to-primary hover:from-primary hover:to-secondary text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <span>Extraer Metadatos</span>
                     </button>
                 </form>
 
                 {% if scraped_data %}
-                <div
-                    class="mt-4 p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+                <div class="mt-4 p-4 rounded-xl {% if scraped_data.success %}bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300{% else %}bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300{% endif %}">
                     {% if scraped_data.success %}
-                    <p class="text-green-700 dark:text-green-400 font-medium">¡Datos extraídos con éxito! Revisa el
-                        formulario de la derecha.</p>
+                    <div class="flex items-start gap-2.5">
+                        <span class="text-lg">✅</span>
+                        <div>
+                            <p class="font-bold text-sm">¡Datos extraídos con éxito!</p>
+                            <p class="text-xs mt-0.5 opacity-90">Revisa el formulario y ajusta pesos y tiempos antes de publicar.</p>
+                        </div>
+                    </div>
                     {% else %}
-                    <p class="text-red-700 dark:text-red-400 font-medium">Error: {{ scraped_data.error }}</p>
+                    <div class="flex items-start gap-2.5">
+                        <span class="text-lg">⚠️</span>
+                        <div>
+                            <p class="font-bold text-sm">Error en la extracción</p>
+                            <p class="text-xs mt-0.5 opacity-90">{{ scraped_data.error }}</p>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
                 {% endif %}
             </div>
 
-            <!-- La Calculadora ahora está integrada en el formulario principal -->
+            <!-- Tarjeta Informativa Tips de Creación Móvil -->
+            <div class="hidden lg:block bg-gradient-to-br from-cyan-500/5 via-primary/5 to-transparent border border-cyan-500/20 rounded-2xl p-5 text-xs text-gray-600 dark:text-gray-400 space-y-2">
+                <h3 class="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                    <span>💡</span> Consejos de publicación rápida
+                </h3>
+                <ul class="space-y-1.5 list-disc pl-4 text-xs">
+                    <li>Los multiplicadores x2.5, x3.0 y x4.0 aplican automáticamente el margen sobre el coste de producción.</li>
+                    <li>Puedes adjuntar archivos .STL y .3MF que quedarán protegidos solo para tu cuenta de administrador.</li>
+                    <li>Los productos no activos se guardan como borradores invisibles en la tienda pública.</li>
+                </ul>
+            </div>
 
         </div>
 
         <!-- Columna Derecha: Formulario de Guardado Rápido -->
-        <div
-            class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-6 h-fit sticky top-24">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Añadir al Catálogo</h2>
+        <div id="admin-col-product"
+            class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl p-5 sm:p-6 lg:sticky lg:top-24 transition-all">
+            
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100 dark:border-gray-800">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📦</span> Añadir al Catálogo
+                    </h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rellena los datos para publicar o guardar borrador</p>
+                </div>
+                <span class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-bold hidden sm:inline-block">
+                    Directo a Tienda
+                </span>
+            </div>
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form method="POST" enctype="multipart/form-data" id="admin-product-form" class="space-y-5">
                 {% csrf_token %}
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
-                    {{ product_form.title }}
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
-                        <label class="block text-sm font-semibold text-gray-200 mb-2">Categorías <span class="text-xs font-normal text-gray-400">(selecciona varias)</span></label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-                            {% for choice in product_form.categories %}
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-800 cursor-pointer transition-colors text-sm text-gray-300">
-                                {{ choice.tag }}
-                                <span>{{ choice.choice_label }}</span>
-                            </label>
-                            {% empty %}
-                            <p class="text-xs text-gray-500">Sin categorías previas</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-200 mb-2">o Nueva(s) Categoría(s)</label>
-                        {{ product_form.new_category }}
-                        <p class="text-xs text-gray-400 mt-1">{{ product_form.new_category.help_text }}</p>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imagen
-                        Principal</label>
-                    {{ product_form.main_image }}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Más Imágenes (Galería
-                        Opcional)</label>
-                    {{ product_form.gallery_images }}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
-                        <span>Archivo 3D (.STL, .3MF, .STEP)</span>
-                        <span class="text-xs text-cyan-500 font-bold">🔒 Solo Admins</span>
-                    </label>
-                    {{ product_form.model_file }}
-                    <p class="text-xs text-gray-400 mt-1">Sube el archivo 3D del diseño. Solo será visible y descargable por el administrador.</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
-                    {{ product_form.description }}
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (g)</label>
-                        {{ product_form.weight_grams }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Horas
-                            Est.</label>
-                        {{ product_form.print_time_hours }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Minutos
-                            Est.</label>
-                        {{ product_form.print_time_minutes }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Otros Costes
-                            (€)</label>
-                        {{ product_form.extra_costs }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Medidas</label>
-                        {{ product_form.dimensions }}
-                    </div>
-                    <div class="col-span-2 md:col-span-1">
-                        <button type="button" id="force-calc-btn"
-                            class="w-full bg-secondary hover:bg-primary text-white font-bold py-2 px-4 rounded-md transition-colors mt-6">
-                            Calcular Costes
-                        </button>
-                    </div>
-
-                    <div class="col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-primary font-bold">Precio
-                                Final (€)</label>
-                            {{ product_form.price }}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Oferta
-                                (€)</label>
-                            {{ product_form.sale_price }}
-                        </div>
-                        <div class="flex items-center h-[42px]">
-                            <label class="inline-flex items-center cursor-pointer">
-                                {{ product_form.is_on_sale }}
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">En Oferta</span>
-                            </label>
-                        </div>
-                        <div class="flex items-center h-[42px]">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <!-- Truco: Invertimos visualmente el is_active para que funcione como 'Oculto' o simplemente lo dejamos como visible -->
-                                {{ product_form.is_active }}
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Visible en catálogo</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-span-2">
-                        <div id="price-suggestion-container"
-                            class="hidden mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
-                            <span class="w-full text-xs text-gray-500 mb-1 block">Sugerencias clickables (Coste Total:
-                                €<span id="cost-val">0.00</span>):</span>
-                            <button type="button" id="apply-suggestion-x25-btn"
-                                class="text-xs bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 px-3 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                x2.5: €<span id="suggested-price-x25-val" class="font-bold">0.00</span>
-                            </button>
-                            <button type="button" id="apply-suggestion-x30-btn"
-                                class="text-xs bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 px-3 py-1.5 rounded hover:bg-green-200 dark:hover:bg-green-800 transition-colors whitespace-nowrap border border-green-300 dark:border-green-700">
-                                x3.0: €<span id="suggested-price-x30-val" class="font-bold">0.00</span>
-                            </button>
-                            <button type="button" id="apply-suggestion-x40-btn"
-                                class="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-3 py-1.5 rounded hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors whitespace-nowrap border border-purple-300 dark:border-purple-700">
-                                x4.0: €<span id="suggested-price-x40-val" class="font-bold">0.00</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 {% if product_form.errors %}
-                <div
-                    class="mb-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded relative">
-                    <strong class="font-bold">Error en el formulario:</strong>
-                    <ul class="list-disc pl-5 mt-1 text-sm">
+                <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400">
+                    <strong class="font-bold flex items-center gap-1.5 text-sm">
+                        <span>⚠️</span> Errores en el formulario:
+                    </strong>
+                    <ul class="list-disc pl-5 mt-1.5 text-xs space-y-1">
                         {% for field in product_form %}
                         {% for error in field.errors %}
-                        <li>{{ field.label }}: {{ error }}</li>
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
                         {% endfor %}
                         {% endfor %}
                         {% for error in product_form.non_field_errors %}
@@ -217,17 +159,198 @@
                 </div>
                 {% endif %}
 
-
-
+                <!-- 1. TÍTULO -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL MakerWorld
-                        (Opcional)</label>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                        Título del Producto *
+                    </label>
+                    {{ product_form.title }}
+                </div>
+
+                <!-- 2. CATEGORÍAS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700/80">
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider mb-2">
+                            Categorías Existentes
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+                            {% for choice in product_form.categories %}
+                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 hover:border-primary cursor-pointer transition text-xs sm:text-sm text-gray-700 dark:text-gray-300 select-none">
+                                {{ choice.tag }}
+                                <span class="font-medium truncate">{{ choice.choice_label }}</span>
+                            </label>
+                            {% empty %}
+                            <p class="text-xs text-gray-400 py-2">Sin categorías previas</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700/80 flex flex-col justify-between">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider mb-1.5">
+                                + Nueva(s) Categoría(s)
+                            </label>
+                            {{ product_form.new_category }}
+                        </div>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-tight">
+                            {{ product_form.new_category.help_text|default:"Separa con comas si añades varias (ej: Navidad, Figuras)" }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. IMÁGENES Y ARCHIVO 3D -->
+                <div class="space-y-3.5 bg-gray-50/60 dark:bg-gray-900/30 p-3.5 rounded-xl border border-gray-200/60 dark:border-gray-800">
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
+                        📸 Archivos y Multimedia
+                    </span>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Imagen Principal *
+                        </label>
+                        {{ product_form.main_image }}
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Galería de Imágenes (Opcional - Múltiple)
+                        </label>
+                        {{ product_form.gallery_images }}
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+                            <span>Archivo 3D (.STL, .3MF, .STEP)</span>
+                            <span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-bold">🔒 Solo Administrador</span>
+                        </label>
+                        {{ product_form.model_file }}
+                        <p class="text-[11px] text-gray-400 mt-1">Descargable únicamente por el administrador desde el panel.</p>
+                    </div>
+                </div>
+
+                <!-- 4. DESCRIPCIÓN -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                        Descripción
+                    </label>
+                    {{ product_form.description }}
+                </div>
+
+                <!-- 5. CALCULADORA DE COSTES Y PARÁMETROS -->
+                <div class="p-3.5 sm:p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🧮</span> Parámetros y Costes
+                        </span>
+                        <span class="text-[11px] text-gray-500 font-medium">Filamento + Energía + Desgaste</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Peso (g)</label>
+                            {{ product_form.weight_grams }}
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Horas Est.</label>
+                            {{ product_form.print_time_hours }}
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Minutos Est.</label>
+                            {{ product_form.print_time_minutes }}
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Otros Costes (€)</label>
+                            {{ product_form.extra_costs }}
+                        </div>
+                        <div class="col-span-2 sm:col-span-2">
+                            <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Medidas (LxAnxAl mm)</label>
+                            {{ product_form.dimensions }}
+                        </div>
+                    </div>
+
+                    <button type="button" id="force-calc-btn"
+                        class="w-full bg-secondary/15 hover:bg-secondary text-secondary hover:text-white font-bold py-2.5 px-3 rounded-xl transition-all border border-secondary/30 active:scale-98 flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <span>⚡</span>
+                        <span>Calcular Costes Ahora</span>
+                    </button>
+
+                    <!-- Contenedor de Sugerencias de Precio (Clickables) -->
+                    <div id="price-suggestion-container"
+                        class="hidden p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Coste Total de Fabricación:</span>
+                            <span class="font-black text-gray-900 dark:text-white">€<span id="cost-val">0.00</span></span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 pt-1">
+                            <button type="button" id="apply-suggestion-x25-btn"
+                                class="py-2 px-1.5 rounded-lg text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 transition active:scale-95 cursor-pointer">
+                                <span class="block text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Margen x2.5</span>
+                                <span class="text-xs sm:text-sm font-black text-primary">€<span id="suggested-price-x25-val">0.00</span></span>
+                            </button>
+                            <button type="button" id="apply-suggestion-x30-btn"
+                                class="py-2 px-1.5 rounded-lg text-center bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 transition active:scale-95 cursor-pointer">
+                                <span class="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Recomendado x3.0</span>
+                                <span class="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400">€<span id="suggested-price-x30-val">0.00</span></span>
+                            </button>
+                            <button type="button" id="apply-suggestion-x40-btn"
+                                class="py-2 px-1.5 rounded-lg text-center bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700/60 transition active:scale-95 cursor-pointer">
+                                <span class="block text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400">Premium x4.0</span>
+                                <span class="text-xs sm:text-sm font-black text-purple-600 dark:text-purple-400">€<span id="suggested-price-x40-val">0.00</span></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. PRECIOS Y VISIBILIDAD -->
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-primary uppercase tracking-wider mb-1">
+                                Precio Final (€) *
+                            </label>
+                            {{ product_form.price }}
+                        </div>
+                        <div id="sale-price-container" class="hidden">
+                            <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">
+                                Precio Oferta (€)
+                            </label>
+                            {{ product_form.sale_price }}
+                        </div>
+                    </div>
+
+                    <!-- Toggles Ergonómicos para Móvil -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 cursor-pointer hover:border-amber-400 transition select-none">
+                            {{ product_form.is_on_sale }}
+                            <div class="min-w-0">
+                                <span class="block text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">🔥 En Oferta</span>
+                                <span class="block text-[11px] text-gray-500">Muestra badge de rebaja en tienda</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 cursor-pointer hover:border-primary transition select-none">
+                            {{ product_form.is_active }}
+                            <div class="min-w-0">
+                                <span class="block text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">👁️ Visible en Catálogo</span>
+                                <span class="block text-[11px] text-gray-500">Público para los clientes</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 7. URL MAKERWORLD OPCIONAL -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        URL MakerWorld (Opcional - Referencia)
+                    </label>
                     {{ product_form.makerworld_url }}
                 </div>
 
-                <button type="submit" name="save_product"
-                    class="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">
-                    Publicar en Catálogo
+                <!-- Botón Principal en el flujo del formulario -->
+                <button type="submit" name="save_product" id="main-submit-product-btn"
+                    class="w-full mt-4 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2 text-base cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Publicar en Catálogo</span>
                 </button>
             </form>
         </div>
@@ -235,33 +358,107 @@
     </div>
 </div>
 
+<!-- Barra Flotante Inferior Móvil (Sticky Action Bar para publicar cómodamente con el pulgar) -->
+<div id="mobile-sticky-publish-bar"
+    class="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-dark/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 z-40 flex items-center justify-between gap-3 shadow-2xl">
+    <div class="min-w-0">
+        <span class="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">Precio Venta:</span>
+        <span class="text-lg font-black text-primary">€<span id="mobile-sticky-price-display">0.00</span></span>
+    </div>
+    <button type="button" onclick="triggerMobileProductSubmit()"
+        class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-2.5 px-5 rounded-xl text-sm shadow-md active:scale-95 flex items-center gap-2 cursor-pointer">
+        <span>💾</span> Publicar Producto
+    </button>
+</div>
+
 <script>
-    // Lógica para el toggle de precio de oferta
+    // ==========================================
+    // NAVEGACIÓN POR PESTAÑAS EN MÓVIL
+    // ==========================================
+    function switchAdminTab(targetTab) {
+        const colScraper = document.getElementById('admin-col-scraper');
+        const colProduct = document.getElementById('admin-col-product');
+        const btnScraper = document.getElementById('tab-btn-scraper');
+        const btnProduct = document.getElementById('tab-btn-product');
+        const mobileBar = document.getElementById('mobile-sticky-publish-bar');
+
+        if (targetTab === 'scraper') {
+            if (colScraper) colScraper.classList.remove('hidden');
+            if (colProduct) colProduct.classList.add('hidden');
+            if (mobileBar) mobileBar.classList.add('hidden');
+
+            if (btnScraper) {
+                btnScraper.className = "flex-1 py-2.5 px-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white dark:bg-dark text-amber-500 shadow-sm";
+            }
+            if (btnProduct) {
+                btnProduct.className = "flex-1 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
+            }
+        } else {
+            if (colProduct) colProduct.classList.remove('hidden');
+            if (colScraper) colScraper.classList.add('hidden');
+            if (mobileBar) mobileBar.classList.remove('hidden');
+
+            if (btnProduct) {
+                btnProduct.className = "flex-1 py-2.5 px-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white dark:bg-dark text-primary shadow-sm";
+            }
+            if (btnScraper) {
+                btnScraper.className = "flex-1 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
+            }
+        }
+    }
+
+    // Inicializar visualización móvil respetando si hubo scraping previo
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth < 1024) {
+            {% if scraped_data and not scraped_data.success %}
+            switchAdminTab('scraper');
+            {% else %}
+            switchAdminTab('product');
+            {% endif %}
+        }
+    });
+
+    window.addEventListener('resize', function() {
+        const colScraper = document.getElementById('admin-col-scraper');
+        const colProduct = document.getElementById('admin-col-product');
+        if (window.innerWidth >= 1024) {
+            if (colScraper) colScraper.classList.remove('hidden');
+            if (colProduct) colProduct.classList.remove('hidden');
+        }
+    });
+
+    // ==========================================
+    // TOGGLE PRECIO DE OFERTA
+    // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
         const isOnSaleCheckbox = document.querySelector('input[name="is_on_sale"]');
         const salePriceContainer = document.getElementById('sale-price-container');
 
         function toggleSalePrice() {
+            if (!isOnSaleCheckbox || !salePriceContainer) return;
             if (isOnSaleCheckbox.checked) {
-                salePriceContainer.style.display = 'block';
+                salePriceContainer.classList.remove('hidden');
             } else {
-                salePriceContainer.style.display = 'none';
+                salePriceContainer.classList.add('hidden');
             }
         }
 
         if (isOnSaleCheckbox) {
             isOnSaleCheckbox.addEventListener('change', toggleSalePrice);
-            toggleSalePrice(); // Ejecutar al cargar
+            toggleSalePrice();
         }
     });
 
-    // Lógica para autocalcular precio sugerido en el formulario rápido
+    // ==========================================
+    // AUTOCALCULADORA DINÁMICA Y SUGERENCIAS
+    // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
         const weightInput = document.querySelector('input[name="weight_grams"]');
         const hoursInput = document.querySelector('input[name="print_time_hours"]');
         const minsInput = document.querySelector('input[name="print_time_minutes"]');
         const extraInput = document.querySelector('input[name="extra_costs"]');
         const priceInput = document.querySelector('input[name="price"]');
+        const stickyPriceDisplay = document.getElementById('mobile-sticky-price-display');
 
         const suggestionContainer = document.getElementById('price-suggestion-container');
         const costVal = document.getElementById('cost-val');
@@ -274,18 +471,30 @@
         const btnX40 = document.getElementById('apply-suggestion-x40-btn');
         const calcBtn = document.getElementById('force-calc-btn');
 
+        function syncStickyPrice() {
+            if (priceInput && stickyPriceDisplay) {
+                const val = parseFloat(priceInput.value) || 0;
+                stickyPriceDisplay.textContent = val.toFixed(2);
+            }
+        }
+
+        if (priceInput) {
+            priceInput.addEventListener('input', syncStickyPrice);
+            syncStickyPrice();
+        }
+
         function calculateSuggested() {
-            const w = parseFloat(weightInput.value) || 0;
-            const h = parseFloat(hoursInput.value) || 0;
-            const m = parseFloat(minsInput.value) || 0;
-            const extra = parseFloat(extraInput.value) || 0;
+            const w = parseFloat(weightInput?.value) || 0;
+            const h = parseFloat(hoursInput?.value) || 0;
+            const m = parseFloat(minsInput?.value) || 0;
+            const extra = parseFloat(extraInput?.value) || 0;
 
             const totalHours = h + (m / 60);
 
             if (w > 0 && totalHours > 0) {
                 const cost_filament = 0.02 * w;
                 const cost_energy = 0.15 * 0.12 * totalHours;
-                const cost_wear = 0.025 * totalHours;
+                const cost_wear = 0.30 * totalHours;
 
                 const cost_subtotal = cost_filament + cost_energy + cost_wear;
                 const error_margin = cost_subtotal * 0.15;
@@ -294,35 +503,62 @@
                 const fixed_costs = cost_wear + error_margin + extra;
 
                 const total_cost = base_var + fixed_costs;
-                costVal.textContent = total_cost.toFixed(2);
+                if (costVal) costVal.textContent = total_cost.toFixed(2);
 
-                valX25.textContent = ((base_var * 2.5) + fixed_costs).toFixed(2);
-                valX30.textContent = ((base_var * 3.0) + fixed_costs).toFixed(2);
-                valX40.textContent = ((base_var * 4.0) + fixed_costs).toFixed(2);
+                if (valX25) valX25.textContent = ((base_var * 2.5) + fixed_costs).toFixed(2);
+                if (valX30) valX30.textContent = ((base_var * 3.0) + fixed_costs).toFixed(2);
+                if (valX40) valX40.textContent = ((base_var * 4.0) + fixed_costs).toFixed(2);
 
-                suggestionContainer.classList.remove('hidden');
+                if (suggestionContainer) suggestionContainer.classList.remove('hidden');
             } else {
-                suggestionContainer.classList.add('hidden');
+                if (suggestionContainer) suggestionContainer.classList.add('hidden');
             }
         }
 
-        // Calcular si hacen click explícitamente en el botón
-        calcBtn.addEventListener('click', calculateSuggested);
+        if (calcBtn) calcBtn.addEventListener('click', calculateSuggested);
 
-        // Y también al escribir si lo desean
         [weightInput, hoursInput, minsInput, extraInput].forEach(el => {
             if (el) el.addEventListener('input', calculateSuggested);
         });
 
-        btnX25.addEventListener('click', () => priceInput.value = valX25.textContent);
-        btnX30.addEventListener('click', () => priceInput.value = valX30.textContent);
-        btnX40.addEventListener('click', () => priceInput.value = valX40.textContent);
+        if (btnX25 && priceInput) {
+            btnX25.addEventListener('click', () => {
+                priceInput.value = valX25.textContent;
+                syncStickyPrice();
+            });
+        }
+        if (btnX30 && priceInput) {
+            btnX30.addEventListener('click', () => {
+                priceInput.value = valX30.textContent;
+                syncStickyPrice();
+            });
+        }
+        if (btnX40 && priceInput) {
+            btnX40.addEventListener('click', () => {
+                priceInput.value = valX40.textContent;
+                syncStickyPrice();
+            });
+        }
 
-        // Ejecutar cálculo inicial por si los campos ya tienen datos
         calculateSuggested();
     });
 
-    // Lógica para comprobar si el nombre del producto ya existe antes de enviarlo
+    // ==========================================
+    // ENVÍO DESDE LA BARRA FLOTANTE MÓVIL
+    // ==========================================
+    function triggerMobileProductSubmit() {
+        const form = document.getElementById('admin-product-form');
+        const mainBtn = document.getElementById('main-submit-product-btn');
+        if (mainBtn) {
+            mainBtn.click();
+        } else if (form) {
+            form.submit();
+        }
+    }
+
+    // ==========================================
+    // COMPROBACIÓN ASÍNCRONA DE TÍTULO DUPLICADO
+    // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
         const saveButton = document.querySelector('button[name="save_product"]');
         if (saveButton) {
@@ -331,10 +567,9 @@
 
             productForm.addEventListener('submit', function(e) {
                 if (confirmedForce) {
-                    return; // Permite el envío normal
+                    return;
                 }
                 
-                // Previene el envío inmediato
                 e.preventDefault();
                 
                 const titleInput = productForm.querySelector('input[name="title"]');
@@ -344,29 +579,25 @@
                     return;
                 }
 
-                // Deshabilita temporalmente el botón para evitar doble clic
-                const originalText = saveButton.innerText;
-                saveButton.innerText = "Comprobando...";
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = "<span>⏳</span> Comprobando...";
                 saveButton.disabled = true;
 
                 fetch(`/api/product/check-title/?title=${encodeURIComponent(titleInput.value)}`)
                     .then(r => r.json())
                     .then(data => {
-                        saveButton.innerText = originalText;
+                        saveButton.innerHTML = originalText;
                         saveButton.disabled = false;
                         
                         if (data.exists) {
                             if (confirm('El nombre "' + titleInput.value + '" ya existe en el catálogo.\n\n¿Deseas añadir este producto de todas formas?')) {
                                 confirmedForce = true;
-                                // Añade input oculto para simular el clic en el botón original
                                 const hiddenSave = document.createElement('input');
                                 hiddenSave.type = 'hidden';
                                 hiddenSave.name = 'save_product';
                                 hiddenSave.value = '1';
                                 productForm.appendChild(hiddenSave);
                                 productForm.submit();
-                            } else {
-                                // Usuario canceló, no hacemos nada
                             }
                         } else {
                             confirmedForce = true;
@@ -380,7 +611,7 @@
                     })
                     .catch(err => {
                         console.error('Error comprobando título:', err);
-                        saveButton.innerText = originalText;
+                        saveButton.innerHTML = originalText;
                         saveButton.disabled = false;
                         confirmedForce = true;
                         

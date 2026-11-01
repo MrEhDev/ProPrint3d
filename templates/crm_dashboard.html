@@ -19,12 +19,14 @@
         position: relative;
     }
 
-        /* Anchos responsivos de columnas Kanban: 3 en pantalla completa, 2 en pantalla dividida */
+        /* Anchos responsivos de columnas Kanban y Modos Móvil */
     .kanban-board {
         display: flex;
         overflow-x: auto;
         gap: 1rem;
         padding-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
     }
     .kanban-col {
         box-sizing: border-box;
@@ -32,21 +34,47 @@
         flex: 0 0 85vw;
         width: 85vw;
         max-width: 340px;
+        transition: transform 0.15s ease, opacity 0.15s ease;
     }
-    @media (min-width: 640px) {
-        .kanban-col {
+
+    /* En móvil y tablet (<1024px), soporte para Modo Pestañas (1 Columna completa) y Modo Deslizar */
+    @media (max-width: 1023px) {
+        .kanban-board.mobile-mode-tabs .kanban-col {
+            display: none !important;
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .kanban-board.mobile-mode-tabs .kanban-col.mobile-tab-active {
+            display: block !important;
+        }
+        .kanban-board.mobile-mode-scroll {
+            scroll-snap-type: x mandatory;
+        }
+        .kanban-board.mobile-mode-scroll .kanban-col {
+            scroll-snap-align: start;
+            flex: 0 0 88vw;
+            width: 88vw;
+            max-width: 360px;
+        }
+    }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+        .kanban-board:not(.mobile-mode-tabs) .kanban-col {
             min-width: 0;
             flex: 0 0 calc((100% - 1rem) / 2);
             width: calc((100% - 1rem) / 2);
             max-width: calc((100% - 1rem) / 2);
         }
     }
+
     @media (min-width: 1024px) {
-        .kanban-col {
+        .kanban-board .kanban-col {
+            display: block !important;
             min-width: 0;
-            flex: 0 0 calc((100% - 2rem) / 3);
-            width: calc((100% - 2rem) / 3);
-            max-width: calc((100% - 2rem) / 3);
+            flex: 0 0 calc((100% - 2rem) / 3) !important;
+            width: calc((100% - 2rem) / 3) !important;
+            max-width: calc((100% - 2rem) / 3) !important;
         }
     }
 
@@ -96,83 +124,83 @@
         </div>
     </div>
 
-    <!-- Barra de Filtros de Período Desde - Hasta -->
-    <div
-        class="mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <form id="filter-form" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <div
-                class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
+    <!-- Barra de Filtros de Período Desde - Hasta (Optimizada Móvil) -->
+    <div class="mb-6 sm:mb-8 bg-white dark:bg-dark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <span class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5 uppercase tracking-wider">
+                <span>📅</span> Filtrar por Período
+            </span>
+            {% if year_from or month_from or year_to or month_to %}
+            <button type="button" onclick="clearDateFilters()"
+                class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 font-bold px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-900/30 transition flex items-center gap-1"
+                title="Restablecer filtro de fechas">
+                <span>✕</span> Restablecer
+            </button>
+            {% endif %}
+        </div>
+        <form id="filter-form" method="GET" class="w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-800/40 p-3 sm:p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                 <!-- DESDE -->
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Período
-                        Desde:</span>
-                    <select name="month_from" id="month_from" onchange="onDateFilterChange()"
-                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
-                        <option value="">Mes (Todo)</option>
-                        <option value="1" {% if month_from == '1' %}selected{% endif %}>Enero</option>
-                        <option value="2" {% if month_from == '2' %}selected{% endif %}>Febrero</option>
-                        <option value="3" {% if month_from == '3' %}selected{% endif %}>Marzo</option>
-                        <option value="4" {% if month_from == '4' %}selected{% endif %}>Abril</option>
-                        <option value="5" {% if month_from == '5' %}selected{% endif %}>Mayo</option>
-                        <option value="6" {% if month_from == '6' %}selected{% endif %}>Junio</option>
-                        <option value="7" {% if month_from == '7' %}selected{% endif %}>Julio</option>
-                        <option value="8" {% if month_from == '8' %}selected{% endif %}>Agosto</option>
-                        <option value="9" {% if month_from == '9' %}selected{% endif %}>Septiembre</option>
-                        <option value="10" {% if month_from == '10' %}selected{% endif %}>Octubre</option>
-                        <option value="11" {% if month_from == '11' %}selected{% endif %}>Noviembre</option>
-                        <option value="12" {% if month_from == '12' %}selected{% endif %}>Diciembre</option>
-                    </select>
-
-                    <select name="year_from" id="year_from" onchange="onDateFilterChange()"
-                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
-                        <option value="">Año (Todo)</option>
-                        <option value="2024" {% if year_from == '2024' %}selected{% endif %}>2024</option>
-                        <option value="2025" {% if year_from == '2025' %}selected{% endif %}>2025</option>
-                        <option value="2026" {% if year_from == '2026' %}selected{% endif %}>2026</option>
-                        <option value="2027" {% if year_from == '2027' %}selected{% endif %}>2027</option>
-                    </select>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:w-16">Desde:</span>
+                    <div class="grid grid-cols-2 gap-2 flex-1">
+                        <select name="month_from" id="month_from" onchange="onDateFilterChange()"
+                            class="text-xs sm:text-sm py-2 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
+                            <option value="">Mes (Todo)</option>
+                            <option value="1" {% if month_from == '1' %}selected{% endif %}>Enero</option>
+                            <option value="2" {% if month_from == '2' %}selected{% endif %}>Febrero</option>
+                            <option value="3" {% if month_from == '3' %}selected{% endif %}>Marzo</option>
+                            <option value="4" {% if month_from == '4' %}selected{% endif %}>Abril</option>
+                            <option value="5" {% if month_from == '5' %}selected{% endif %}>Mayo</option>
+                            <option value="6" {% if month_from == '6' %}selected{% endif %}>Junio</option>
+                            <option value="7" {% if month_from == '7' %}selected{% endif %}>Julio</option>
+                            <option value="8" {% if month_from == '8' %}selected{% endif %}>Agosto</option>
+                            <option value="9" {% if month_from == '9' %}selected{% endif %}>Septiembre</option>
+                            <option value="10" {% if month_from == '10' %}selected{% endif %}>Octubre</option>
+                            <option value="11" {% if month_from == '11' %}selected{% endif %}>Noviembre</option>
+                            <option value="12" {% if month_from == '12' %}selected{% endif %}>Diciembre</option>
+                        </select>
+                        <select name="year_from" id="year_from" onchange="onDateFilterChange()"
+                            class="text-xs sm:text-sm py-2 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
+                            <option value="">Año (Todo)</option>
+                            <option value="2024" {% if year_from == '2024' %}selected{% endif %}>2024</option>
+                            <option value="2025" {% if year_from == '2025' %}selected{% endif %}>2025</option>
+                            <option value="2026" {% if year_from == '2026' %}selected{% endif %}>2026</option>
+                            <option value="2027" {% if year_from == '2027' %}selected{% endif %}>2027</option>
+                        </select>
+                    </div>
                 </div>
-
-                <span class="text-gray-400 font-bold text-base hidden sm:inline">→</span>
 
                 <!-- HASTA -->
-                <div class="flex items-center gap-2">
-                    <span
-                        class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Hasta:</span>
-                    <select name="month_to" id="month_to" onchange="onDateFilterChange()"
-                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
-                        <option value="">Mes (Todo)</option>
-                        <option value="1" {% if month_to == '1' %}selected{% endif %}>Enero</option>
-                        <option value="2" {% if month_to == '2' %}selected{% endif %}>Febrero</option>
-                        <option value="3" {% if month_to == '3' %}selected{% endif %}>Marzo</option>
-                        <option value="4" {% if month_to == '4' %}selected{% endif %}>Abril</option>
-                        <option value="5" {% if month_to == '5' %}selected{% endif %}>Mayo</option>
-                        <option value="6" {% if month_to == '6' %}selected{% endif %}>Junio</option>
-                        <option value="7" {% if month_to == '7' %}selected{% endif %}>Julio</option>
-                        <option value="8" {% if month_to == '8' %}selected{% endif %}>Agosto</option>
-                        <option value="9" {% if month_to == '9' %}selected{% endif %}>Septiembre</option>
-                        <option value="10" {% if month_to == '10' %}selected{% endif %}>Octubre</option>
-                        <option value="11" {% if month_to == '11' %}selected{% endif %}>Noviembre</option>
-                        <option value="12" {% if month_to == '12' %}selected{% endif %}>Diciembre</option>
-                    </select>
-
-                    <select name="year_to" id="year_to" onchange="onDateFilterChange()"
-                        class="text-sm py-2 px-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
-                        <option value="">Año (Todo)</option>
-                        <option value="2024" {% if year_to == '2024' %}selected{% endif %}>2024</option>
-                        <option value="2025" {% if year_to == '2025' %}selected{% endif %}>2025</option>
-                        <option value="2026" {% if year_to == '2026' %}selected{% endif %}>2026</option>
-                        <option value="2027" {% if year_to == '2027' %}selected{% endif %}>2027</option>
-                    </select>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider sm:w-16">Hasta:</span>
+                    <div class="grid grid-cols-2 gap-2 flex-1">
+                        <select name="month_to" id="month_to" onchange="onDateFilterChange()"
+                            class="text-xs sm:text-sm py-2 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
+                            <option value="">Mes (Todo)</option>
+                            <option value="1" {% if month_to == '1' %}selected{% endif %}>Enero</option>
+                            <option value="2" {% if month_to == '2' %}selected{% endif %}>Febrero</option>
+                            <option value="3" {% if month_to == '3' %}selected{% endif %}>Marzo</option>
+                            <option value="4" {% if month_to == '4' %}selected{% endif %}>Abril</option>
+                            <option value="5" {% if month_to == '5' %}selected{% endif %}>Mayo</option>
+                            <option value="6" {% if month_to == '6' %}selected{% endif %}>Junio</option>
+                            <option value="7" {% if month_to == '7' %}selected{% endif %}>Julio</option>
+                            <option value="8" {% if month_to == '8' %}selected{% endif %}>Agosto</option>
+                            <option value="9" {% if month_to == '9' %}selected{% endif %}>Septiembre</option>
+                            <option value="10" {% if month_to == '10' %}selected{% endif %}>Octubre</option>
+                            <option value="11" {% if month_to == '11' %}selected{% endif %}>Noviembre</option>
+                            <option value="12" {% if month_to == '12' %}selected{% endif %}>Diciembre</option>
+                        </select>
+                        <select name="year_to" id="year_to" onchange="onDateFilterChange()"
+                            class="text-xs sm:text-sm py-2 px-2.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white font-medium focus:ring-primary focus:border-primary">
+                            <option value="">Año (Todo)</option>
+                            <option value="2024" {% if year_to == '2024' %}selected{% endif %}>2024</option>
+                            <option value="2025" {% if year_to == '2025' %}selected{% endif %}>2025</option>
+                            <option value="2026" {% if year_to == '2026' %}selected{% endif %}>2026</option>
+                            <option value="2027" {% if year_to == '2027' %}selected{% endif %}>2027</option>
+                        </select>
+                    </div>
                 </div>
-
-                {% if year_from or month_from or year_to or month_to %}
-                <button type="button" onclick="clearDateFilters()"
-                    class="text-sm text-red-500 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 ml-auto transition-colors"
-                    title="Restablecer filtro de fechas">
-                    ✕
-                </button>
-                {% endif %}
             </div>
         </form>
     </div>
@@ -186,6 +214,48 @@
             </h2>
             <span class="text-sm text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de
                 estado</span>
+        </div>
+
+        <!-- Barra de Navegación Móvil de Columnas Kanban -->
+        <div id="mobile-kanban-nav" class="lg:hidden mb-4 bg-white dark:bg-dark p-2.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-2 px-1">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📱</span> Vista Móvil Kanban
+                </span>
+                <div class="inline-flex rounded-xl bg-gray-100 dark:bg-gray-800 p-0.5 border border-gray-200 dark:border-gray-700 text-xs">
+                    <button type="button" id="btn-kanban-mode-tabs" onclick="setMobileKanbanMode('tabs')"
+                        class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs">
+                        <span>📑</span> 1 Columna
+                    </button>
+                    <button type="button" id="btn-kanban-mode-scroll" onclick="setMobileKanbanMode('scroll')"
+                        class="px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                        <span>↔️</span> Deslizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tiras de Pestañas de las 6 Columnas -->
+            <div class="flex overflow-x-auto gap-1.5 pb-1 no-scrollbar scroll-smooth" id="mobile-kanban-tabs-strip">
+                {% for status_name, group_orders in kanban_columns.items %}
+                <button type="button" onclick="selectMobileKanbanTab('{{ status_name|escapejs }}')"
+                    class="mobile-kanban-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition select-none border cursor-pointer"
+                    data-status="{{ status_name }}">
+                    <span>
+                        {% if status_name == 'Presupuestado' %}📝
+                        {% elif status_name == 'En proceso' %}⚙️
+                        {% elif status_name == 'Realizado' %}✅
+                        {% elif status_name == 'Enviado' %}🚚
+                        {% elif status_name == 'Entregado' %}📦
+                        {% elif status_name == 'Cobrado' %}💰
+                        {% endif %}
+                    </span>
+                    <span>{{ status_name }}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-black bg-black/10 dark:bg-white/10">
+                        {{ group_orders|length }}
+                    </span>
+                </button>
+                {% endfor %}
+            </div>
         </div>
 
         <div class="flex overflow-x-auto gap-4 pb-4 kanban-board">
@@ -271,6 +341,13 @@
                                         📊
                                     </span>
                                 </button>
+                                {% if group.order.whatsapp_url %}
+                                <a href="{{ group.order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
+                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 hover:text-white dark:bg-emerald-500/20 dark:hover:bg-emerald-600 dark:text-emerald-400 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none flex-shrink-0"
+                                    title="Abrir WhatsApp con {{ group.order.client_name }} ({{ group.order.client_contact }})">
+                                    <span>💬</span>
+                                </a>
+                                {% endif %}
                                 <div class="flex items-center gap-1 flex-shrink-0">
                                     {% if status_name == 'Cobrado' or group.order.status == 'Cobrado' %}
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-500/30">
@@ -288,6 +365,17 @@
                                 </div>
                             </div>
 
+                            {% if group.order.deadline_info %}
+                            <div class="my-1.5">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-black border shadow-xs {{ group.order.deadline_info.css }}"
+                                    title="{{ group.order.deadline_info.tooltip }}">
+                                    <span>{{ group.order.deadline_info.icon }} Límite:</span>
+                                    <span>{{ group.order.deadline_info.formatted_date }}</span>
+                                    <span class="text-[10px] opacity-80 font-bold">({{ group.order.deadline_info.text }})</span>
+                                </span>
+                            </div>
+                            {% endif %}
+
                             <!-- Títulos de las piezas -->
                             <div class="my-2 space-y-1 pl-1">
                                 {% for item in group.items %}
@@ -299,15 +387,30 @@
                                 {% endfor %}
                             </div>
 
-                            <!-- Total del pedido y llamada a desplegar -->
+                            <!-- Total del pedido y llamada a desplegar con accesos rápidos -->
                             <div class="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800 mt-2 text-sm">
-                                <div class="flex items-baseline gap-1">
+                                <div class="flex items-baseline gap-1.5 flex-wrap">
                                     <span class="text-xs text-gray-400 uppercase font-semibold">Total:</span>
                                     <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                    {% if group.order.hourly_rate_info %}
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border {{ group.order.hourly_rate_info.badge_css }}"
+                                        title="{{ group.order.hourly_rate_info.tooltip }}">
+                                        <span>{{ group.order.hourly_rate_info.icon }}</span>
+                                        <span>{{ group.order.hourly_rate_info.text }}</span>
+                                    </span>
+                                    {% endif %}
                                 </div>
-                                <span class="text-xs text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline">
-                                    Detalles ▾
-                                </span>
+                                <div class="flex items-center gap-1">
+                                    <button type="button"
+                                        onclick="event.stopPropagation(); openMobileMoveModal('order', {{ group.order.id }}, '{{ status_name|escapejs }}', '{{ group.order.client_name|escapejs }}')"
+                                        class="px-2 py-0.5 rounded-md text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white transition"
+                                        title="Mover pedido">
+                                        🔄 Mover
+                                    </button>
+                                    <span class="text-xs text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline ml-1">
+                                        Detalles ▾
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         {% endif %}
@@ -335,6 +438,13 @@
                                             📊
                                         </span>
                                     </button>
+                                    {% if group.order.whatsapp_url %}
+                                    <a href="{{ group.order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 hover:text-white dark:bg-emerald-500/20 dark:hover:bg-emerald-600 dark:text-emerald-400 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none flex-shrink-0"
+                                        title="Abrir WhatsApp con {{ group.order.client_name }} ({{ group.order.client_contact }})">
+                                        <span>💬</span> WhatsApp
+                                    </a>
+                                    {% endif %}
                                     {% if group.order.notes %}
                                     <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                         📝
@@ -360,11 +470,20 @@
                                         title="Retención IRPF (21%) aplicada a la ganancia">IRPF</span>
                                     {% endif %}
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    📅 {{ group.order.order_date|date:"d/m/Y" }}
-                                    {% if group.order.platform %} · <span
-                                        class="font-medium text-gray-600 dark:text-gray-300">{{ group.order.platform }}</span>{% endif %}
-                                </p>
+                                <div class="flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <span>📅 {{ group.order.order_date|date:"d/m/Y" }}</span>
+                                    {% if group.order.deadline_info %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs border shadow-xs {{ group.order.deadline_info.css }}"
+                                        title="{{ group.order.deadline_info.tooltip }}">
+                                        <span>{{ group.order.deadline_info.icon }}</span>
+                                        <span>{{ group.order.deadline_info.short_date }}</span>
+                                        <span class="text-[10px] opacity-80">({{ group.order.deadline_info.text }})</span>
+                                    </span>
+                                    {% endif %}
+                                    {% if group.order.platform %}
+                                    <span class="font-medium text-gray-600 dark:text-gray-300">· {{ group.order.platform }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Badge de Estado / Completado -->
@@ -438,8 +557,14 @@
                                         {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
                                     </div>
                                 </div>
-                                <div class="text-right flex-shrink-0">
+                                <div class="text-right flex-shrink-0 flex items-center gap-1">
                                     <span class="text-sm font-bold text-primary">€{{ item.price }}</span>
+                                    <button type="button"
+                                        onclick="event.stopPropagation(); openMobileMoveModal('item', {{ item.id }}, '{{ status_name|escapejs }}', '{{ item.description|escapejs }}', {{ group.order.id }})"
+                                        class="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition text-xs"
+                                        title="Cambiar estado de esta pieza">
+                                        🔄
+                                    </button>
                                 </div>
                             </div>
                             {% endfor %}
@@ -475,11 +600,17 @@
                                 {% endif %}
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold"
+                                {% if group.order.hourly_rate_info %}
+                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold border {{ group.order.hourly_rate_info.badge_css }}"
+                                    title="{{ group.order.hourly_rate_info.tooltip }}">
+                                    <span>{{ group.order.hourly_rate_info.icon }}</span>
+                                    <span>{{ group.order.hourly_rate_info.text }}</span>
+                                </span>
+                                {% endif %}
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50 shadow-2xs"
                                     title="Ganancia Neta Pedido">
                                     +€{{ group.order.profit }}
                                 </span>
-                                <!-- Acceso al modal de cobro/señal -->
                                 <button type="button"
                                     onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
                                     class="p-1.5 rounded text-gray-400 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm"
@@ -491,6 +622,39 @@
                                     class="text-sm text-gray-400 hover:text-primary transition-colors p-1.5"
                                     title="Editar pedido y piezas">✏️</button>
                             </div>
+                        </div>
+
+                        <!-- Barra Táctil Móvil de Cambio de Estado Rápido -->
+                        <div class="flex items-center justify-between gap-1 pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
+                            <div class="flex items-center gap-1">
+                                {% if status_name != 'Presupuestado' %}
+                                <button type="button"
+                                    onclick="event.stopPropagation(); quickStepOrder({{ group.order.id }}, '{{ status_name|escapejs }}', -1)"
+                                    class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-black flex items-center justify-center transition active:scale-95"
+                                    title="Retroceder a estado anterior">
+                                    ◀
+                                </button>
+                                {% endif %}
+                                {% if status_name != 'Cobrado' %}
+                                <button type="button"
+                                    onclick="event.stopPropagation(); quickStepOrder({{ group.order.id }}, '{{ status_name|escapejs }}', 1)"
+                                    class="w-7 h-7 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-black flex items-center justify-center transition active:scale-95"
+                                    title="Avanzar a siguiente estado">
+                                    ▶
+                                </button>
+                                {% endif %}
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openMobileMoveModal('order', {{ group.order.id }}, '{{ status_name|escapejs }}', '{{ group.order.client_name|escapejs }}')"
+                                    class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold flex items-center gap-1 transition active:scale-95"
+                                    title="Mover a cualquier estado">
+                                    <span>🔄</span> Mover
+                                </button>
+                            </div>
+                            <a href="{% url 'generate_order_quote_pdf' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
+                                class="px-2 py-1 rounded-lg text-gray-500 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-1 text-[11px] font-semibold"
+                                title="Descargar Presupuesto en PDF">
+                                <span>📄</span> PDF
+                            </a>
                         </div>
                     
                             {% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
@@ -565,7 +729,7 @@
     </div>
 
     <!-- Tarjetas de Resumen Global -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-8">
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
             <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Facturado</dt>
             <dd id="stat-total-sales" class="mt-1 text-3xl font-black text-gray-900 dark:text-white">€{{ total_sales|floatformat:2 }}</dd>
@@ -601,9 +765,21 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Selector de Vista: Tarjetas Móviles vs Tabla Completa -->
+            <div class="inline-flex rounded-xl bg-gray-100 dark:bg-gray-800 p-0.5 border border-gray-200 dark:border-gray-700 text-xs">
+                <button type="button" id="btn-orders-view-cards" onclick="setOrdersViewMode('cards')"
+                    class="px-2.5 py-2 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs">
+                    <span>🗂️</span> Tarjetas
+                </button>
+                <button type="button" id="btn-orders-view-table" onclick="setOrdersViewMode('table')"
+                    class="px-2.5 py-2 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                    <span>📑</span> Tabla
+                </button>
+            </div>
+
             <!-- Botón Ocultar / Mostrar Cobrados -->
             <button type="button" id="btn-toggle-hide-paid" onclick="toggleHidePaidOrders()"
-                class="px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
+                class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
                 title="Ocultar o mostrar pedidos que ya están en estado Cobrado">
                 <span id="hide-paid-icon">👁️</span>
                 <span id="hide-paid-label">Ocultar Cobrados</span>
@@ -631,8 +807,148 @@
         </div>
     </div>
 
+    <!-- Vista de Tarjetas Móviles para Desglose de Pedidos -->
+    <div id="orders-cards-container" class="space-y-3 mb-10 hidden">
+        {% for order in orders %}
+        <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm order-mobile-card transition-all"
+            id="order-card-{{ order.id }}"
+            data-order-id="{{ order.id }}"
+            data-status="{{ order.status }}"
+            data-price="{{ order.price|default:0|unlocalize }}"
+            data-profit="{{ order.profit|default:0|unlocalize }}"
+            data-cost="{{ order.total_cost|default:0|unlocalize }}"
+            data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
+            
+            <div class="flex items-start justify-between gap-2 mb-2.5">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                            #{{ order.id }}
+                        </span>
+                        <button type="button" onclick="openOrderSummaryModal({{ order.id }})"
+                            class="text-sm font-bold text-gray-900 dark:text-white truncate hover:text-primary text-left">
+                            {{ order.client_name }}
+                        </button>
+                        {% if order.whatsapp_url %}
+                        <a href="{{ order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 hover:bg-emerald-600 text-emerald-800 hover:text-white dark:bg-emerald-900/40 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none"
+                            title="Abrir chat de WhatsApp con {{ order.client_name }}">
+                            <span>💬</span> WhatsApp
+                        </a>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        📅 {{ order.order_date|date:"d/m/Y" }}
+                        {% if order.deadline_info %} · <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[11px] font-bold border {{ order.deadline_info.css }}" title="{{ order.deadline_info.tooltip }}"><span>{{ order.deadline_info.icon }}</span><span>{{ order.deadline_info.formatted_date }}</span></span>{% endif %}
+                        {% if order.platform %} · <span>{{ order.platform }}</span>{% endif %}
+                    </p>
+                </div>
+                
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap
+                    {% if order.status == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
+                    {% elif order.status == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
+                    {% elif order.status == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
+                    {% elif order.status == 'Enviado' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
+                    {% elif order.status == 'Entregado' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
+                    {% elif order.status == 'Cobrado' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
+                    {% endif %}">
+                    {{ order.status }}
+                </span>
+            </div>
+
+            {% if order.notes %}
+            <div class="mb-2.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
+                📝 <span class="font-medium">{{ order.notes }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Resumen numérico -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 text-center mb-3">
+                <div>
+                    <span class="block text-[10px] text-gray-400 font-bold uppercase">Total</span>
+                    <span class="text-sm font-black text-gray-900 dark:text-white">€{{ order.price|default:0|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Beneficio</span>
+                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|default:0|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] text-cyan-600 dark:text-cyan-400 font-bold uppercase">€/h Máq.</span>
+                    {% if order.hourly_rate_info %}
+                    <span class="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-bold border {{ order.hourly_rate_info.badge_css }}" title="{{ order.hourly_rate_info.tooltip }}">
+                        <span>{{ order.hourly_rate_info.text }}</span>
+                    </span>
+                    {% else %}
+                    <span class="text-xs text-gray-400 font-semibold">--</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <span class="block text-[10px] text-gray-400 font-bold uppercase">Cobros</span>
+                    {% if order.status == 'Cobrado' %}
+                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">💰 Cobrado</span>
+                    {% elif order.deposit_amount > 0 %}
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">🤝 Señal €{{ order.deposit_amount|floatformat:0 }}</span>
+                    {% else %}
+                    <span class="text-xs text-gray-400">⏳ Pte.</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Desplegable de piezas del pedido -->
+            <div class="mb-3">
+                <button type="button" onclick="toggleMobileCardPieces({{ order.id }})"
+                    class="w-full flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 hover:text-primary font-semibold py-1 px-0.5 select-none">
+                    <span class="flex items-center gap-1.5">
+                        <span>🧩</span> Piezas ({{ order.items.count }} ref · {{ order.total_items_count }} uds)
+                    </span>
+                    <span id="mobile-card-chevron-{{ order.id }}" class="text-primary font-bold">▾ Ver piezas</span>
+                </button>
+                <div id="mobile-card-pieces-{{ order.id }}" class="hidden mt-2 space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
+                    {% for item in order.items.all %}
+                    <div class="p-2 rounded-lg bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between gap-2 text-xs">
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-gray-900 dark:text-white truncate">
+                                {{ item.description }} <span class="text-gray-400 font-normal">x{{ item.quantity }}</span>
+                            </div>
+                            <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
+                                {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
+                                {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h</span>{% endif %}
+                                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{{ item.status }}</span>
+                            </div>
+                        </div>
+                        <span class="font-bold text-primary whitespace-nowrap">€{{ item.price }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+                <button type="button"
+                    onclick="openMobileMoveModal('order', {{ order.id }}, '{{ order.status|escapejs }}', '{{ order.client_name|escapejs }}')"
+                    class="flex-1 py-2 px-2.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold flex items-center justify-center gap-1 transition active:scale-95">
+                    <span>🔄</span> Mover
+                </button>
+                <button type="button" onclick="openPaymentModal({{ order.id }})"
+                    class="py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold hover:bg-emerald-100 transition flex items-center gap-1">
+                    <span>💳</span> Cobro
+                </button>
+                <a href="{% url 'generate_order_quote_pdf' order.id %}" target="_blank"
+                    class="py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1">
+                    <span>📄</span> PDF
+                </a>
+                <button type="button" onclick="openEditOrderModal({{ order.id }})"
+                    class="py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                    <span>✏️</span> Editar
+                </button>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
     <!-- Tabla Principal: 1 Fila por Pedido con Acordeón Desplegable -->
-    <div
+    <div id="orders-table-container"
         class="bg-white dark:bg-dark shadow-xl rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-12">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left">
@@ -728,12 +1044,19 @@
                                     #{{ order.id }}
                                 </span>
                                 <div>
-                                    <div class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-1.5">
+                                    <div class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                                         <span>{{ order.client_name }}</span>
                                         <span
                                             class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold">
                                             {{ order.total_items_count }} uds · {{ order.items.count }} ref
                                         </span>
+                                        {% if order.whatsapp_url %}
+                                        <a href="{{ order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 hover:bg-emerald-600 text-emerald-800 hover:text-white dark:bg-emerald-900/50 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none ml-1"
+                                            title="Abrir chat de WhatsApp con {{ order.client_name }} ({{ order.client_contact }})">
+                                            <span>💬</span> WhatsApp
+                                        </a>
+                                        {% endif %}
                                     </div>
                                     {% if order.notes %}
                                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ order.notes }}</p>
@@ -745,8 +1068,13 @@
                         <!-- Fechas -->
                         <td class="px-3 py-3.5 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             <div>📅 {{ order.order_date|date:"d/m/Y" }}</div>
-                            {% if order.deadline %}
-                            <div class="text-amber-600 dark:text-amber-400 font-semibold text-xs mt-0.5">⏳ {{ order.deadline|date:"d/m/Y" }}</div>
+                            {% if order.deadline_info %}
+                            <div class="mt-0.5">
+                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold border {{ order.deadline_info.css }}" title="{{ order.deadline_info.tooltip }}">
+                                    <span>{{ order.deadline_info.icon }}</span>
+                                    <span>{{ order.deadline_info.formatted_date }}</span>
+                                </span>
+                            </div>
                             {% endif %}
                         </td>
 
@@ -808,6 +1136,15 @@
                                 class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                 {{ order.profit_margin_percent }}%
                             </span>
+                            {% if order.hourly_rate_info %}
+                            <div class="mt-1">
+                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border {{ order.hourly_rate_info.badge_css }}"
+                                    title="{{ order.hourly_rate_info.tooltip }}">
+                                    <span>{{ order.hourly_rate_info.icon }}</span>
+                                    <span>{{ order.hourly_rate_info.text }}</span>
+                                </span>
+                            </div>
+                            {% endif %}
                         </td>
 
                         <!-- Cobros -->
@@ -1013,6 +1350,51 @@
 </div>
 
 <!-- ========================================== -->
+<!-- ========================================== -->
+<!-- MODAL DE CAMBIO RÁPIDO DE ESTADO (MÓVIL / TÁCTIL) -->
+<!-- ========================================== -->
+<div id="mobile-move-modal"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm hidden animate-in fade-in"
+    onclick="if(event.target === this) closeMobileMoveModal()">
+    <div class="bg-white dark:bg-dark border-t sm:border border-gray-200 dark:border-gray-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        
+        <div class="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+        
+        <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800">
+            <div>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>🔄</span> Cambiar de Estado
+                </h3>
+                <p id="mmm-title" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate max-w-[280px]">
+                    Pedido #123 · Cliente
+                </p>
+            </div>
+            <button type="button" onclick="closeMobileMoveModal()"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl font-bold p-1 leading-none">&times;</button>
+        </div>
+        
+        <div class="my-3 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 flex items-center justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400 font-medium">Estado actual:</span>
+            <span id="mmm-current-status-badge" class="font-bold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                En proceso
+            </span>
+        </div>
+
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">
+            Selecciona la nueva columna:
+        </p>
+
+        <div class="space-y-2" id="mmm-status-buttons-list">
+            <!-- Botones generados dinámicamente -->
+        </div>
+
+        <button type="button" onclick="closeMobileMoveModal()"
+            class="w-full mt-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            Cancelar
+        </button>
+    </div>
+</div>
+
 <!-- MODAL DE RESUMEN GLOBAL Y RENTABILIDAD DEL PEDIDO (POPUP KANBAN) -->
 <!-- ========================================== -->
 <div id="order-summary-modal"
@@ -1037,7 +1419,14 @@
                 </div>
                 <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-300 mt-1 flex-wrap">
                     <span>📅 <span id="sm-modal-date">--</span></span>
-                    <span id="sm-modal-contact-container" class="hidden text-cyan-300 font-medium">📱 / ✉️ <span id="sm-modal-contact">--</span></span>
+                    <span id="sm-modal-contact-container" class="hidden text-cyan-300 font-medium inline-flex items-center gap-1.5 flex-wrap">
+                        <span>📱 / ✉️</span> <span id="sm-modal-contact">--</span>
+                        <a id="sm-modal-whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer"
+                            class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition shadow-xs select-none"
+                            title="Contactar por WhatsApp">
+                            <span>💬</span> WhatsApp
+                        </a>
+                    </span>
                     <span id="sm-modal-deadline-container" class="text-amber-300 font-semibold hidden">⏳ Límite: <span id="sm-modal-deadline">--</span></span>
                     <span>🛒 <span id="sm-modal-platform">--</span></span>
                     <span>🚚 <span id="sm-modal-shipping">--</span></span>
@@ -1073,41 +1462,46 @@
                 </h4>
 
                 <div class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-4 sm:p-5 shadow-sm">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-center">
                         <!-- Piezas -->
-                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
-                            <p class="text-lg font-black text-gray-900 dark:text-white mt-0.5"><span id="sm-kpi-items">0</span> <span class="text-xs font-semibold text-gray-500">uds</span></p>
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 flex flex-col justify-center">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
+                            <p class="text-base font-black text-gray-900 dark:text-white mt-0.5"><span id="sm-kpi-items">0</span> <span class="text-xs font-semibold text-gray-500">uds</span></p>
                         </div>
                         <!-- Peso Total -->
-                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
-                            <p class="text-lg font-black text-cyan-600 dark:text-cyan-400 mt-0.5"><span id="sm-kpi-weight">0</span> <span class="text-xs font-semibold text-cyan-500">g</span></p>
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 flex flex-col justify-center">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
+                            <p class="text-base font-black text-cyan-600 dark:text-cyan-400 mt-0.5"><span id="sm-kpi-weight">0</span> <span class="text-xs font-semibold text-cyan-500">g</span></p>
                         </div>
                         <!-- Tiempo Fab. -->
-                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Tiempo Fab.</p>
-                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400 mt-0.5" id="sm-kpi-time">0h 0m</p>
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 flex flex-col justify-center">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Tiempo Fab.</p>
+                            <p class="text-base font-black text-indigo-600 dark:text-indigo-400 mt-0.5" id="sm-kpi-time">0h 0m</p>
                         </div>
                         <!-- Coste Fab. -->
-                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
-                            <p class="text-lg font-black text-red-500 mt-0.5">€<span id="sm-kpi-cost">0.00</span></p>
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 flex flex-col justify-center">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
+                            <p class="text-base font-black text-red-500 mt-0.5">€<span id="sm-kpi-cost">0.00</span></p>
                         </div>
-                        <!-- Total Pedido -->
-                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 sm:col-span-2 lg:col-span-1">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Venta</p>
-                            <p class="text-xl font-black text-primary mt-0.5">€<span id="sm-kpi-price">0.00</span></p>
+                        <!-- Total Venta -->
+                        <div class="p-2.5 rounded-xl bg-white/80 dark:bg-dark/60 border border-gray-200/60 dark:border-gray-700/60 flex flex-col justify-center">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Venta</p>
+                            <p class="text-base font-black text-primary mt-0.5">€<span id="sm-kpi-price">0.00</span></p>
                         </div>
                         <!-- Beneficio -->
-                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50">
-                            <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
-                            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">€<span id="sm-kpi-profit">0.00</span></p>
+                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex flex-col justify-center">
+                            <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
+                            <p class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">€<span id="sm-kpi-profit">0.00</span></p>
                         </div>
                         <!-- Margen -->
-                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50">
-                            <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
-                            <p class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5"><span id="sm-kpi-margin">0</span>%</p>
+                        <div class="p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex flex-col justify-center">
+                            <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
+                            <p class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5"><span id="sm-kpi-margin">0</span>%</p>
+                        </div>
+                        <!-- €/h Máquina -->
+                        <div class="p-2.5 rounded-xl bg-cyan-50/90 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 flex flex-col justify-center">
+                            <p class="text-[10px] text-cyan-800 dark:text-cyan-300 font-bold uppercase tracking-wider">⚡ €/h Máquina</p>
+                            <p class="text-base font-black text-cyan-700 dark:text-cyan-300 mt-0.5" id="sm-kpi-hourly-rate">--</p>
                         </div>
                     </div>
 
@@ -1497,41 +1891,38 @@
 
             <!-- 3. Barra Resumen en Tiempo Real -->
             <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800">
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-center">
-                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-400 font-bold uppercase">Piezas</p>
-                        <p id="edit-summary-items" class="text-base font-black text-gray-900 dark:text-white">0 uds</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center">
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Piezas</p>
+                        <p id="edit-summary-items" class="text-base font-black text-gray-900 dark:text-white mt-0.5">0 uds</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-400 font-bold uppercase">Peso Total</p>
-                        <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400">0 g
-                        </p>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Peso Total</p>
+                        <p id="edit-summary-weight" class="text-base font-black text-cyan-600 dark:text-cyan-400 mt-0.5">0 g</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-400 font-bold uppercase">Tiempo Fab.</p>
-                        <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400">0h
-                            0m</p>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Tiempo Fab.</p>
+                        <p id="edit-summary-time" class="text-base font-black text-indigo-600 dark:text-indigo-400 mt-0.5">0h 0m</p>
                     </div>
-                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-400 font-bold uppercase">Coste Fab.</p>
-                        <p id="edit-summary-cost" class="text-base font-black text-red-500">€0.00</p>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
+                        <p id="edit-summary-cost" class="text-base font-black text-red-500 mt-0.5">€0.00</p>
                     </div>
-                    <div
-                        class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
-                        <p class="text-xs text-gray-400 font-bold uppercase">Total Pedido</p>
-                        <p id="edit-summary-price" class="text-lg font-black text-primary">€0.00</p>
+                    <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Pedido</p>
+                        <p id="edit-summary-price" class="text-base font-black text-primary mt-0.5">€0.00</p>
                     </div>
-                    <div
-                        class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
-                        <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase">Beneficio</p>
-                        <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400">
-                            €0.00</p>
+                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 flex flex-col justify-center">
+                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
+                        <p id="edit-summary-profit" class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">€0.00</p>
                     </div>
-                    <div
-                        class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
-                        <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase">Margen</p>
-                        <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400">
-                            0%</p>
+                    <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 flex flex-col justify-center">
+                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Margen</p>
+                        <p id="edit-summary-margin" class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0%</p>
+                    </div>
+                    <div class="p-2 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/40 flex flex-col justify-center">
+                        <p class="text-[10px] text-cyan-800 dark:text-cyan-300 font-bold uppercase tracking-wider">⚡ €/h Máq.</p>
+                        <p id="edit-summary-hourly-rate" class="text-base font-black text-cyan-700 dark:text-cyan-300 mt-0.5">--</p>
                     </div>
                 </div>
             </div>
@@ -1569,6 +1960,7 @@
         id: {{ order.id }},
         clientName: "{{ order.client_name|escapejs }}",
         clientContact: "{{ order.client_contact|default:''|escapejs }}",
+        whatsappUrl: "{{ order.whatsapp_url|default:''|escapejs }}",
         orderDate: "{{ order.order_date|date:'d/m/Y' }}",
         deadline: "{{ order.deadline|date:'d/m/Y'|default:'' }}",
         rawOrderDate: "{{ order.order_date|date:'Y-m-d' }}",
@@ -2385,6 +2777,15 @@
             }
         });
 
+        // Filtrar simultáneamente las tarjetas de la vista móvil
+        document.querySelectorAll('.order-mobile-card').forEach(card => {
+            const searchText = (card.dataset.searchText || '').toLowerCase();
+            const status = card.dataset.status || '';
+            const matchesSearch = !filter || searchText.includes(filter);
+            const matchesPaidFilter = !hidePaidOrders || status !== 'Cobrado';
+            card.style.display = (matchesSearch && matchesPaidFilter) ? '' : 'none';
+        });
+
         if (noResultsRow) {
             if (visibleCount === 0 && rows.length > 0) {
                 noResultsRow.classList.remove('hidden');
@@ -2488,7 +2889,7 @@
 
         const costFilament = 0.02 * weight;
         const costEnergy = 0.15 * 0.12 * totalHours;
-        const costWear = 0.025 * totalHours;
+        const costWear = 0.30 * totalHours;
 
         const costSubtotal = costFilament + costEnergy + costWear;
         const errorMargin = costSubtotal * 0.15;
@@ -2538,11 +2939,21 @@
 
         const elContactCont = document.getElementById('sm-modal-contact-container');
         const elContact = document.getElementById('sm-modal-contact');
+        const elWhatsappBtn = document.getElementById('sm-modal-whatsapp-btn');
         if (order.clientContact) {
             if (elContact) elContact.textContent = order.clientContact;
             if (elContactCont) elContactCont.classList.remove('hidden');
+            if (elWhatsappBtn) {
+                if (order.whatsappUrl) {
+                    elWhatsappBtn.href = order.whatsappUrl;
+                    elWhatsappBtn.classList.remove('hidden');
+                } else {
+                    elWhatsappBtn.classList.add('hidden');
+                }
+            }
         } else {
             if (elContactCont) elContactCont.classList.add('hidden');
+            if (elWhatsappBtn) elWhatsappBtn.classList.add('hidden');
         }
 
         const pdfUrl = `/crm/order/${order.id}/quote-pdf/`;
@@ -2551,7 +2962,8 @@
         if (btnPdfHeader) btnPdfHeader.href = pdfUrl;
         if (btnPdfFooter) btnPdfFooter.href = pdfUrl;
 
-        if (order.deadline) {
+        const isShippedOrDone = ['Enviado', 'Entregado', 'Cobrado'].includes(order.status);
+        if (order.deadline && !isShippedOrDone) {
             if (elDeadline) elDeadline.textContent = order.deadline;
             if (elDeadlineCont) elDeadlineCont.classList.remove('hidden');
         } else {
@@ -2622,6 +3034,25 @@
             kpiProfit.className = `text-xl font-black ${finalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`;
         }
         if (kpiMargin) kpiMargin.textContent = margin;
+
+        const totalPrintHours = totalMins / 60.0;
+        const elHourlyRate = document.getElementById('sm-kpi-hourly-rate');
+        if (elHourlyRate) {
+            if (totalPrintHours > 0) {
+                const hourlyRate = finalProfit / totalPrintHours;
+                elHourlyRate.textContent = `${hourlyRate.toFixed(2)} €/h`;
+                if (hourlyRate >= 6.0) {
+                    elHourlyRate.className = "text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5";
+                } else if (hourlyRate >= 3.0) {
+                    elHourlyRate.className = "text-lg font-black text-amber-600 dark:text-amber-400 mt-0.5";
+                } else {
+                    elHourlyRate.className = "text-lg font-black text-red-500 mt-0.5";
+                }
+            } else {
+                elHourlyRate.textContent = "--";
+                elHourlyRate.className = "text-lg font-black text-gray-400 mt-0.5";
+            }
+        }
 
         // Badges Fiscales (IVA e IRPF)
         const taxBadgesEl = document.getElementById('sm-modal-tax-badges');
@@ -2853,6 +3284,86 @@
         editModalPieces = [];
     }
 
+    // Funciones de cálculo y reparto de placa completa (Slicer)
+    function toggleEditPlatePanel(index) {
+        const panel = document.getElementById(`edit-plate-panel-${index}`);
+        const icon = document.getElementById(`edit-plate-icon-${index}`);
+        if (!panel) return;
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+            panel.classList.remove('hidden');
+            if (icon) icon.textContent = '▾';
+        } else {
+            panel.classList.add('hidden');
+            if (icon) icon.textContent = '▸';
+        }
+    }
+
+    function calculatePlateDivision(totalW, totalH, totalM, count) {
+        const n = Math.max(1, parseInt(count) || 1);
+        const w = Math.max(0, parseFloat(totalW) || 0);
+        const h = Math.max(0, parseFloat(totalH) || 0);
+        const m = Math.max(0, parseFloat(totalM) || 0);
+
+        const unitW = Math.round((w / n) * 10) / 10;
+        const totalPlateMinutes = (h * 60) + m;
+        const unitTotalMinutes = totalPlateMinutes / n;
+
+        let unitH = Math.floor(unitTotalMinutes / 60);
+        let unitM = Math.round(unitTotalMinutes % 60);
+        if (unitM === 60) {
+            unitH += 1;
+            unitM = 0;
+        }
+
+        return {
+            unitWeight: unitW,
+            unitHours: unitH,
+            unitMins: unitM,
+            piecesCount: n
+        };
+    }
+
+    function updateEditPlatePreview(index) {
+        const w = parseFloat(document.getElementById(`edit-plate-w-${index}`)?.value) || 0;
+        const h = parseFloat(document.getElementById(`edit-plate-h-${index}`)?.value) || 0;
+        const m = parseInt(document.getElementById(`edit-plate-m-${index}`)?.value) || 0;
+        const count = parseInt(document.getElementById(`edit-plate-count-${index}`)?.value) || 1;
+        const res = calculatePlateDivision(w, h, m, count);
+        const badge = document.getElementById(`edit-plate-preview-${index}`);
+        if (badge) {
+            badge.textContent = `${res.unitWeight}g · ${res.unitHours}h ${res.unitMins}m`;
+        }
+    }
+
+    function applyEditPlateDivision(index) {
+        const p = editModalPieces[index];
+        if (!p) return;
+        const w = parseFloat(document.getElementById(`edit-plate-w-${index}`)?.value) || 0;
+        const h = parseFloat(document.getElementById(`edit-plate-h-${index}`)?.value) || 0;
+        const m = parseInt(document.getElementById(`edit-plate-m-${index}`)?.value) || 0;
+        const count = Math.max(1, parseInt(document.getElementById(`edit-plate-count-${index}`)?.value) || 1);
+        const syncQty = document.getElementById(`edit-plate-sync-qty-${index}`)?.checked ?? true;
+
+        const res = calculatePlateDivision(w, h, m, count);
+        p.weight = res.unitWeight;
+        p.hours = res.unitHours;
+        p.mins = res.unitMins;
+
+        if (syncQty) {
+            p.quantity = res.piecesCount;
+            if (p.unitPrice > 0) {
+                p.totalPrice = Math.round((p.unitPrice * p.quantity) * 100) / 100;
+            }
+        }
+
+        const costData = calculateUnitCost(p.weight, p.hours, p.mins, p.extra);
+        p.unitCost = costData.unitCost;
+        p.totalCost = Math.round((p.unitCost * (p.quantity || 1)) * 100) / 100;
+
+        renderEditPieces();
+    }
+
     function renderEditPieces() {
         const container = document.getElementById('edit-pieces-container');
         if (!container) return;
@@ -2949,34 +3460,84 @@
                     </div>
                 </div>
 
+                <!-- Desplegable / Calculadora de Placa Completa (Slicer) -->
+                <div class="mb-3 p-2 rounded-lg border border-cyan-200/80 dark:border-cyan-800/60 bg-cyan-50/40 dark:bg-cyan-950/20">
+                    <button type="button" onclick="toggleEditPlatePanel(${index})" class="text-xs font-bold text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 flex items-center gap-1.5 transition select-none cursor-pointer">
+                        <span id="edit-plate-icon-${index}">▸</span>
+                        <span>🖨️ Repartir desde Placa / Lote Completo (Slicer)</span>
+                    </button>
+                    
+                    <div id="edit-plate-panel-${index}" class="hidden mt-2 pt-2 border-t border-cyan-200/60 dark:border-cyan-800/40 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-cyan-900 dark:text-cyan-200">Valores totales del lote o placa:</span>
+                            <span class="text-[11px] text-gray-500 dark:text-gray-400">Redondeo automático por pieza</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-0.5">Peso Placa (g)</label>
+                                <input type="number" step="any" min="0" placeholder="Ej. 180" id="edit-plate-w-${index}" oninput="updateEditPlatePreview(${index})" class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-0.5">Horas Placa</label>
+                                <input type="number" step="1" min="0" placeholder="Ej. 4" id="edit-plate-h-${index}" oninput="updateEditPlatePreview(${index})" class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-0.5">Minutos Placa</label>
+                                <input type="number" step="1" min="0" max="59" placeholder="Ej. 30" id="edit-plate-m-${index}" oninput="updateEditPlatePreview(${index})" class="w-full text-xs p-1.5 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-cyan-800 dark:text-cyan-300 mb-0.5">Piezas en Placa *</label>
+                                <input type="number" step="1" min="1" value="1" placeholder="Ej. 6" id="edit-plate-count-${index}" oninput="updateEditPlatePreview(${index})" class="w-full text-xs p-1.5 font-bold rounded border border-cyan-400 dark:border-cyan-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-cyan-200/40 dark:border-cyan-800/30">
+                            <div class="text-xs text-cyan-900 dark:text-cyan-200 flex items-center gap-1.5">
+                                <span>Por pieza:</span>
+                                <strong id="edit-plate-preview-${index}" class="font-bold bg-white dark:bg-gray-800 px-2 py-0.5 rounded border border-cyan-300 dark:border-cyan-700 text-cyan-700 dark:text-cyan-300">
+                                    -- g · --h --m
+                                </strong>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="inline-flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+                                    <input type="checkbox" checked id="edit-plate-sync-qty-${index}" class="rounded border-gray-300 text-cyan-600 focus:ring-cyan-500">
+                                    <span>Poner cantidad</span>
+                                </label>
+                                <button type="button" onclick="applyEditPlateDivision(${index})" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 active:scale-95 text-white rounded-lg font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
+                                    <span>✓</span> Aplicar a la pieza
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Cantidad, Precio y Rentabilidad -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
                     <div>
-                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Cantidad *</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-1">Cantidad *</label>
                         <input type="number" min="1" step="1" value="${piece.quantity || 1}"
                             oninput="onEditPieceQtyChange(${index}, this.value)"
-                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                            class="w-full text-sm p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold h-[38px]">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Precio Unitario (€)</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-1">Precio Unitario (€)</label>
                         <input type="number" step="0.01" min="0" value="${piece.unitPrice || 0}"
                             oninput="onEditPieceUnitPriceChange(${index}, this.value)"
-                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold edit-piece-uprice">
+                            class="w-full text-sm p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold edit-piece-uprice h-[38px]">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 font-semibold mb-0.5">Total Pieza (€) *</label>
+                        <label class="block text-xs text-gray-500 font-semibold mb-1">Total Pieza (€) *</label>
                         <input type="number" step="0.01" min="0" value="${piece.totalPrice || 0}"
                             oninput="onEditPieceTotalPriceChange(${index}, this.value)"
-                            class="w-full text-sm p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-black edit-piece-tprice">
+                            class="w-full text-sm p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-black edit-piece-tprice h-[38px]">
                     </div>
-                    <div class="bg-gray-100 dark:bg-gray-700/60 p-2 rounded-lg flex items-center justify-between text-xs">
-                        <div>
-                            <span class="block text-xs text-gray-400 uppercase font-bold">Ganancia</span>
+                    <div>
+                        <label class="block text-xs text-gray-500 font-semibold mb-1">Beneficio / Margen</label>
+                        <div class="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700/80 flex items-center justify-between text-xs h-[38px]">
                             <span class="piece-profit-val font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">€${profit.toFixed(2)}</span>
+                            <span class="piece-margin-badge px-2 py-0.5 rounded text-xs font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
+                                ${margin}%
+                            </span>
                         </div>
-                        <span class="piece-margin-badge px-2 py-0.5 rounded text-xs font-bold ${profit >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
-                            ${margin}%
-                        </span>
                     </div>
                 </div>
             `;
@@ -3412,9 +3973,229 @@
             .catch(() => alert('Error de conexión al eliminar pedido.'));
     }
 
+        // ==========================================
+    // CONTROL DEL MODO MÓVIL KANBAN Y ACCIONES TÁCTILES
+    // ==========================================
+    let currentMobileKanbanMode = localStorage.getItem('proprint3d_mobile_kanban_mode') || 'tabs';
+    let currentMobileKanbanTab = localStorage.getItem('proprint3d_mobile_kanban_active_tab') || 'Presupuestado';
+    let currentOrdersViewMode = localStorage.getItem('proprint3d_orders_view_mode') || (window.innerWidth < 768 ? 'cards' : 'table');
+
+    function setMobileKanbanMode(mode) {
+        currentMobileKanbanMode = mode;
+        localStorage.setItem('proprint3d_mobile_kanban_mode', mode);
+        
+        const board = document.querySelector('.kanban-board');
+        const btnTabs = document.getElementById('btn-kanban-mode-tabs');
+        const btnScroll = document.getElementById('btn-kanban-mode-scroll');
+        
+        if (board) {
+            if (mode === 'tabs') {
+                board.classList.add('mobile-mode-tabs');
+                board.classList.remove('mobile-mode-scroll');
+            } else {
+                board.classList.add('mobile-mode-scroll');
+                board.classList.remove('mobile-mode-tabs');
+            }
+        }
+        
+        if (btnTabs && btnScroll) {
+            if (mode === 'tabs') {
+                btnTabs.className = "px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs";
+                btnScroll.className = "px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400";
+            } else {
+                btnScroll.className = "px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs";
+                btnTabs.className = "px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400";
+            }
+        }
+        
+        selectMobileKanbanTab(currentMobileKanbanTab);
+    }
+
+    function selectMobileKanbanTab(status) {
+        currentMobileKanbanTab = status;
+        localStorage.setItem('proprint3d_mobile_kanban_active_tab', status);
+        
+        if (currentMobileKanbanMode === 'tabs') {
+            document.querySelectorAll('.kanban-col').forEach(col => {
+                if (col.getAttribute('data-status') === status) {
+                    col.classList.add('mobile-tab-active');
+                } else {
+                    col.classList.remove('mobile-tab-active');
+                }
+            });
+        } else {
+            const col = document.querySelector(`.kanban-col[data-status="${status}"]`);
+            if (col) {
+                col.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        }
+        
+        updateMobileKanbanTabsUI();
+    }
+
+    function updateMobileKanbanTabsUI() {
+        document.querySelectorAll('.mobile-kanban-tab-btn').forEach(btn => {
+            const status = btn.getAttribute('data-status');
+            const isActive = status === currentMobileKanbanTab;
+            
+            const colors = {
+                'Presupuestado': { active: 'bg-indigo-600 text-white border-indigo-600 shadow-md', inactive: 'bg-indigo-50/70 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
+                'En proceso': { active: 'bg-amber-600 text-white border-amber-600 shadow-md', inactive: 'bg-amber-50/70 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
+                'Realizado': { active: 'bg-teal-600 text-white border-teal-600 shadow-md', inactive: 'bg-teal-50/70 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300 border-teal-200 dark:border-teal-800' },
+                'Enviado': { active: 'bg-blue-600 text-white border-blue-600 shadow-md', inactive: 'bg-blue-50/70 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+                'Entregado': { active: 'bg-purple-600 text-white border-purple-600 shadow-md', inactive: 'bg-purple-50/70 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+                'Cobrado': { active: 'bg-emerald-600 text-white border-emerald-600 shadow-md', inactive: 'bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' }
+            };
+            
+            const c = colors[status] || { active: 'bg-primary text-white border-primary', inactive: 'bg-gray-100 text-gray-700 border-gray-200' };
+            btn.className = `mobile-kanban-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition select-none border cursor-pointer ${isActive ? c.active : c.inactive}`;
+        });
+    }
+
+    // Modal de Mover en Móvil
+    let currentMobileMoveTarget = null; // { type, id, currentStatus, title, orderId }
+
+    function openMobileMoveModal(type, id, currentStatus, title, orderId = null) {
+        currentMobileMoveTarget = { type, id, currentStatus, title, orderId };
+        const modal = document.getElementById('mobile-move-modal');
+        const titleEl = document.getElementById('mmm-title');
+        const currentBadge = document.getElementById('mmm-current-status-badge');
+        const listEl = document.getElementById('mmm-status-buttons-list');
+        
+        if (titleEl) {
+            titleEl.textContent = (type === 'order' ? 'Pedido #' + id + ' (' + title + ')' : 'Pieza: ' + title);
+        }
+        if (currentBadge) {
+            currentBadge.textContent = currentStatus;
+        }
+        
+        const stages = [
+            { name: 'Presupuestado', icon: '📝', desc: 'Presupuesto inicial creado' },
+            { name: 'En proceso', icon: '⚙️', desc: 'En cola o imprimiendo en máquina' },
+            { name: 'Realizado', icon: '✅', desc: 'Impresión y post-procesado finalizados' },
+            { name: 'Enviado', icon: '🚚', desc: 'En tránsito hacia el cliente' },
+            { name: 'Entregado', icon: '📦', desc: 'Recibido por el cliente' },
+            { name: 'Cobrado', icon: '💰', desc: 'Pago total recibido y confirmado' }
+        ];
+        
+        if (listEl) {
+            listEl.innerHTML = stages.map(st => {
+                const isCurrent = st.name === currentStatus;
+                return `
+                    <button type="button" onclick="selectMobileMoveDestination('${st.name}')"
+                        class="w-full p-3 rounded-xl border flex items-center justify-between text-left transition ${
+                            isCurrent 
+                                ? 'bg-gray-100 dark:bg-gray-800/60 border-gray-300 dark:border-gray-700 opacity-60 cursor-default' 
+                                : 'bg-white dark:bg-gray-800 hover:bg-primary/5 dark:hover:bg-primary/10 border-gray-200 dark:border-gray-700/80 active:scale-98 cursor-pointer'
+                        }">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">${st.icon}</span>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900 dark:text-white">${st.name}</span>
+                                <span class="block text-[11px] text-gray-400">${isCurrent ? 'Estado actual' : st.desc}</span>
+                            </div>
+                        </div>
+                        ${isCurrent ? '<span class="text-xs font-bold text-gray-400">Actual</span>' : '<span class="text-primary font-bold text-sm">Mover ➔</span>'}
+                    </button>
+                `;
+            }).join('');
+        }
+        
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeMobileMoveModal() {
+        const modal = document.getElementById('mobile-move-modal');
+        if (modal) modal.classList.add('hidden');
+        currentMobileMoveTarget = null;
+    }
+
+    function selectMobileMoveDestination(targetStatus) {
+        if (!currentMobileMoveTarget) return;
+        const { type, id, currentStatus, orderId } = currentMobileMoveTarget;
+        if (targetStatus === currentStatus) {
+            closeMobileMoveModal();
+            return;
+        }
+        closeMobileMoveModal();
+        
+        if (targetStatus === 'Cobrado') {
+            const orderIdToPay = type === 'order' ? id : (orderId || id);
+            openPaymentModal(orderIdToPay, 'order_drag');
+            return;
+        }
+        
+        if (type === 'order') {
+            updateOrderStatus(id, targetStatus);
+        } else if (type === 'item') {
+            updateItemStatus(id, targetStatus);
+        }
+    }
+
+    function quickStepOrder(orderId, currentStatus, direction) {
+        const stages = ['Presupuestado', 'En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'];
+        const idx = stages.indexOf(currentStatus);
+        if (idx === -1) return;
+        const nextIdx = idx + direction;
+        if (nextIdx < 0 || nextIdx >= stages.length) return;
+        const nextStatus = stages[nextIdx];
+        
+        if (nextStatus === 'Cobrado') {
+            openPaymentModal(orderId, 'order_drag');
+            return;
+        }
+        updateOrderStatus(orderId, nextStatus);
+    }
+
+    // Selector de Vista de Pedidos (Tarjetas vs Tabla)
+    function setOrdersViewMode(mode) {
+        currentOrdersViewMode = mode;
+        localStorage.setItem('proprint3d_orders_view_mode', mode);
+        
+        const cardsContainer = document.getElementById('orders-cards-container');
+        const tableContainer = document.getElementById('orders-table-container');
+        const btnCards = document.getElementById('btn-orders-view-cards');
+        const btnTable = document.getElementById('btn-orders-view-table');
+        
+        if (cardsContainer && tableContainer) {
+            if (mode === 'cards') {
+                cardsContainer.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+            } else {
+                tableContainer.classList.remove('hidden');
+                cardsContainer.classList.add('hidden');
+            }
+        }
+        
+        if (btnCards && btnTable) {
+            if (mode === 'cards') {
+                btnCards.className = "px-2.5 py-2 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs";
+                btnTable.className = "px-2.5 py-2 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200";
+            } else {
+                btnTable.className = "px-2.5 py-2 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs";
+                btnCards.className = "px-2.5 py-2 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200";
+            }
+        }
+    }
+
+    function toggleMobileCardPieces(orderId) {
+        const container = document.getElementById(`mobile-card-pieces-${orderId}`);
+        const chevron = document.getElementById(`mobile-card-chevron-${orderId}`);
+        if (!container) return;
+        const isHidden = container.classList.contains('hidden');
+        if (isHidden) {
+            container.classList.remove('hidden');
+            if (chevron) chevron.textContent = '▲ Ocultar';
+        } else {
+            container.classList.add('hidden');
+            if (chevron) chevron.textContent = '▾ Ver piezas';
+        }
+    }
+
     // Cerrar con Escape o clic exterior
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
+            closeMobileMoveModal();
             closePaymentModal();
             closeEditOrderModal();
             closeOrderSummaryModal();
@@ -3446,6 +4227,13 @@
                 window.location.replace(window.location.pathname + '?' + params.toString());
             }
         }
+
+        // Inicializar modo móvil de Kanban y vista de pedidos
+        if (window.innerWidth < 1024) {
+            setMobileKanbanMode(currentMobileKanbanMode);
+            selectMobileKanbanTab(currentMobileKanbanTab);
+        }
+        setOrdersViewMode(currentOrdersViewMode);
 
         // Inicializar preservación de scroll del Kanban y cálculo de métricas
         initKanbanScrollPreservation();

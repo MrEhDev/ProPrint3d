@@ -82,7 +82,7 @@
                         {% if img.is_cover %}
                         <span class="absolute bottom-0 left-0 right-0 bg-primary text-white text-xs text-center py-0.5 rounded-b-lg font-bold">Portada</span>
                         {% endif %}
-                        <button type="button" onclick="deleteGalleryImage({{ img.id }}, '{{ csrf_token }}')" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow">✕</button>
+                        <button type="button" onclick="deleteGalleryImage({{ img.id }}, '{{ csrf_token }}')" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shadow">✕</button>
                     </div>
                     {% endfor %}
                 </div>
@@ -250,7 +250,7 @@
             if (w > 0 && totalHours > 0) {
                 const cost_filament = 0.02 * w;
                 const cost_energy = 0.15 * 0.12 * totalHours;
-                const cost_wear = 0.025 * totalHours;
+                const cost_wear = 0.30 * totalHours;
                 
                 const cost_subtotal = cost_filament + cost_energy + cost_wear;
                 const error_margin = cost_subtotal * 0.15;
