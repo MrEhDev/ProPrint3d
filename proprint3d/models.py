@@ -685,6 +685,7 @@ class Order(models.Model):
             'duration_str': duration_str,
             'formatted_date': self.deadline.strftime('%d/%m/%Y'),
             'short_date': self.deadline.strftime('%d/%m'),
+            'is_urgent': level in ['overdue', 'critical', 'warning'],
         }
 
     @property

@@ -576,6 +576,17 @@ def crm_dashboard_view(request):
     avg_profit = 0
     if orders_for_stats.count() > 0:
         avg_profit = total_profit / orders_for_stats.count()
+
+    # Métricas de tiempo de taller y eficiencia horaria
+    total_stats_hours = sum(o.total_print_time_hours for o in orders_for_stats)
+    avg_hourly_rate = (float(total_profit) / total_stats_hours) if total_stats_hours > 0 else 0.0
+
+    # Pedidos en cola activa (Presupuestado y En proceso)
+    queue_orders = [o for o in orders if o.status in ['Presupuestado', 'En proceso']]
+    queue_hours = sum(o.total_print_time_hours for o in queue_orders)
+
+    # Recuento inicial de pedidos urgentes / con fecha límite próxima
+    urgent_orders_count = sum(1 for o in orders if o.deadline_info and o.deadline_info.get('is_urgent'))
         
     products_qs = Product.objects.filter(is_active=True).prefetch_related('categories')
     products_with_id = []
@@ -606,6 +617,9 @@ def crm_dashboard_view(request):
         'total_costs': total_costs,
         'total_profit': total_profit,
         'avg_profit': avg_profit,
+        'avg_hourly_rate': avg_hourly_rate,
+        'queue_hours': queue_hours,
+        'urgent_orders_count': urgent_orders_count,
         'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
         'status_choices': [c[0] for c in Order.STATUS_CHOICES],
         'platform_choices': Order.PLATFORM_CHOICES,

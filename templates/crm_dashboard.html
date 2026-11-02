@@ -208,12 +208,46 @@
     <!-- Tablero Kanban: Flujo de 6 Pasos -->
     {% if kanban_columns %}
     <div class="mb-10">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>📌</span> Flujo de Pedidos (Tablero Kanban)
-            </h2>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de
-                estado</span>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>📌</span> Flujo de Pedidos (Tablero Kanban)
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Arrastra piezas o pedidos completos para cambiar de estado</p>
+            </div>
+
+            <!-- Widget Carga de Trabajo y Cola de Taller Activa -->
+            <div class="flex flex-wrap items-center gap-2.5 sm:gap-3.5 bg-white dark:bg-dark px-3 py-2 sm:px-4 sm:py-2 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <!-- Horas en Cola y Días estimados -->
+                <div class="flex items-center gap-2">
+                    <span class="text-lg select-none">⏱️</span>
+                    <div>
+                        <div class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">Cola de Taller</div>
+                        <div class="text-xs sm:text-sm font-black text-gray-800 dark:text-gray-100 flex items-center gap-1.5" id="workshop-queue-label" title="Horas acumuladas en pedidos En Proceso y Presupuestados">
+                            <span id="workshop-queue-hours">--h</span>
+                            <span class="text-gray-300 dark:text-gray-600 font-normal">•</span>
+                            <span id="workshop-queue-days" class="text-primary font-bold text-xs sm:text-xs">~-- días</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+
+                <!-- Selector Interactivo de Impresoras -->
+                <div class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/60 px-2 py-1 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
+                    title="Número de impresoras 3D activas en el taller para calcular los días estimados de producción (asumiendo ~16h de impresión diaria por máquina)">
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 select-none flex items-center gap-1">
+                        <span>🖨️</span> <span class="hidden sm:inline">Impresoras:</span>
+                    </span>
+                    <button type="button" onclick="adjustPrintersCount(-1)"
+                        class="w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition shadow-2xs text-xs select-none active:scale-95"
+                        title="Reducir impresoras">-</button>
+                    <span id="workshop-printers-count" class="font-black px-1.5 text-primary text-sm min-w-[1.2rem] text-center select-none">2</span>
+                    <button type="button" onclick="adjustPrintersCount(1)"
+                        class="w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition shadow-2xs text-xs select-none active:scale-95"
+                        title="Aumentar impresoras">+</button>
+                </div>
+            </div>
         </div>
 
         <!-- Barra de Navegación Móvil de Columnas Kanban -->
@@ -293,6 +327,7 @@
                         </h3>
                     </div>
                     <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <span class="kanban-col-hours text-[11px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/80 px-1.5 py-0.5 rounded-md border border-gray-200/60 dark:border-gray-700/60 hidden" title="Horas totales de impresión en esta columna"></span>
                         <span class="text-sm px-2.5 py-0.5 rounded-full font-bold
                             {% if status_name == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
                             {% elif status_name == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
@@ -317,6 +352,10 @@
                         {% endif %}{% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %} kanban-card-collapsible is-collapsed cursor-pointer{% endif %}" onclick="{% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}toggleKanbanCardCollapse(this, event){% endif %}" data-order-id="{{ group.order.id }}"
                         data-client-name="{{ group.order.client_name|escapejs }}"
                         data-price="{{ group.order.price|default:0|unlocalize }}"
+                        data-profit="{{ group.order.profit|default:0|unlocalize }}"
+                        data-print-hours="{{ group.order.total_print_time_hours|default:0|unlocalize }}"
+                        data-has-deadline="{% if group.order.deadline_info %}1{% else %}0{% endif %}"
+                        data-is-urgent="{% if group.order.deadline_info and group.order.deadline_info.is_urgent %}1{% else %}0{% endif %}"
                         data-deposit-amount="{{ group.order.deposit_amount|default:0|unlocalize }}"
                         data-deposit-method="{{ group.order.deposit_method|default:''|escapejs }}"
                         data-final-method="{{ group.order.final_payment_method|default:''|escapejs }}"
@@ -737,7 +776,13 @@
         <div
             class="bg-white dark:bg-dark border border-green-200 dark:border-green-900/30 rounded-xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute right-0 top-0 h-full w-2 bg-green-500"></div>
-            <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ganancia Neta</dt>
+            <div class="flex items-center justify-between gap-1">
+                <dt class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Ganancia Neta</dt>
+                <span id="stat-avg-hourly-rate" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition-all shadow-2xs flex-shrink-0"
+                    title="Rentabilidad horaria media del taller: Beneficio neto / horas totales de impresión en columnas computadas">
+                    ⚡ €{{ avg_hourly_rate|floatformat:2 }}/h
+                </span>
+            </div>
             <dd id="stat-total-profit" class="mt-1 text-3xl font-black text-green-600 dark:text-green-400">€{{ total_profit|floatformat:2 }}</dd>
         </div>
         <div class="bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
@@ -776,6 +821,14 @@
                     <span>📑</span> Tabla
                 </button>
             </div>
+
+            <!-- Botón Filtro Rápido Urgentes / Fechas Límite -->
+            <button type="button" id="btn-toggle-urgent-only" onclick="toggleUrgentOnlyOrders()"
+                class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-600"
+                title="Filtrar pedidos mostrando solo aquellos con fecha límite urgente o próxima">
+                <span id="urgent-filter-icon">🔥</span>
+                <span id="urgent-filter-label">Urgentes (<span id="urgent-filter-count">{{ urgent_orders_count }}</span>)</span>
+            </button>
 
             <!-- Botón Ocultar / Mostrar Cobrados -->
             <button type="button" id="btn-toggle-hide-paid" onclick="toggleHidePaidOrders()"
@@ -817,6 +870,9 @@
             data-price="{{ order.price|default:0|unlocalize }}"
             data-profit="{{ order.profit|default:0|unlocalize }}"
             data-cost="{{ order.total_cost|default:0|unlocalize }}"
+            data-print-hours="{{ order.total_print_time_hours|default:0|unlocalize }}"
+            data-has-deadline="{% if order.deadline_info %}1{% else %}0{% endif %}"
+            data-is-urgent="{% if order.deadline_info and order.deadline_info.is_urgent %}1{% else %}0{% endif %}"
             data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
             
             <div class="flex items-start justify-between gap-2 mb-2.5">
@@ -1027,6 +1083,9 @@
                         data-price="{{ order.price|default:0|unlocalize }}"
                         data-profit="{{ order.profit|default:0|unlocalize }}"
                         data-deposit="{{ order.deposit_amount|default:0|unlocalize }}"
+                        data-print-hours="{{ order.total_print_time_hours|default:0|unlocalize }}"
+                        data-has-deadline="{% if order.deadline_info %}1{% else %}0{% endif %}"
+                        data-is-urgent="{% if order.deadline_info and order.deadline_info.is_urgent %}1{% else %}0{% endif %}"
                         data-logistics="{{ order.platform|default:''|escapejs }} {{ order.shipping|default:''|escapejs }}"
                         data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
 
@@ -2579,9 +2638,113 @@
             }
         }
 
-        // 4. Delegar en filterTableLive para recalcular totales y actualizar la tabla con el buscador actual
+        // 4. Actualizar métricas de cola de taller
+        updateWorkshopQueueMetrics();
+
+        // 5. Delegar en filterTableLive para recalcular totales y actualizar la tabla con el buscador actual
         const searchInput = document.getElementById('table-search-input');
         filterTableLive(searchInput ? searchInput.value : '');
+    }
+
+    // ==========================================
+    // GESTIÓN DE COLA DE TALLER E IMPRESORAS 3D
+    // ==========================================
+    function getPrintersCount() {
+        const saved = parseInt(localStorage.getItem('proprint3d_printers_count'), 10);
+        return (!isNaN(saved) && saved >= 1) ? saved : 2;
+    }
+
+    function savePrintersCount(count) {
+        localStorage.setItem('proprint3d_printers_count', count);
+    }
+
+    function adjustPrintersCount(delta) {
+        let count = getPrintersCount() + delta;
+        if (count < 1) count = 1;
+        if (count > 20) count = 20;
+        savePrintersCount(count);
+        updateWorkshopQueueMetrics();
+    }
+
+    function formatHoursNice(totalHours) {
+        if (!totalHours || totalHours <= 0) return '0h';
+        const totalMinutes = Math.round(totalHours * 60);
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        if (h === 0) return `${m}m`;
+        if (m === 0) return `${h}h`;
+        return `${h}h ${m}m`;
+    }
+
+    function updateWorkshopQueueMetrics() {
+        const printersCount = getPrintersCount();
+        const printersEl = document.getElementById('workshop-printers-count');
+        if (printersEl) printersEl.textContent = printersCount;
+
+        let queueHours = 0;
+        let inProgressHours = 0;
+        let quotedHours = 0;
+
+        document.querySelectorAll('.kanban-col').forEach(col => {
+            const colStatus = col.getAttribute('data-status');
+            let colHours = 0;
+
+            col.querySelectorAll('.kanban-card').forEach(card => {
+                const h = parseFloat(card.dataset.printHours) || 0;
+                colHours += h;
+            });
+
+            // Actualizar píldora de horas en cabecera de la columna Kanban
+            const colHoursEl = col.querySelector('.kanban-col-hours');
+            if (colHoursEl) {
+                if (colHours > 0) {
+                    colHoursEl.textContent = `⏱️ ${formatHoursNice(colHours)}`;
+                    colHoursEl.classList.remove('hidden');
+                } else {
+                    colHoursEl.classList.add('hidden');
+                }
+            }
+
+            if (colStatus === 'En proceso') {
+                inProgressHours += colHours;
+                queueHours += colHours;
+            } else if (colStatus === 'Presupuestado') {
+                quotedHours += colHours;
+                queueHours += colHours;
+            }
+        });
+
+        const queueHoursEl = document.getElementById('workshop-queue-hours');
+        const queueDaysEl = document.getElementById('workshop-queue-days');
+        const queueLabelEl = document.getElementById('workshop-queue-label');
+
+        // Capacidad diaria: printersCount * 16h productivas/día
+        const dailyCapacityHours = printersCount * 16.0;
+        const estimatedDays = dailyCapacityHours > 0 ? (queueHours / dailyCapacityHours) : 0;
+
+        if (queueHoursEl) {
+            queueHoursEl.textContent = formatHoursNice(queueHours);
+        }
+
+        if (queueDaysEl) {
+            if (queueHours <= 0) {
+                queueDaysEl.textContent = 'Sin cola';
+                queueDaysEl.className = "text-emerald-500 font-bold text-xs sm:text-xs";
+            } else if (estimatedDays < 0.8) {
+                queueDaysEl.textContent = `~${estimatedDays.toFixed(1)} días (< 1 día)`;
+                queueDaysEl.className = "text-primary font-bold text-xs sm:text-xs";
+            } else if (estimatedDays <= 2.5) {
+                queueDaysEl.textContent = `~${estimatedDays.toFixed(1)} días`;
+                queueDaysEl.className = "text-amber-500 font-bold text-xs sm:text-xs";
+            } else {
+                queueDaysEl.textContent = `~${estimatedDays.toFixed(1)} días`;
+                queueDaysEl.className = "text-rose-500 font-bold text-xs sm:text-xs";
+            }
+        }
+
+        if (queueLabelEl) {
+            queueLabelEl.title = `Cola de taller: ${formatHoursNice(queueHours)} acumuladas (${formatHoursNice(inProgressHours)} en proceso + ${formatHoursNice(quotedHours)} presupuestadas). Con ${printersCount} impresora(s) a 16h útiles/día = ~${estimatedDays.toFixed(1)} días de trabajo.`;
+        }
     }
 
     // ==========================================
@@ -2609,15 +2772,43 @@
         if (!btn || !icon || !label) return;
 
         if (hidePaidOrders) {
-            btn.className = "px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700/60 ring-2 ring-emerald-500/20";
+            btn.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700/60 ring-2 ring-emerald-500/20";
             icon.textContent = '🚫';
             label.textContent = 'Cobrados Ocultos';
             btn.title = "Clic para volver a mostrar los pedidos cobrados";
         } else {
-            btn.className = "px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all inline-flex items-center gap-2 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600";
+            btn.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600";
             icon.textContent = '👁️';
             label.textContent = 'Ocultar Cobrados';
             btn.title = "Clic para ocultar los pedidos que ya están cobrados";
+        }
+    }
+
+    // Control de Filtro Rápido Urgentes / Fechas Límite
+    let filterUrgentOnly = (localStorage.getItem('crm_filter_urgent_only') === '1');
+
+    function toggleUrgentOnlyOrders() {
+        filterUrgentOnly = !filterUrgentOnly;
+        localStorage.setItem('crm_filter_urgent_only', filterUrgentOnly ? '1' : '0');
+        updateUrgentOnlyButtonUI();
+        const searchInput = document.getElementById('table-search-input');
+        filterTableLive(searchInput ? searchInput.value : '');
+    }
+
+    function updateUrgentOnlyButtonUI() {
+        const btn = document.getElementById('btn-toggle-urgent-only');
+        const icon = document.getElementById('urgent-filter-icon');
+        const label = document.getElementById('urgent-filter-label');
+        if (!btn) return;
+
+        if (filterUrgentOnly) {
+            btn.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-700/60 ring-2 ring-rose-500/20";
+            if (icon) icon.textContent = '🔥';
+            btn.title = "Clic para ver todos los pedidos (desactivar filtro de urgentes)";
+        } else {
+            btn.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-600";
+            if (icon) icon.textContent = '🔥';
+            btn.title = "Filtrar mostrando solo pedidos con fecha límite urgente o próxima";
         }
     }
 
@@ -2734,6 +2925,8 @@
         let sumSales = 0;
         let sumProfit = 0;
         let sumCosts = 0;
+        let sumPrintHours = 0;
+        let totalUrgentCount = 0;
 
         if (clearBtn) {
             if (filter.length > 0) {
@@ -2748,24 +2941,29 @@
             const orderId = row.dataset.orderId;
             const accordionRow = document.getElementById(`order-accordion-${orderId}`);
             const status = row.dataset.status || '';
+            const isUrgent = (row.dataset.isUrgent === '1');
+
+            if (isUrgent) totalUrgentCount++;
 
             const matchesSearch = !filter || searchText.includes(filter);
             const matchesPaidFilter = !hidePaidOrders || status !== 'Cobrado';
+            const matchesUrgentFilter = !filterUrgentOnly || isUrgent;
 
-            if (matchesSearch && matchesPaidFilter) {
+            if (matchesSearch && matchesPaidFilter && matchesUrgentFilter) {
                 row.style.display = '';
                 visibleCount++;
 
-                // Solo sumar a las tarjetas métricas (Total Facturado, Ganancia Neta, etc.)
-                // si la columna de este estado está marcada en los checkboxes
+                // Solo sumar a las tarjetas métricas si el estado está seleccionado
                 if (activeStatuses.includes(status)) {
                     const p = parseFloat(row.dataset.price) || 0;
                     const pr = parseFloat(row.dataset.profit) || 0;
                     const c = parseFloat(row.dataset.cost) || 0;
+                    const h = parseFloat(row.dataset.printHours) || 0;
 
                     sumSales += p;
                     sumProfit += pr;
                     sumCosts += c;
+                    sumPrintHours += h;
                     countedMetricOrders++;
                     row.classList.remove('opacity-60');
                 } else {
@@ -2781,10 +2979,31 @@
         document.querySelectorAll('.order-mobile-card').forEach(card => {
             const searchText = (card.dataset.searchText || '').toLowerCase();
             const status = card.dataset.status || '';
+            const isUrgent = (card.dataset.isUrgent === '1');
             const matchesSearch = !filter || searchText.includes(filter);
             const matchesPaidFilter = !hidePaidOrders || status !== 'Cobrado';
-            card.style.display = (matchesSearch && matchesPaidFilter) ? '' : 'none';
+            const matchesUrgentFilter = !filterUrgentOnly || isUrgent;
+            card.style.display = (matchesSearch && matchesPaidFilter && matchesUrgentFilter) ? '' : 'none';
         });
+
+        // Filtrar tarjetas en el tablero Kanban si el filtro urgente está activo
+        document.querySelectorAll('.kanban-card').forEach(card => {
+            const isUrgent = (card.dataset.isUrgent === '1');
+            if (filterUrgentOnly) {
+                if (isUrgent) {
+                    card.style.display = '';
+                    card.classList.remove('opacity-30');
+                } else {
+                    card.style.display = 'none';
+                }
+            } else {
+                card.style.display = '';
+            }
+        });
+
+        // Actualizar contador del botón urgente
+        const urgentCountEl = document.getElementById('urgent-filter-count');
+        if (urgentCountEl) urgentCountEl.textContent = totalUrgentCount;
 
         if (noResultsRow) {
             if (visibleCount === 0 && rows.length > 0) {
@@ -2805,6 +3024,21 @@
         if (statProfit) statProfit.textContent = formatStatCurrency(sumProfit);
         if (statCosts) statCosts.textContent = formatStatCurrency(sumCosts);
         if (statAvgProfit) statAvgProfit.textContent = formatStatCurrency(avgProfit);
+
+        // Actualizar Rentabilidad Horaria Media del Taller
+        const avgHourlyRate = sumPrintHours > 0 ? (sumProfit / sumPrintHours) : 0;
+        const statAvgHourly = document.getElementById('stat-avg-hourly-rate');
+        if (statAvgHourly) {
+            statAvgHourly.textContent = `⚡ €${avgHourlyRate.toFixed(2)}/h`;
+            if (avgHourlyRate >= 4.0) {
+                statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition-all shadow-2xs flex-shrink-0";
+            } else if (avgHourlyRate >= 2.0) {
+                statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800 transition-all shadow-2xs flex-shrink-0";
+            } else {
+                statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300 border border-rose-300 dark:border-rose-800 transition-all shadow-2xs flex-shrink-0";
+            }
+            statAvgHourly.title = `Rentabilidad horaria media: €${avgHourlyRate.toFixed(2)}/h (${sumPrintHours.toFixed(1)}h de impresión computadas para €${sumProfit.toFixed(2)} de beneficio neto)`;
+        }
     }
 
     function clearTableSearchLive() {
@@ -4234,6 +4468,15 @@
             selectMobileKanbanTab(currentMobileKanbanTab);
         }
         setOrdersViewMode(currentOrdersViewMode);
+
+        // Inicializar estado de botones de filtros
+        hidePaidOrders = (localStorage.getItem('crm_hide_paid_orders') === '1');
+        updateHidePaidButtonUI();
+        filterUrgentOnly = (localStorage.getItem('crm_filter_urgent_only') === '1');
+        updateUrgentOnlyButtonUI();
+
+        // Inicializar métricas de cola de taller y selector de impresoras
+        updateWorkshopQueueMetrics();
 
         // Inicializar preservación de scroll del Kanban y cálculo de métricas
         initKanbanScrollPreservation();
