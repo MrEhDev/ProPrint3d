@@ -6,7 +6,13 @@
 
 {% block content %}
 <style>
-        /* Elevación de z-index al hacer hover para que los tooltips nunca queden ocultos */
+    /* Soporte táctil optimizado para móvil: respuesta inmediata sin lag */
+    button, a, input, select, .kanban-card, .mobile-kanban-tab-btn {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Elevación de z-index al hacer hover para que los tooltips nunca queden ocultos */
     .kanban-card:hover {
         z-index: 40 !important;
         position: relative;
@@ -19,7 +25,7 @@
         position: relative;
     }
 
-        /* Anchos responsivos de columnas Kanban y Modos Móvil */
+    /* Anchos responsivos de columnas Kanban y Modos Móvil */
     .kanban-board {
         display: flex;
         overflow-x: auto;
@@ -83,7 +89,7 @@
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .kanban-card-collapsible.is-collapsed {
-        padding: 0.75rem !important;
+        padding: 0.85rem !important;
     }
     .kanban-card-collapsible.is-collapsed:hover {
         transform: translateY(-1px);
@@ -100,6 +106,18 @@
     }
     .kanban-card-collapsible:not(.is-collapsed) .kanban-full-view {
         display: block !important;
+    }
+
+    /* Scrollbar estilizada y suave para tira de pestañas móvil */
+    #mobile-kanban-tabs-strip::-webkit-scrollbar {
+        height: 4px;
+    }
+    #mobile-kanban-tabs-strip::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    #mobile-kanban-tabs-strip::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.4);
+        border-radius: 9999px;
     }
 </style>
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -234,47 +252,47 @@
                 <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
 
                 <!-- Selector Interactivo de Impresoras -->
-                <div class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/60 px-2 py-1 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
+                <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/60 px-2.5 py-1.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
                     title="Número de impresoras 3D activas en el taller para calcular los días estimados de producción (asumiendo ~16h de impresión diaria por máquina)">
                     <span class="text-xs font-bold text-gray-600 dark:text-gray-300 select-none flex items-center gap-1">
                         <span>🖨️</span> <span class="hidden sm:inline">Impresoras:</span>
                     </span>
                     <button type="button" onclick="adjustPrintersCount(-1)"
-                        class="w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition shadow-2xs text-xs select-none active:scale-95"
+                        class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-black hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 transition shadow-2xs text-sm select-none active:scale-95"
                         title="Reducir impresoras">-</button>
-                    <span id="workshop-printers-count" class="font-black px-1.5 text-primary text-sm min-w-[1.2rem] text-center select-none">2</span>
+                    <span id="workshop-printers-count" class="font-black px-1.5 text-primary text-base min-w-[1.4rem] text-center select-none">2</span>
                     <button type="button" onclick="adjustPrintersCount(1)"
-                        class="w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition shadow-2xs text-xs select-none active:scale-95"
+                        class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-black hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 transition shadow-2xs text-sm select-none active:scale-95"
                         title="Aumentar impresoras">+</button>
                 </div>
             </div>
         </div>
 
         <!-- Barra de Navegación Móvil de Columnas Kanban -->
-        <div id="mobile-kanban-nav" class="lg:hidden mb-4 bg-white dark:bg-dark p-2.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-            <div class="flex items-center justify-between gap-2 mb-2 px-1">
+        <div id="mobile-kanban-nav" class="lg:hidden mb-4 bg-white dark:bg-dark p-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-2.5 px-1">
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>📱</span> Vista Móvil Kanban
+                    <span>📱</span> Flujo Móvil
                 </span>
                 <div class="inline-flex rounded-xl bg-gray-100 dark:bg-gray-800 p-0.5 border border-gray-200 dark:border-gray-700 text-xs">
                     <button type="button" id="btn-kanban-mode-tabs" onclick="setMobileKanbanMode('tabs')"
-                        class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs">
+                        class="px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 bg-white dark:bg-dark text-primary shadow-xs">
                         <span>📑</span> 1 Columna
                     </button>
                     <button type="button" id="btn-kanban-mode-scroll" onclick="setMobileKanbanMode('scroll')"
-                        class="px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                        class="px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                         <span>↔️</span> Deslizar
                     </button>
                 </div>
             </div>
 
-            <!-- Tiras de Pestañas de las 6 Columnas -->
-            <div class="flex overflow-x-auto gap-1.5 pb-1 no-scrollbar scroll-smooth" id="mobile-kanban-tabs-strip">
+            <!-- Tiras de Pestañas de las 6 Columnas con Botones Cómodos -->
+            <div class="flex overflow-x-auto gap-2 pb-1 no-scrollbar scroll-smooth" id="mobile-kanban-tabs-strip">
                 {% for status_name, group_orders in kanban_columns.items %}
                 <button type="button" onclick="selectMobileKanbanTab('{{ status_name|escapejs }}')"
-                    class="mobile-kanban-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition select-none border cursor-pointer"
+                    class="mobile-kanban-tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1.5 transition select-none border cursor-pointer active:scale-95 shadow-2xs"
                     data-status="{{ status_name }}">
-                    <span>
+                    <span class="text-base">
                         {% if status_name == 'Presupuestado' %}📝
                         {% elif status_name == 'En proceso' %}⚙️
                         {% elif status_name == 'Realizado' %}✅
@@ -284,7 +302,7 @@
                         {% endif %}
                     </span>
                     <span>{{ status_name }}</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-black bg-black/10 dark:bg-white/10">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-black bg-black/10 dark:bg-white/10">
                         {{ group_orders|length }}
                     </span>
                 </button>
@@ -341,6 +359,32 @@
                     </div>
                 </div>
 
+                <!-- Barra de Navegación Rápida entre Fases Móvil -->
+                <div class="lg:hidden flex items-center justify-between gap-1.5 mb-3 p-1.5 bg-white dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-2xs">
+                    <button type="button" onclick="navigateMobileKanbanColumn(-1)"
+                        class="h-8 px-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-black text-gray-700 dark:text-gray-200 flex items-center gap-1 transition active:scale-95 select-none"
+                        title="Fase anterior">
+                        <span>◀</span> Ant.
+                    </button>
+                    <span class="text-xs font-black text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                        <span>Fase</span>
+                        <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-black">
+                            {% if status_name == 'Presupuestado' %}1 de 6
+                            {% elif status_name == 'En proceso' %}2 de 6
+                            {% elif status_name == 'Realizado' %}3 de 6
+                            {% elif status_name == 'Enviado' %}4 de 6
+                            {% elif status_name == 'Entregado' %}5 de 6
+                            {% elif status_name == 'Cobrado' %}6 de 6
+                            {% endif %}
+                        </span>
+                    </span>
+                    <button type="button" onclick="navigateMobileKanbanColumn(1)"
+                        class="h-8 px-2.5 rounded-lg bg-primary hover:bg-secondary text-white text-xs font-black flex items-center gap-1 transition active:scale-95 shadow-2xs select-none"
+                        title="Siguiente fase">
+                        Sig. <span>▶</span>
+                    </button>
+                </div>
+
                 <div class="space-y-3 kanban-items min-h-[140px]">
                     {% for group in group_orders %}
                     <!-- Tarjeta de Pedido / Agrupación en columna -->
@@ -382,9 +426,9 @@
                                 </button>
                                 {% if group.order.whatsapp_url %}
                                 <a href="{{ group.order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
-                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 hover:text-white dark:bg-emerald-500/20 dark:hover:bg-emerald-600 dark:text-emerald-400 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none flex-shrink-0"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xs transition active:scale-95 flex-shrink-0"
                                     title="Abrir WhatsApp con {{ group.order.client_name }} ({{ group.order.client_contact }})">
-                                    <span>💬</span>
+                                    <span>💬</span> <span class="hidden sm:inline">WhatsApp</span>
                                 </a>
                                 {% endif %}
                                 <div class="flex items-center gap-1 flex-shrink-0">
@@ -427,10 +471,10 @@
                             </div>
 
                             <!-- Total del pedido y llamada a desplegar con accesos rápidos -->
-                            <div class="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800 mt-2 text-sm">
+                            <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-sm">
                                 <div class="flex items-baseline gap-1.5 flex-wrap">
                                     <span class="text-xs text-gray-400 uppercase font-semibold">Total:</span>
-                                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
+                                    <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€{{ group.order.price }}</span>
                                     {% if group.order.hourly_rate_info %}
                                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border {{ group.order.hourly_rate_info.badge_css }}"
                                         title="{{ group.order.hourly_rate_info.tooltip }}">
@@ -439,14 +483,14 @@
                                     </span>
                                     {% endif %}
                                 </div>
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-1.5">
                                     <button type="button"
                                         onclick="event.stopPropagation(); openMobileMoveModal('order', {{ group.order.id }}, '{{ status_name|escapejs }}', '{{ group.order.client_name|escapejs }}')"
-                                        class="px-2 py-0.5 rounded-md text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white transition"
+                                        class="h-8 px-2.5 rounded-lg text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white transition flex items-center gap-1 active:scale-95 shadow-2xs"
                                         title="Mover pedido">
-                                        🔄 Mover
+                                        <span>🔄</span> Mover
                                     </button>
-                                    <span class="text-xs text-primary dark:text-cyan-400 font-semibold flex items-center gap-0.5 hover:underline ml-1">
+                                    <span class="h-8 px-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-primary dark:text-cyan-400 font-bold flex items-center gap-0.5 select-none hover:underline">
                                         Detalles ▾
                                     </span>
                                 </div>
@@ -479,9 +523,9 @@
                                     </button>
                                     {% if group.order.whatsapp_url %}
                                     <a href="{{ group.order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
-                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 hover:text-white dark:bg-emerald-500/20 dark:hover:bg-emerald-600 dark:text-emerald-400 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none flex-shrink-0"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xs transition-all active:scale-95 flex-shrink-0"
                                         title="Abrir WhatsApp con {{ group.order.client_name }} ({{ group.order.client_contact }})">
-                                        <span>💬</span> WhatsApp
+                                        <span class="text-sm">💬</span> WhatsApp
                                     </a>
                                     {% endif %}
                                     {% if group.order.notes %}
@@ -551,7 +595,7 @@
                         <div class="mb-2">
                             <button type="button"
                                 onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
-                                class="w-full text-left inline-flex items-center justify-between gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition"
+                                class="w-full text-left inline-flex items-center justify-between gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition active:scale-98"
                                 title="Paga y señal registrada: €{{ group.order.deposit_amount|floatformat:2 }}. Clic para editar">
                                 <span>🤝 Señal: €{{ group.order.deposit_amount|floatformat:2 }}{% if group.order.deposit_method %} ({{ group.order.deposit_method }}){% endif %}</span>
                                 <span class="text-xs text-amber-600 dark:text-amber-400 font-semibold">Restan €{{ group.order.remaining_amount|floatformat:2 }}</span>
@@ -560,9 +604,9 @@
                         {% endif %}
 
                         <!-- Piezas en esta columna (Arrastrables individualmente) -->
-                        <div class="space-y-1.5 my-2.5">
+                        <div class="space-y-2 my-2.5">
                             {% for item in group.items %}
-                            <div class="p-2 rounded-lg bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
+                            <div class="p-2.5 rounded-xl bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
                                 draggable="true" ondragstart="dragPiece(event)"
                                 data-item-id="{{ item.id }}"
                                 data-order-id="{{ group.order.id }}"
@@ -580,7 +624,7 @@
                                         </span>
 
                                         <!-- Cantidad del pedido (siempre visible junto al nombre: x100, x5, etc.) -->
-                                        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold flex-shrink-0">
+                                        <span class="text-xs px-2 py-0.5 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-black flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
 
@@ -601,21 +645,21 @@
                                     </div>
 
                                     <!-- Fila 2 (debajo del nombre): Cantidad realizada ([-] X/Y [+]) + peso + horas restantes en formato (d h m) -->
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1 flex-wrap">
-                                        <!-- Cantidad realizada: Contador interactivo [-] X/Y [+] ÚNICAMENTE en En proceso -->
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1.5 flex-wrap">
+                                        <!-- Cantidad realizada: Contador interactivo con botones táctiles cómodos (32px) -->
                                         {% if status_name == 'En proceso' %}
-                                        <div class="inline-flex items-center gap-0.5 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs text-xs select-none flex-shrink-0"
+                                        <div class="inline-flex items-center gap-1 bg-white dark:bg-gray-900 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-2xs select-none flex-shrink-0"
                                             onclick="event.stopPropagation();"
                                             title="Unidades ya fabricadas de {{ item.quantity }} (pulsa + al terminar una impresión)">
                                             <button type="button" onclick="adjustItemProgressLive({{ item.id }}, -1, this, event)"
-                                                class="w-4 h-4 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black transition text-[11px] active:scale-90"
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100 font-black text-sm transition active:scale-90 shadow-2xs select-none"
                                                 title="Restar 1 unidad hecha">-</button>
-                                            <span id="item-badge-{{ item.id }}" class="font-black px-1 text-center min-w-[2.4rem] text-[11px]
+                                            <span id="item-badge-{{ item.id }}" class="font-black px-1.5 text-center min-w-[3rem] text-xs
                                                 {% if item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400{% elif item.completed_quantity > 0 %}text-primary{% else %}text-gray-500 dark:text-gray-400{% endif %}">
                                                 <span class="completed-val">{{ item.completed_quantity|default:0 }}</span>/{{ item.quantity }} hechas
                                             </span>
                                             <button type="button" onclick="adjustItemProgressLive({{ item.id }}, 1, this, event)"
-                                                class="w-4 h-4 flex items-center justify-center rounded bg-primary/10 hover:bg-primary text-primary hover:text-white font-black transition text-[11px] active:scale-90"
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary hover:bg-secondary text-white font-black text-sm transition active:scale-90 shadow-2xs select-none"
                                                 title="Sumar 1 unidad terminada">+</button>
                                         </div>
                                         {% endif %}
@@ -627,13 +671,13 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="text-right flex-shrink-0 flex items-center gap-1">
-                                    <span class="text-sm font-bold text-primary">€{{ item.price }}</span>
+                                <div class="text-right flex-shrink-0 flex items-center gap-1.5">
+                                    <span class="text-sm font-black text-primary">€{{ item.price }}</span>
                                     <button type="button"
                                         onclick="event.stopPropagation(); openMobileMoveModal('item', {{ item.id }}, '{{ status_name|escapejs }}', '{{ item.description|escapejs }}', {{ group.order.id }})"
-                                        class="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition text-xs"
+                                        class="h-8 px-2.5 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-300 bg-gray-100 hover:bg-primary hover:text-white dark:bg-gray-700/80 dark:hover:bg-primary transition flex items-center gap-1 active:scale-95 shadow-2xs"
                                         title="Cambiar estado de esta pieza">
-                                        🔄
+                                        <span>🔄</span> <span class="hidden sm:inline">Mover</span>
                                     </button>
                                 </div>
                             </div>
@@ -694,37 +738,64 @@
                             </div>
                         </div>
 
-                        <!-- Barra Táctil Móvil de Cambio de Estado Rápido -->
-                        <div class="flex items-center justify-between gap-1 pt-2 border-t border-gray-100 dark:border-gray-800 mt-2 text-xs">
-                            <div class="flex items-center gap-1">
+                        <!-- Barra Táctil Móvil de Acciones Cómodas del Pedido -->
+                        <div class="pt-3 border-t border-gray-100 dark:border-gray-800 mt-3 space-y-2 select-none">
+                            <!-- Fila 1: Botones Principales de Flujo (Retroceder / Avanzar / Mover) -->
+                            <div class="flex items-center gap-1.5 sm:gap-2">
                                 {% if status_name != 'Presupuestado' %}
                                 <button type="button"
                                     onclick="event.stopPropagation(); quickStepOrder({{ group.order.id }}, '{{ status_name|escapejs }}', -1)"
-                                    class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-black flex items-center justify-center transition active:scale-95"
-                                    title="Retroceder a estado anterior">
+                                    class="h-10 w-10 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black text-base flex items-center justify-center transition active:scale-95 border border-gray-200 dark:border-gray-700 shadow-2xs"
+                                    title="Retroceder a fase anterior">
                                     ◀
                                 </button>
                                 {% endif %}
+
                                 {% if status_name != 'Cobrado' %}
                                 <button type="button"
                                     onclick="event.stopPropagation(); quickStepOrder({{ group.order.id }}, '{{ status_name|escapejs }}', 1)"
-                                    class="w-7 h-7 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-black flex items-center justify-center transition active:scale-95"
-                                    title="Avanzar a siguiente estado">
-                                    ▶
+                                    class="flex-1 h-10 px-3 rounded-xl bg-primary hover:bg-secondary text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
+                                    title="Avanzar a siguiente fase">
+                                    <span>
+                                        {% if status_name == 'Presupuestado' %}⚙️ Fabricar
+                                        {% elif status_name == 'En proceso' %}✅ Realizado
+                                        {% elif status_name == 'Realizado' %}🚚 Enviar
+                                        {% elif status_name == 'Enviado' %}📦 Entregado
+                                        {% elif status_name == 'Entregado' %}💰 Cobrar
+                                        {% endif %}
+                                    </span>
+                                    <span class="font-black text-sm leading-none">➔</span>
                                 </button>
                                 {% endif %}
+
                                 <button type="button"
                                     onclick="event.stopPropagation(); openMobileMoveModal('order', {{ group.order.id }}, '{{ status_name|escapejs }}', '{{ group.order.client_name|escapejs }}')"
-                                    class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold flex items-center gap-1 transition active:scale-95"
-                                    title="Mover a cualquier estado">
+                                    class="{% if status_name == 'Cobrado' %}w-full{% endif %} h-10 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition active:scale-95 border border-gray-200 dark:border-gray-700 shadow-2xs"
+                                    title="Mover a cualquier fase">
                                     <span>🔄</span> Mover
                                 </button>
                             </div>
-                            <a href="{% url 'generate_order_quote_pdf' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
-                                class="px-2 py-1 rounded-lg text-gray-500 hover:text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-1 text-[11px] font-semibold"
-                                title="Descargar Presupuesto en PDF">
-                                <span>📄</span> PDF
-                            </a>
+
+                            <!-- Fila 2: Accesos Directos Secundarios (Cobro / Editar / PDF) -->
+                            <div class="flex items-center justify-between gap-1.5">
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openPaymentModal({{ group.order.id }})"
+                                    class="flex-1 h-9 px-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80 font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
+                                    title="Gestionar Cobro o Paga y Señal">
+                                    <span>💳</span> Cobro
+                                </button>
+                                <button type="button"
+                                    onclick="event.stopPropagation(); openEditOrderModal({{ group.order.id }})"
+                                    class="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 border border-gray-200 dark:border-gray-700"
+                                    title="Editar pedido y piezas">
+                                    <span>✏️</span> Editar
+                                </button>
+                                <a href="{% url 'generate_order_quote_pdf' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
+                                    class="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                                    title="Descargar Presupuesto en PDF">
+                                    <span>📄</span> PDF
+                                </a>
+                            </div>
                         </div>
                     
                             {% if status_name == 'Enviado' or status_name == 'Entregado' or status_name == 'Cobrado' %}
@@ -907,31 +978,31 @@
             data-search-text="{{ order.id }} {{ order.client_name|lower }} {{ order.platform|lower }} {{ order.shipping|lower }} {{ order.notes|lower }} {% for itm in order.items.all %}{{ itm.description|lower }} {% endfor %}">
             
             <div class="flex items-start justify-between gap-2 mb-2.5">
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
                             #{{ order.id }}
                         </span>
                         <button type="button" onclick="openOrderSummaryModal({{ order.id }})"
-                            class="text-sm font-bold text-gray-900 dark:text-white truncate hover:text-primary text-left">
+                            class="text-base font-black text-gray-900 dark:text-white truncate hover:text-primary text-left">
                             {{ order.client_name }}
                         </button>
                         {% if order.whatsapp_url %}
                         <a href="{{ order.whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 hover:bg-emerald-600 text-emerald-800 hover:text-white dark:bg-emerald-900/40 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white border border-emerald-500/30 transition shadow-xs select-none"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xs transition active:scale-95 select-none"
                             title="Abrir chat de WhatsApp con {{ order.client_name }}">
                             <span>💬</span> WhatsApp
                         </a>
                         {% endif %}
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         📅 {{ order.order_date|date:"d/m/Y" }}
                         {% if order.deadline_info %} · <span class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[11px] font-bold border {{ order.deadline_info.css }}" title="{{ order.deadline_info.tooltip }}"><span>{{ order.deadline_info.icon }}</span><span>{{ order.deadline_info.formatted_date }}</span></span>{% endif %}
                         {% if order.platform %} · <span>{{ order.platform }}</span>{% endif %}
                     </p>
                 </div>
                 
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap
+                <span class="px-2.5 py-1 rounded-full text-xs font-black whitespace-nowrap
                     {% if order.status == 'Presupuestado' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300
                     {% elif order.status == 'En proceso' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
                     {% elif order.status == 'Realizado' %}bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300
@@ -953,16 +1024,16 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/60 text-center mb-3">
                 <div>
                     <span class="block text-[10px] text-gray-400 font-bold uppercase">Total</span>
-                    <span class="text-sm font-black text-gray-900 dark:text-white">€{{ order.price|default:0|floatformat:2 }}</span>
+                    <span class="text-base font-black text-gray-900 dark:text-white">€{{ order.price|default:0|floatformat:2 }}</span>
                 </div>
                 <div>
                     <span class="block text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Beneficio</span>
-                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|default:0|floatformat:2 }}</span>
+                    <span class="text-base font-black text-emerald-600 dark:text-emerald-400">+€{{ order.profit|default:0|floatformat:2 }}</span>
                 </div>
                 <div>
                     <span class="block text-[10px] text-cyan-600 dark:text-cyan-400 font-bold uppercase">€/h Máq.</span>
                     {% if order.hourly_rate_info %}
-                    <span class="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-bold border {{ order.hourly_rate_info.badge_css }}" title="{{ order.hourly_rate_info.tooltip }}">
+                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border {{ order.hourly_rate_info.badge_css }}" title="{{ order.hourly_rate_info.tooltip }}">
                         <span>{{ order.hourly_rate_info.text }}</span>
                     </span>
                     {% else %}
@@ -981,18 +1052,18 @@
                 </div>
             </div>
 
-            <!-- Desplegable de piezas del pedido -->
+            <!-- Desplegable de piezas del pedido (Botón Táctil Cómodo) -->
             <div class="mb-3">
                 <button type="button" onclick="toggleMobileCardPieces({{ order.id }})"
-                    class="w-full flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 hover:text-primary font-semibold py-1 px-0.5 select-none">
+                    class="w-full flex items-center justify-between text-xs py-2 px-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80 font-bold text-gray-700 dark:text-gray-200 hover:border-primary transition select-none active:scale-98">
                     <span class="flex items-center gap-1.5">
                         <span>🧩</span> Piezas ({{ order.items.count }} ref · {{ order.total_items_count }} uds)
                     </span>
-                    <span id="mobile-card-chevron-{{ order.id }}" class="text-primary font-bold">▾ Ver piezas</span>
+                    <span id="mobile-card-chevron-{{ order.id }}" class="text-primary font-black">▾ Ver piezas</span>
                 </button>
                 <div id="mobile-card-pieces-{{ order.id }}" class="hidden mt-2 space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
                     {% for item in order.items.all %}
-                    <div class="p-2 rounded-lg bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between gap-2 text-xs">
+                    <div class="p-2.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between gap-2 text-xs">
                         <div class="min-w-0 flex-1">
                             <div class="font-bold text-gray-900 dark:text-white truncate">
                                 {{ item.description }} <span class="text-gray-400 font-normal">x{{ item.quantity }}</span>
@@ -1009,25 +1080,25 @@
                 </div>
             </div>
 
-            <!-- Acciones -->
-            <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+            <!-- Acciones Cómodas de Tarjeta Móvil -->
+            <div class="flex items-center justify-between gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-800 text-xs">
                 <button type="button"
                     onclick="openMobileMoveModal('order', {{ order.id }}, '{{ order.status|escapejs }}', '{{ order.client_name|escapejs }}')"
-                    class="flex-1 py-2 px-2.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold flex items-center justify-center gap-1 transition active:scale-95">
+                    class="flex-1 h-10 px-3 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold flex items-center justify-center gap-1.5 transition active:scale-95 border border-primary/20 shadow-2xs">
                     <span>🔄</span> Mover
                 </button>
                 <button type="button" onclick="openPaymentModal({{ order.id }})"
-                    class="py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold hover:bg-emerald-100 transition flex items-center gap-1">
+                    class="h-10 px-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-100 border border-emerald-300 dark:border-emerald-800/80 transition flex items-center gap-1.5 active:scale-95 shadow-2xs">
                     <span>💳</span> Cobro
                 </button>
-                <a href="{% url 'generate_order_quote_pdf' order.id %}" target="_blank"
-                    class="py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1">
-                    <span>📄</span> PDF
-                </a>
                 <button type="button" onclick="openEditOrderModal({{ order.id }})"
-                    class="py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                    class="h-10 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1 active:scale-95 border border-gray-200 dark:border-gray-700">
                     <span>✏️</span> Editar
                 </button>
+                <a href="{% url 'generate_order_quote_pdf' order.id %}" target="_blank"
+                    class="h-10 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1 active:scale-95 border border-gray-200 dark:border-gray-700">
+                    <span>📄</span> PDF
+                </a>
             </div>
 
         </div>
@@ -1732,19 +1803,18 @@
                     <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">Disponible en cualquier
                         momento</span>
                 </div>
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Importe Señal (€)</label>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Importe Señal (€)</label>
                         <input type="number" step="0.01" min="0" id="modal-deposit-amount"
                             oninput="recalcModalAmounts()"
-                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
+                            class="w-full text-base sm:text-sm p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
                             placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Método de la
-                            Señal</label>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Método de la Señal</label>
                         <select id="modal-deposit-method"
-                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium">
+                            class="w-full text-base sm:text-sm p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
                             <option value="">(Selecciona método...)</option>
                             {% for m in payment_methods %}
                             <option value="{{ m }}">{{ m }}</option>
@@ -1760,14 +1830,13 @@
                 <label
                     class="block text-sm font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center justify-between">
                     <span class="flex items-center gap-1.5"><span>💵</span> 2. Cobro Restante / Final</span>
-                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">€<span
+                    <span class="text-base font-black text-emerald-600 dark:text-emerald-400">€<span
                             id="modal-remaining-calc">0.00</span></span>
                 </label>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Método de Cobro del Restante
-                        (para cerrar y cobrar)</label>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Método de Cobro del Restante (para cerrar y cobrar)</label>
                     <select id="modal-final-method"
-                        class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                        class="w-full text-base sm:text-sm p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
                         <option value="">Selecciona cómo se ha cobrado el resto...</option>
                         {% for m in payment_methods %}
                         <option value="{{ m }}">{{ m }}</option>
@@ -1778,30 +1847,29 @@
 
             <!-- Notas -->
             <div>
-                <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1 font-medium">Notas o comentarios de cobro
-                    (opcional)</label>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Notas o comentarios de cobro (opcional)</label>
                 <input type="text" id="modal-payment-notes"
                     placeholder="Ej. 20€ Bizum señal el 10/10, restante en mano en efectivo"
-                    class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-medium">
+                    class="w-full text-base sm:text-sm p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-medium">
             </div>
 
-            <!-- Botones de Acción -->
+            <!-- Botones de Acción Cómodos para Móvil -->
             <div
                 class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
                 <button type="button" onclick="closePaymentModal(false)"
-                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    class="w-full sm:w-auto h-11 px-5 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition active:scale-95">
                     Cerrar
                 </button>
-                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto justify-end">
                     <!-- Botón 1: Guardar solo señal (en cualquier momento) -->
                     <button type="button" id="btn-save-deposit-only" onclick="submitDepositOnly()"
-                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition flex items-center justify-center gap-1.5"
+                        class="w-full sm:w-auto h-11 px-4 rounded-xl text-sm font-black bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5"
                         title="Guarda la señal/adelanto sin cambiar el estado actual del pedido">
                         <span>🤝</span> Guardar Señal
                     </button>
                     <!-- Botón 2: Confirmar cobro completo -->
                     <button type="button" id="btn-save-full-payment" onclick="submitFullPayment()"
-                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white shadow-md transition flex items-center justify-center gap-1.5">
+                        class="w-full sm:w-auto h-11 px-5 rounded-xl text-sm font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
                         <span>✅</span> Confirmar Cobro Total
                     </button>
                 </div>
@@ -4381,6 +4449,16 @@
         selectMobileKanbanTab(currentMobileKanbanTab);
     }
 
+    function navigateMobileKanbanColumn(direction) {
+        const stages = ['Presupuestado', 'En proceso', 'Realizado', 'Enviado', 'Entregado', 'Cobrado'];
+        let idx = stages.indexOf(currentMobileKanbanTab);
+        if (idx === -1) idx = 0;
+        let nextIdx = idx + direction;
+        if (nextIdx < 0) nextIdx = stages.length - 1;
+        if (nextIdx >= stages.length) nextIdx = 0;
+        selectMobileKanbanTab(stages[nextIdx]);
+    }
+
     function selectMobileKanbanTab(status) {
         currentMobileKanbanTab = status;
         localStorage.setItem('proprint3d_mobile_kanban_active_tab', status);
@@ -4401,6 +4479,14 @@
         }
         
         updateMobileKanbanTabsUI();
+
+        // Auto-scroll horizontal suave en la tira de pestañas para mantener activa la seleccionada
+        try {
+            const activeTabBtn = document.querySelector(`.mobile-kanban-tab-btn[data-status="${status}"]`);
+            if (activeTabBtn) {
+                activeTabBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        } catch(e) {}
     }
 
     function updateMobileKanbanTabsUI() {
@@ -4409,16 +4495,34 @@
             const isActive = status === currentMobileKanbanTab;
             
             const colors = {
-                'Presupuestado': { active: 'bg-indigo-600 text-white border-indigo-600 shadow-md', inactive: 'bg-indigo-50/70 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
-                'En proceso': { active: 'bg-amber-600 text-white border-amber-600 shadow-md', inactive: 'bg-amber-50/70 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
-                'Realizado': { active: 'bg-teal-600 text-white border-teal-600 shadow-md', inactive: 'bg-teal-50/70 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300 border-teal-200 dark:border-teal-800' },
-                'Enviado': { active: 'bg-blue-600 text-white border-blue-600 shadow-md', inactive: 'bg-blue-50/70 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
-                'Entregado': { active: 'bg-purple-600 text-white border-purple-600 shadow-md', inactive: 'bg-purple-50/70 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
-                'Cobrado': { active: 'bg-emerald-600 text-white border-emerald-600 shadow-md', inactive: 'bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' }
+                'Presupuestado': { 
+                    active: 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-400/40', 
+                    inactive: 'bg-indigo-50/80 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/80' 
+                },
+                'En proceso': { 
+                    active: 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-400/40', 
+                    inactive: 'bg-amber-50/80 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800/80' 
+                },
+                'Realizado': { 
+                    active: 'bg-teal-600 text-white border-teal-600 shadow-md ring-2 ring-teal-400/40', 
+                    inactive: 'bg-teal-50/80 text-teal-800 dark:bg-teal-950/40 dark:text-teal-300 border-teal-200 dark:border-teal-800/80' 
+                },
+                'Enviado': { 
+                    active: 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-400/40', 
+                    inactive: 'bg-blue-50/80 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800/80' 
+                },
+                'Entregado': { 
+                    active: 'bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-400/40', 
+                    inactive: 'bg-purple-50/80 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800/80' 
+                },
+                'Cobrado': { 
+                    active: 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-400/40', 
+                    inactive: 'bg-emerald-50/80 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80' 
+                }
             };
             
-            const c = colors[status] || { active: 'bg-primary text-white border-primary', inactive: 'bg-gray-100 text-gray-700 border-gray-200' };
-            btn.className = `mobile-kanban-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition select-none border cursor-pointer ${isActive ? c.active : c.inactive}`;
+            const c = colors[status] || { active: 'bg-primary text-white border-primary shadow-md', inactive: 'bg-gray-100 text-gray-700 border-gray-200' };
+            btn.className = `mobile-kanban-tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1.5 transition select-none border cursor-pointer active:scale-95 shadow-2xs ${isActive ? c.active : c.inactive}`;
         });
     }
 
@@ -4440,12 +4544,12 @@
         }
         
         const stages = [
-            { name: 'Presupuestado', icon: '📝', desc: 'Presupuesto inicial creado' },
-            { name: 'En proceso', icon: '⚙️', desc: 'En cola o imprimiendo en máquina' },
-            { name: 'Realizado', icon: '✅', desc: 'Impresión y post-procesado finalizados' },
-            { name: 'Enviado', icon: '🚚', desc: 'En tránsito hacia el cliente' },
-            { name: 'Entregado', icon: '📦', desc: 'Recibido por el cliente' },
-            { name: 'Cobrado', icon: '💰', desc: 'Pago total recibido y confirmado' }
+            { name: 'Presupuestado', icon: '📝', desc: 'Presupuesto inicial creado', theme: 'border-l-4 border-l-indigo-500' },
+            { name: 'En proceso', icon: '⚙️', desc: 'En cola o imprimiendo en máquina', theme: 'border-l-4 border-l-amber-500' },
+            { name: 'Realizado', icon: '✅', desc: 'Impresión y post-procesado finalizados', theme: 'border-l-4 border-l-teal-500' },
+            { name: 'Enviado', icon: '🚚', desc: 'En tránsito hacia el cliente', theme: 'border-l-4 border-l-blue-500' },
+            { name: 'Entregado', icon: '📦', desc: 'Recibido por el cliente', theme: 'border-l-4 border-l-purple-500' },
+            { name: 'Cobrado', icon: '💰', desc: 'Pago total recibido y confirmado', theme: 'border-l-4 border-l-emerald-500' }
         ];
         
         if (listEl) {
@@ -4453,19 +4557,22 @@
                 const isCurrent = st.name === currentStatus;
                 return `
                     <button type="button" onclick="selectMobileMoveDestination('${st.name}')"
-                        class="w-full p-3 rounded-xl border flex items-center justify-between text-left transition ${
+                        class="w-full min-h-[54px] p-3 rounded-2xl border flex items-center justify-between text-left transition select-none ${st.theme} ${
                             isCurrent 
-                                ? 'bg-gray-100 dark:bg-gray-800/60 border-gray-300 dark:border-gray-700 opacity-60 cursor-default' 
-                                : 'bg-white dark:bg-gray-800 hover:bg-primary/5 dark:hover:bg-primary/10 border-gray-200 dark:border-gray-700/80 active:scale-98 cursor-pointer'
+                                ? 'bg-gray-100 dark:bg-gray-800/80 border-gray-300 dark:border-gray-700 opacity-70 cursor-default' 
+                                : 'bg-white dark:bg-gray-800/90 hover:bg-primary/5 dark:hover:bg-primary/10 border-gray-200 dark:border-gray-700/80 active:scale-98 shadow-2xs hover:shadow-sm cursor-pointer'
                         }">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl">${st.icon}</span>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">${st.name}</span>
-                                <span class="block text-[11px] text-gray-400">${isCurrent ? 'Estado actual' : st.desc}</span>
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="text-2xl flex-shrink-0">${st.icon}</span>
+                            <div class="min-w-0">
+                                <span class="block text-sm font-black text-gray-900 dark:text-white truncate">${st.name}</span>
+                                <span class="block text-[11px] text-gray-400 truncate">${isCurrent ? 'Fase actual' : st.desc}</span>
                             </div>
                         </div>
-                        ${isCurrent ? '<span class="text-xs font-bold text-gray-400">Actual</span>' : '<span class="text-primary font-bold text-sm">Mover ➔</span>'}
+                        ${isCurrent 
+                            ? '<span class="text-xs font-black px-2.5 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">Actual</span>' 
+                            : '<span class="text-xs font-black px-3 py-1 rounded-xl bg-primary text-white shadow-2xs">Elegir ➔</span>'
+                        }
                     </button>
                 `;
             }).join('');
