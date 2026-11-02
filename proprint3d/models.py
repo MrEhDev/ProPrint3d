@@ -515,14 +515,17 @@ class Order(models.Model):
             return None
         rate = round(p / total_item_hours, 2)
         rate_str = f"{rate:.2f} €/h"
-        if rate >= 6.0:
+        if rate >= 3.0:
             badge_css = 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
             icon = '⚡'
-        elif rate >= 3.0:
-            badge_css = 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+        elif rate >= 1.40:
+            badge_css = 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30'
             icon = '⚡'
+        elif rate >= 1.00:
+            badge_css = 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+            icon = '⏳'
         else:
-            badge_css = 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30 font-bold'
+            badge_css = 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30 font-bold'
             icon = '⚠️'
         return {
             'rate': rate,
@@ -761,25 +764,30 @@ class Order(models.Model):
         rate_rounded = round(rate, 2)
         rate_str = f"{rate_rounded:.2f} €/h"
 
-        if rate >= 6.0:
+        if rate >= 3.0:
             level = 'excellent'
             color = 'emerald'
             icon = '⚡'
             badge_css = 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30'
-            tooltip = f"Eficiencia horaria excelente: genera {rate_str} de beneficio neto por hora de máquina ocupada ({self.total_print_time_str} en total)."
-        elif rate >= 3.0:
+            tooltip = f"Eficiencia horaria top: genera {rate_str} de beneficio neto por hora de máquina ocupada ({self.total_print_time_str} en total)."
+        elif rate >= 1.40:
             level = 'normal'
-            color = 'amber'
+            color = 'teal'
             icon = '⚡'
+            badge_css = 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-500/30'
+            tooltip = f"Eficiencia horaria buena y rentable: genera {rate_str} por hora (en la media habitual del taller)."
+        elif rate >= 1.00:
+            level = 'warning'
+            color = 'amber'
+            icon = '⏳'
             badge_css = 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
-            tooltip = f"Eficiencia horaria estándar: genera {rate_str} por hora de máquina ocupada ({self.total_print_time_str} en total)."
+            tooltip = f"Eficiencia horaria ajustada: genera {rate_str} por hora de máquina ocupada. Margen moderado."
         else:
             level = 'low'
             color = 'red'
             icon = '⚠️'
-            badge_css = 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30 font-bold'
-            tooltip = f"¡Alerta de baja rentabilidad horaria! Solo genera {rate_str} ocupando la máquina durante {self.total_print_time_str}."
-
+            badge_css = 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30 font-bold'
+            tooltip = f"¡Alerta de baja rentabilidad horaria! Solo genera {rate_str} ocupando la máquina durante {self.total_print_time_str}." 
         return {
             'rate': rate_rounded,
             'rate_str': rate_str,

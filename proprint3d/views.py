@@ -546,6 +546,8 @@ def crm_dashboard_view(request):
             orders_map[oid]['group_price'] += float(item.price or 0)
             orders_map[oid]['group_cost'] += float(item.total_cost or 0)
             orders_map[oid]['group_weight'] += float(item.weight_grams or 0)
+            item_mins = ((item.print_time_hours or 0.0) * 60 + (item.print_time_minutes or 0)) * (item.quantity or 1)
+            orders_map[oid]['group_print_minutes'] = orders_map[oid].get('group_print_minutes', 0) + item_mins
 
         card_groups = []
         for oid, data in orders_map.items():
@@ -555,6 +557,13 @@ def crm_dashboard_view(request):
                     data['group_price'] = float(data['order'].price or 0)
                 else:
                     data['group_price'] = round(data['group_price'] * 1.21, 2)
+            
+            # Cómputo exacto de tiempo de impresión solo de las piezas en esta columna
+            mins = data.get('group_print_minutes', 0)
+            data['group_print_hours'] = round(mins / 60.0, 2)
+            h = int(mins // 60)
+            m = int(mins % 60)
+            data['group_print_time_str'] = f"{h}h {m}m" if mins > 0 else "0h"
             card_groups.append(data)
             
         kanban_columns[col_status] = card_groups
@@ -582,8 +591,10 @@ def crm_dashboard_view(request):
     avg_hourly_rate = (float(total_profit) / total_stats_hours) if total_stats_hours > 0 else 0.0
 
     # Pedidos en cola activa (Presupuestado y En proceso)
-    queue_orders = [o for o in orders if o.status in ['Presupuestado', 'En proceso']]
-    queue_hours = sum(o.total_print_time_hours for o in queue_orders)
+    # Sumar únicamente las piezas que siguen pendientes en estas columnas
+    queue_items = active_order_items.filter(status__in=['Presupuestado', 'En proceso'])
+    queue_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in queue_items)
+    queue_hours = round(queue_mins / 60.0, 2)
 
     # Recuento inicial de pedidos urgentes / con fecha límite próxima
     urgent_orders_count = sum(1 for o in orders if o.deadline_info and o.deadline_info.get('is_urgent'))

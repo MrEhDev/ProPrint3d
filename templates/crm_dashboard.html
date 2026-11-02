@@ -353,7 +353,7 @@
                         data-client-name="{{ group.order.client_name|escapejs }}"
                         data-price="{{ group.order.price|default:0|unlocalize }}"
                         data-profit="{{ group.order.profit|default:0|unlocalize }}"
-                        data-print-hours="{{ group.order.total_print_time_hours|default:0|unlocalize }}"
+                        data-print-hours="{{ group.group_print_hours|default:0|unlocalize }}"
                         data-has-deadline="{% if group.order.deadline_info %}1{% else %}0{% endif %}"
                         data-is-urgent="{% if group.order.deadline_info and group.order.deadline_info.is_urgent %}1{% else %}0{% endif %}"
                         data-deposit-amount="{{ group.order.deposit_amount|default:0|unlocalize }}"
@@ -634,7 +634,7 @@
                                 {% else %}
                                 <span class="text-sm font-bold text-primary">€{{ group.group_price|floatformat:2 }}</span>
                                 {% if group.total_items_in_order > 1 and not group.all_items_in_this_col %}
-                                <span class="block text-xs text-gray-400">(de €{{ group.order.price }})</span>
+                                <span class="block text-xs text-gray-400">(de €{{ group.order.price }}) · ⏱️ {{ group.group_print_time_str }}</span>
                                 {% endif %}
                                 {% endif %}
                             </div>
@@ -3030,9 +3030,11 @@
         const statAvgHourly = document.getElementById('stat-avg-hourly-rate');
         if (statAvgHourly) {
             statAvgHourly.textContent = `⚡ €${avgHourlyRate.toFixed(2)}/h`;
-            if (avgHourlyRate >= 4.0) {
+            if (avgHourlyRate >= 2.50) {
                 statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition-all shadow-2xs flex-shrink-0";
-            } else if (avgHourlyRate >= 2.0) {
+            } else if (avgHourlyRate >= 1.40) {
+                statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 border border-teal-300 dark:border-teal-800 transition-all shadow-2xs flex-shrink-0";
+            } else if (avgHourlyRate >= 1.00) {
                 statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800 transition-all shadow-2xs flex-shrink-0";
             } else {
                 statAvgHourly.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300 border border-rose-300 dark:border-rose-800 transition-all shadow-2xs flex-shrink-0";
