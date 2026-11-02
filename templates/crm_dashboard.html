@@ -572,34 +572,18 @@
                                 data-unit-minutes="{{ item.print_time_minutes|default:0 }}"
                                 title="{{ item.description }}">
                                 <div class="min-w-0 flex-1">
+                                    <!-- Fila 1: Nombre de la pieza + Cantidad x100 junto al nombre -->
                                     <div class="flex items-center gap-1.5 min-w-0 flex-wrap">
                                         <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0"
                                             title="{{ item.description }}">
                                             {{ item.description }}
                                         </span>
 
-                                        <!-- Cantidad del pedido (siempre visible como antes: x100, x5, etc.) -->
+                                        <!-- Cantidad del pedido (siempre visible junto al nombre: x100, x5, etc.) -->
                                         <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
 
-                                        <!-- Contador interactivo de piezas hechas [-] X/Y [+] ÚNICAMENTE en En proceso -->
-                                        {% if status_name == 'En proceso' %}
-                                        <div class="inline-flex items-center gap-0.5 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs text-xs select-none flex-shrink-0"
-                                            onclick="event.stopPropagation();"
-                                            title="Unidades ya fabricadas de {{ item.quantity }} (pulsa + al terminar una impresión)">
-                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, -1, this, event)"
-                                                class="w-4 h-4 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black transition text-[11px] active:scale-90"
-                                                title="Restar 1 unidad hecha">-</button>
-                                            <span id="item-badge-{{ item.id }}" class="font-black px-1 text-center min-w-[2.4rem] text-[11px]
-                                                {% if item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400{% elif item.completed_quantity > 0 %}text-primary{% else %}text-gray-500 dark:text-gray-400{% endif %}">
-                                                <span class="completed-val">{{ item.completed_quantity|default:0 }}</span>/{{ item.quantity }}
-                                            </span>
-                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, 1, this, event)"
-                                                class="w-4 h-4 flex items-center justify-center rounded bg-primary/10 hover:bg-primary text-primary hover:text-white font-black transition text-[11px] active:scale-90"
-                                                title="Sumar 1 unidad terminada">+</button>
-                                        </div>
-                                        {% endif %}
                                         {% if item.display_notes %}
                                         <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                             📝
@@ -615,11 +599,31 @@
                                         </span>
                                         {% endif %}
                                     </div>
-                                    <div
-                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5 flex-wrap">
+
+                                    <!-- Fila 2 (debajo del nombre): Cantidad realizada ([-] X/Y [+]) + peso + horas restantes en formato (d h m) -->
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1 flex-wrap">
+                                        <!-- Cantidad realizada: Contador interactivo [-] X/Y [+] ÚNICAMENTE en En proceso -->
+                                        {% if status_name == 'En proceso' %}
+                                        <div class="inline-flex items-center gap-0.5 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs text-xs select-none flex-shrink-0"
+                                            onclick="event.stopPropagation();"
+                                            title="Unidades ya fabricadas de {{ item.quantity }} (pulsa + al terminar una impresión)">
+                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, -1, this, event)"
+                                                class="w-4 h-4 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black transition text-[11px] active:scale-90"
+                                                title="Restar 1 unidad hecha">-</button>
+                                            <span id="item-badge-{{ item.id }}" class="font-black px-1 text-center min-w-[2.4rem] text-[11px]
+                                                {% if item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400{% elif item.completed_quantity > 0 %}text-primary{% else %}text-gray-500 dark:text-gray-400{% endif %}">
+                                                <span class="completed-val">{{ item.completed_quantity|default:0 }}</span>/{{ item.quantity }} hechas
+                                            </span>
+                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, 1, this, event)"
+                                                class="w-4 h-4 flex items-center justify-center rounded bg-primary/10 hover:bg-primary text-primary hover:text-white font-black transition text-[11px] active:scale-90"
+                                                title="Sumar 1 unidad terminada">+</button>
+                                        </div>
+                                        {% endif %}
+
                                         {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
+
                                         <span id="item-rem-time-{{ item.id }}" class="font-medium {% if status_name == 'En proceso' and item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400 font-bold{% endif %}">
-                                            ⏱️ {% if status_name == 'En proceso' and item.completed_quantity >= item.quantity %}¡Hecha! (0h rest.){% elif status_name == 'En proceso' and item.completed_quantity > 0 %}{{ item.remaining_print_time_str }} rest.{% else %}{% if item.print_time_hours %}<span>{{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% else %}0h{% endif %}{% endif %}
+                                            ⏱️ {% if status_name == 'En proceso' and item.completed_quantity >= item.quantity %}¡Hecha! (0h rest.){% elif status_name == 'En proceso' and item.completed_quantity > 0 %}{{ item.remaining_print_time_str }} rest.{% else %}{{ item.total_print_time_str }}{% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -2696,11 +2700,19 @@
     function formatHoursNice(totalHours) {
         if (!totalHours || totalHours <= 0) return '0h';
         const totalMinutes = Math.round(totalHours * 60);
-        const h = Math.floor(totalMinutes / 60);
-        const m = totalMinutes % 60;
-        if (h === 0) return `${m}m`;
-        if (m === 0) return `${h}h`;
-        return `${h}h ${m}m`;
+        const totalH = Math.floor(totalMinutes / 60);
+        const remM = totalMinutes % 60;
+        const hStr = (totalH === 0) ? `${remM}m` : ((remM === 0) ? `${totalH}h` : `${totalH}h ${remM}m`);
+
+        if (totalH >= 24) {
+            const days = Math.floor(totalH / 24);
+            const dh = totalH % 24;
+            let dParts = [`${days}d`];
+            if (dh > 0) dParts.push(`${dh}h`);
+            if (remM > 0) dParts.push(`${remM}m`);
+            return `${hStr} (${dParts.join(' ')})`;
+        }
+        return hStr;
     }
 
     function adjustItemProgressLive(itemId, delta, btnEl, ev) {
@@ -2730,14 +2742,22 @@
             }
         }
 
-        // 2. Recalcular horas restantes de esta pieza
+        // 2. Recalcular horas restantes de esta pieza con formato (días horas minutos)
         const unitHours = parseFloat(pieceEl.dataset.unitHours) || 0;
         const unitMins = parseFloat(pieceEl.dataset.unitMinutes) || 0;
         const remQty = Math.max(0, totalQty - newCompleted);
         const itemRemMins = Math.round((unitHours * 60 + unitMins) * remQty);
-        const remH = Math.floor(itemRemMins / 60);
+        const remTotalH = Math.floor(itemRemMins / 60);
         const remM = itemRemMins % 60;
-        const remStr = (remH === 0) ? `${remM}m` : ((remM === 0) ? `${remH}h` : `${remH}h ${remM}m`);
+        let remStr = (remTotalH === 0) ? `${remM}m` : ((remM === 0) ? `${remTotalH}h` : `${remTotalH}h ${remM}m`);
+        if (remTotalH >= 24) {
+            const days = Math.floor(remTotalH / 24);
+            const dh = remTotalH % 24;
+            let dParts = [`${days}d`];
+            if (dh > 0) dParts.push(`${dh}h`);
+            if (remM > 0) dParts.push(`${remM}m`);
+            remStr = `${remStr} (${dParts.join(' ')})`;
+        }
 
         const timeSpan = document.getElementById(`item-rem-time-${itemId}`);
         if (timeSpan) {

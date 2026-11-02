@@ -804,15 +804,26 @@ class Order(models.Model):
 
     @property
     def total_print_time_str(self):
-        """Tiempo de fabricación acumulado formateado."""
+        """Tiempo de fabricación acumulado formateado (incluye días si >= 24h)."""
         items = list(self.items.all())
         if items:
             mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in items)
         else:
             mins = ((self.print_time_hours or 0.0) * 60 + (self.print_time_minutes or 0)) * (self.quantity or 1)
+        mins = int(round(mins))
         h = int(mins // 60)
         m = int(mins % 60)
-        return f"{h}h {m}m"
+        h_str = f"{h}h {m}m" if m > 0 else f"{h}h"
+        if h >= 24:
+            days = h // 24
+            dh = h % 24
+            d_parts = [f"{days}d"]
+            if dh > 0:
+                d_parts.append(f"{dh}h")
+            if m > 0:
+                d_parts.append(f"{m}m")
+            return f"{h_str} ({' '.join(d_parts)})"
+        return h_str
 
     @property
     def total_items_count(self):
@@ -926,18 +937,53 @@ class OrderItem(models.Model):
 
     @property
     def remaining_print_time_str(self):
-        """Texto formateado de horas pendientes de impresión."""
+        """Texto formateado de horas pendientes de impresión (incluye días si >= 24h, ej. 293h 40m (12d 5h 40m))."""
         rem_qty = self.remaining_quantity
         h = float(self.print_time_hours or 0)
         m = float(self.print_time_minutes or 0)
-        total_mins = int((h * 60 + m) * rem_qty)
+        total_mins = int(round((h * 60 + m) * rem_qty))
+        if total_mins <= 0:
+            return "0h"
+        
         hours = total_mins // 60
         mins = total_mins % 60
-        if hours == 0:
-            return f"{mins}m"
-        if mins == 0:
-            return f"{hours}h"
-        return f"{hours}h {mins}m"
+        h_str = f"{hours}h {mins}m" if mins > 0 else f"{hours}h"
+
+        if hours >= 24:
+            days = hours // 24
+            dh = hours % 24
+            d_parts = [f"{days}d"]
+            if dh > 0:
+                d_parts.append(f"{dh}h")
+            if mins > 0:
+                d_parts.append(f"{mins}m")
+            return f"{h_str} ({' '.join(d_parts)})"
+        return h_str
+
+    @property
+    def total_print_time_str(self):
+        """Texto formateado de tiempo total de impresión de esta pieza (incluye días si >= 24h)."""
+        qty = self.quantity or 1
+        h = float(self.print_time_hours or 0)
+        m = float(self.print_time_minutes or 0)
+        total_mins = int(round((h * 60 + m) * qty))
+        if total_mins <= 0:
+            return "0h"
+        
+        hours = total_mins // 60
+        mins = total_mins % 60
+        h_str = f"{hours}h {mins}m" if mins > 0 else f"{hours}h"
+
+        if hours >= 24:
+            days = hours // 24
+            dh = hours % 24
+            d_parts = [f"{days}d"]
+            if dh > 0:
+                d_parts.append(f"{dh}h")
+            if mins > 0:
+                d_parts.append(f"{mins}m")
+            return f"{h_str} ({' '.join(d_parts)})"
+        return h_str
 
     @property
     def display_notes(self):

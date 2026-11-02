@@ -558,12 +558,24 @@ def crm_dashboard_view(request):
                 else:
                     data['group_price'] = round(data['group_price'] * 1.21, 2)
             
-            # Cómputo exacto de tiempo de impresión solo de las piezas en esta columna
+            # Cómputo exacto de tiempo de impresión solo de las piezas en esta columna (incluye días si >= 24h)
             mins = data.get('group_print_minutes', 0)
             data['group_print_hours'] = round(mins / 60.0, 2)
-            h = int(mins // 60)
-            m = int(mins % 60)
-            data['group_print_time_str'] = f"{h}h {m}m" if mins > 0 else "0h"
+            mins_int = int(round(mins))
+            h = int(mins_int // 60)
+            m = int(mins_int % 60)
+            h_str = f"{h}h {m}m" if m > 0 else f"{h}h"
+            if h >= 24:
+                days = h // 24
+                dh = h % 24
+                d_parts = [f"{days}d"]
+                if dh > 0:
+                    d_parts.append(f"{dh}h")
+                if m > 0:
+                    d_parts.append(f"{m}m")
+                data['group_print_time_str'] = f"{h_str} ({' '.join(d_parts)})"
+            else:
+                data['group_print_time_str'] = h_str if mins_int > 0 else "0h"
             card_groups.append(data)
             
         kanban_columns[col_status] = card_groups
