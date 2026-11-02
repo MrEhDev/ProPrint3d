@@ -315,6 +315,89 @@ class QuoteItem(models.Model):
         return f"{self.quantity}x {self.custom_title}"
 
 # =====================================================================
+# MODELO: Customer
+# Propósito: Guardar los datos de clientes fijos o habituales para
+# agilizar pedidos, etiquetado térmico y trazabilidad comercial.
+# =====================================================================
+class Customer(models.Model):
+    name = models.CharField(max_length=150, help_text="Nombre y apellidos del cliente o razón social")
+    company_name = models.CharField(max_length=150, blank=True, null=True, default='', help_text="Empresa (opcional)")
+    vat_number = models.CharField(max_length=50, blank=True, null=True, default='', help_text="DNI, NIF o CIF (opcional)")
+    
+    phone = models.CharField(max_length=50, blank=True, null=True, default='', help_text="Teléfono / WhatsApp")
+    email = models.EmailField(blank=True, null=True, default='', help_text="Correo electrónico")
+    
+    # Dirección de Envío completa
+    address = models.CharField(max_length=250, blank=True, null=True, default='', help_text="Calle, número, piso, puerta")
+    postal_code = models.CharField(max_length=20, blank=True, null=True, default='', help_text="Código postal")
+    city = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Localidad / Municipio")
+    province = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Provincia")
+    delivery_notes = models.CharField(max_length=250, blank=True, null=True, default='', help_text="Notas para el repartidor (opcional)")
+    
+    platform = models.CharField(max_length=50, blank=True, null=True, default='Directo', help_text="Canal habitual (Wallapop, Vinted, Directo, etc.)")
+    platform_username = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Usuario en la plataforma (ej. @usuario)")
+    notes = models.TextField(blank=True, null=True, default='', help_text="Notas internas sobre el cliente")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Cliente'
+        verbose_name_plural = 'Clientes'
+
+    def __str__(self):
+        city_suffix = f" ({self.city})" if self.city else ""
+        return f"{self.name}{city_suffix}"
+
+    @property
+    def full_address(self):
+        parts = []
+        if self.address:
+            parts.append(self.address)
+        loc = []
+        if self.postal_code:
+            loc.append(self.postal_code)
+        if self.city:
+            loc.append(self.city)
+        if self.province and self.city and self.province.strip().lower() != self.city.strip().lower():
+            loc.append(f"({self.province})")
+        elif self.province and not self.city:
+            loc.append(f"({self.province})")
+        if loc:
+            parts.append(" ".join(loc))
+        return "\n".join(parts)
+
+    @property
+    def whatsapp_url(self):
+        if not self.phone:
+            return None
+        import re
+        clean = re.sub(r'[^\d+]', '', self.phone)
+        if not clean:
+            return None
+        if not clean.startswith('+'):
+            if clean.startswith('34') and len(clean) == 11:
+                clean = '+' + clean
+            elif len(clean) == 9:
+                clean = '+34' + clean
+            else:
+                clean = '+' + clean
+        return f"https://wa.me/{clean.replace('+', '')}"
+
+    @property
+    def total_orders(self):
+        return self.orders.count()
+
+    @property
+    def total_spent(self):
+        import decimal
+        from django.db.models import Sum
+        val = self.orders.aggregate(Sum('price'))['price__sum']
+        return val or decimal.Decimal('0.00')
+
+
+# =====================================================================
 # MODELO: Order
 # Propósito: Mini-CRM para control de pedidos.
 # Razón de la estructura: Separado de los presupuestos para enfocarse en 
@@ -366,8 +449,27 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.CharField(max_length=250, blank=True, null=True, help_text="Descripción del Pedido (Ej. Fiat Panda Rally)")
     
+    # Cliente fijo vinculado (opcional para mantener retrocompatibilidad total)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', help_text="Cliente fijo vinculado")
+    
     client_name = models.CharField(max_length=150, help_text="Nombre de la Persona")
     client_contact = models.CharField(max_length=150, blank=True, null=True, default='', help_text="Email, teléfono o usuario de contacto")
+    client_phone = models.CharField(max_length=50, blank=True, null=True, default='', help_text="Teléfono / WhatsApp")
+    client_email = models.EmailField(blank=True, null=True, default='', help_text="Correo electrónico")
+    
+    # Datos de entrega y dirección específica para este pedido
+    shipping_address = models.CharField(max_length=250, blank=True, null=True, default='', help_text="Dirección de envío completa")
+    shipping_postal_code = models.CharField(max_length=20, blank=True, null=True, default='', help_text="Código Postal")
+    shipping_city = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Localidad / Municipio")
+    shipping_province = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Provincia")
+    
+    # Integración y logística con Correos
+    correos_service = models.CharField(max_length=50, blank=True, null=True, default='Carta Certificada', help_text="Servicio de Correos (Carta Certificada, Paq Ligero, Paq Estándar, etc.)")
+    tracking_number = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Número de seguimiento / Tracking de Correos")
+    shipping_package_weight = models.IntegerField(default=100, help_text="Peso total estimado en gramos con embalaje")
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Coste real del envío en Correos (€)")
+    shipping_cost_paid_by = models.CharField(max_length=20, default='client', choices=[('client', 'Cliente'), ('seller', 'Vendedor (ProPrint3D)')], help_text="¿Quién asume el coste del envío?")
+    include_shipping_in_total = models.BooleanField(default=False, help_text="¿Añadir el coste del envío al presupuesto total?")
     
     # Métricas de fabricación y costes por unidad
     weight_grams = models.FloatField(null=True, blank=True, help_text="Peso estimado en gramos por unidad")
@@ -477,6 +579,17 @@ class Order(models.Model):
         # Auto-asignar fechas según estado
         self.update_status_dates()
 
+        # Sincronizar contacto, teléfono y email
+        if not self.client_contact:
+            parts = [p for p in [self.client_phone, self.client_email] if p]
+            if parts:
+                self.client_contact = " · ".join(parts)
+        elif not self.client_phone and not self.client_email and self.client_contact:
+            if '@' in self.client_contact:
+                self.client_email = self.client_contact
+            else:
+                self.client_phone = self.client_contact
+
         # Calcular coste unitario
         calc_u_cost = self.calculate_unit_cost()
         if calc_u_cost > 0:
@@ -536,12 +649,18 @@ class Order(models.Model):
 
     @property
     def profit(self):
-        """Calcula la ganancia real descontando el coste de producción, considerando IVA e IRPF si aplican."""
+        """Calcula la ganancia real descontando el coste de producción y el envío si lo asume el vendedor, considerando IVA e IRPF si aplican."""
         import decimal
         if self.price is not None and self.total_cost is not None:
             p = decimal.Decimal(str(self.price))
             c = decimal.Decimal(str(self.total_cost))
             
+            # Si el coste de envío se incluyó en el total presupuestado, se descuenta para medir la ganancia neta de producción
+            if self.include_shipping_in_total and self.shipping_cost:
+                p -= decimal.Decimal(str(self.shipping_cost))
+                if p < 0:
+                    p = decimal.Decimal('0.00')
+
             # Si incluye IVA, la base imponible sobre la que se calcula la ganancia es p / 1.21
             if self.has_vat:
                 base_p = p / decimal.Decimal('1.21')
@@ -550,11 +669,91 @@ class Order(models.Model):
                 
             base_profit = base_p - c
             
+            # Si el envío lo paga el vendedor (ProPrint3D) y no lo cobró en el presupuesto, se descuenta del beneficio
+            if self.shipping_cost and self.shipping_cost_paid_by == 'seller' and not self.include_shipping_in_total:
+                base_profit -= decimal.Decimal(str(self.shipping_cost))
+            
             # Si descuenta IRPF, descuenta un 21% de la ganancia total
             if self.has_irpf:
                 return round(base_profit * decimal.Decimal('0.79'), 2) if base_profit > 0 else round(base_profit, 2)
             return round(base_profit, 2)
         return decimal.Decimal('0.00')
+
+    @property
+    def correos_tracking_url(self):
+        """Genera el enlace directo al localizador web oficial de Correos."""
+        if not self.tracking_number:
+            return None
+        return f"https://www.correos.es/es/es/herramientas/localizador/envios/detalle?numero={self.tracking_number.strip()}"
+
+    @property
+    def correos_tracking_number(self):
+        return self.tracking_number or ''
+
+    @correos_tracking_number.setter
+    def correos_tracking_number(self, value):
+        self.tracking_number = value
+
+    @property
+    def shipping_cost_estimated(self):
+        return self.shipping_cost
+
+    @shipping_cost_estimated.setter
+    def shipping_cost_estimated(self, value):
+        self.shipping_cost = value
+
+    @property
+    def formatted_shipping_address(self):
+        return self.recipient_full_address
+
+    @property
+    def total_shipping_weight_grams(self):
+        return self.calculated_total_weight_grams
+
+    @property
+    def shipping_weight_grams(self):
+        return self.shipping_package_weight
+
+    @shipping_weight_grams.setter
+    def shipping_weight_grams(self, value):
+        if value is not None:
+            try:
+                self.shipping_package_weight = int(round(float(value)))
+            except (ValueError, TypeError):
+                pass
+
+    @property
+    def recipient_full_address(self):
+        """Devuelve la dirección de entrega formateada para Correos y etiquetas térmicas."""
+        if self.shipping_address or self.shipping_city:
+            parts = []
+            if self.shipping_address:
+                parts.append(self.shipping_address)
+            loc = []
+            if self.shipping_postal_code:
+                loc.append(self.shipping_postal_code)
+            if self.shipping_city:
+                loc.append(self.shipping_city)
+            if self.shipping_province and self.shipping_city and self.shipping_province.strip().lower() != self.shipping_city.strip().lower():
+                loc.append(f"({self.shipping_province})")
+            elif self.shipping_province and not self.shipping_city:
+                loc.append(f"({self.shipping_province})")
+            if loc:
+                parts.append(" ".join(loc))
+            return "\n".join(parts)
+        elif self.customer and self.customer.address:
+            return self.customer.full_address
+        return ""
+
+    @property
+    def calculated_total_weight_grams(self):
+        """Calcula el peso total estimado: suma de piezas del pedido + 100g de embalaje."""
+        items_weight = 0
+        for item in self.items.all():
+            items_weight += (item.weight_grams or 0) * (item.quantity or 1)
+        if items_weight == 0 and self.weight_grams:
+            items_weight = (self.weight_grams or 0) * (self.quantity or 1)
+        return int(items_weight + 100)
 
     @property
     def are_all_items_realizado(self):
@@ -862,6 +1061,10 @@ class Order(models.Model):
             total_p = round(sum_pieces_p * decimal.Decimal('1.21'), 2)
         else:
             total_p = sum_pieces_p
+
+        # Si el cliente desea incluir los gastos de envío en el presupuesto
+        if self.include_shipping_in_total and self.shipping_cost:
+            total_p += decimal.Decimal(str(self.shipping_cost))
 
         if len(items) == 1:
             desc = items[0].description

@@ -10,10 +10,16 @@ from django.contrib.admin.views.decorators import staff_member_required
 # Utilidades PDF
 import io
 
-from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem
+from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
+from .utils.correos_rates import (
+    calculate_all_correos_options,
+    calculate_correos_rate,
+    CORREOS_SERVICES,
+    PACKAGING_TARE_DEFAULT_GRAMS
+)
 
 # =====================================================================
 # VISTA: catalog_view
@@ -647,6 +653,8 @@ def crm_dashboard_view(request):
         'status_choices': [c[0] for c in Order.STATUS_CHOICES],
         'platform_choices': Order.PLATFORM_CHOICES,
         'shipping_choices': Order.SHIPPING_CHOICES,
+        'correos_services': CORREOS_SERVICES,
+        'customers': Customer.objects.all().order_by('-updated_at')[:50],
         'products_with_id': products_with_id,
         'products_json': json.dumps(products_with_id, default=str),
     }
@@ -873,8 +881,98 @@ def update_order_full_api(request, order_id):
             # 1. Cabecera del pedido
             if 'client_name' in data and data['client_name'].strip():
                 order.client_name = data['client_name'].strip()
+            if 'client_phone' in data:
+                order.client_phone = data['client_phone'].strip() if data['client_phone'] else ''
+            if 'client_email' in data:
+                order.client_email = data['client_email'].strip() if data['client_email'] else ''
             if 'client_contact' in data:
                 order.client_contact = data['client_contact'].strip() if data['client_contact'] else ''
+            if not order.client_contact and (order.client_phone or order.client_email):
+                parts = [p for p in [order.client_phone, order.client_email] if p]
+                order.client_contact = " · ".join(parts)
+            if 'include_shipping_in_total' in data:
+                order.include_shipping_in_total = bool(data['include_shipping_in_total'])
+            
+            # Cliente habitual / recurrente
+            customer_id = data.get('customer_id')
+            if customer_id:
+                order.customer = Customer.objects.filter(id=customer_id).first()
+            elif 'customer_id' in data and data['customer_id'] is None:
+                order.customer = None
+                
+            # Datos de dirección postal
+            if 'shipping_address' in data:
+                order.shipping_address = data['shipping_address'].strip() if data['shipping_address'] else ''
+            if 'shipping_postal_code' in data:
+                order.shipping_postal_code = data['shipping_postal_code'].strip() if data['shipping_postal_code'] else ''
+            if 'shipping_city' in data:
+                order.shipping_city = data['shipping_city'].strip() if data['shipping_city'] else ''
+            if 'shipping_province' in data:
+                order.shipping_province = data['shipping_province'].strip() if data['shipping_province'] else ''
+                
+            # Logística Correos
+            if 'correos_service' in data:
+                order.correos_service = data['correos_service'].strip() if data['correos_service'] else 'carta_certificada'
+            if 'correos_tracking_number' in data:
+                order.correos_tracking_number = data['correos_tracking_number'].strip() if data['correos_tracking_number'] else ''
+            if 'shipping_cost_paid_by' in data:
+                order.shipping_cost_paid_by = data['shipping_cost_paid_by']
+            if 'shipping_cost_estimated' in data:
+                try:
+                    order.shipping_cost_estimated = decimal.Decimal(str(data['shipping_cost_estimated']).replace(',', '.'))
+                except Exception:
+                    pass
+            if 'shipping_weight_grams' in data:
+                try:
+                    order.shipping_weight_grams = float(data['shipping_weight_grams']) if data['shipping_weight_grams'] is not None else None
+                except (ValueError, TypeError):
+                    pass
+            if 'shipping_pkg_length' in data:
+                try:
+                    order.shipping_pkg_length = float(data['shipping_pkg_length']) if data['shipping_pkg_length'] else None
+                except (ValueError, TypeError):
+                    pass
+            if 'shipping_pkg_width' in data:
+                try:
+                    order.shipping_pkg_width = float(data['shipping_pkg_width']) if data['shipping_pkg_width'] else None
+                except (ValueError, TypeError):
+                    pass
+            if 'shipping_pkg_height' in data:
+                try:
+                    order.shipping_pkg_height = float(data['shipping_pkg_height']) if data['shipping_pkg_height'] else None
+                except (ValueError, TypeError):
+                    pass
+
+            # Guardar / actualizar en base de datos de Clientes si se solicita
+            if data.get('save_as_customer'):
+                cust = order.customer
+                if not cust and order.client_name:
+                    cust = Customer.objects.filter(name__iexact=order.client_name).first()
+                if not cust:
+                    cust = Customer(name=order.client_name)
+                
+                # Actualizar campos de contacto y envío en la ficha de cliente
+                cust.name = order.client_name
+                if order.client_phone:
+                    cust.phone = order.client_phone
+                if order.client_email:
+                    cust.email = order.client_email
+                elif order.client_contact:
+                    if '@' in order.client_contact:
+                        cust.email = order.client_contact
+                    else:
+                        cust.phone = order.client_contact
+                if order.shipping_address:
+                    cust.address = order.shipping_address
+                if order.shipping_postal_code:
+                    cust.postal_code = order.shipping_postal_code
+                if order.shipping_city:
+                    cust.city = order.shipping_city
+                if order.shipping_province:
+                    cust.province = order.shipping_province
+                cust.save()
+                order.customer = cust
+
             if 'order_date' in data and data['order_date']:
                 order.order_date = datetime.date.fromisoformat(data['order_date'])
             if 'deadline' in data:
@@ -1106,16 +1204,28 @@ class SmartOrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
-            'client_name', 'client_contact', 'order_date', 'deadline', 'status', 'quantity', 
+            'client_name', 'client_phone', 'client_email', 'client_contact', 'customer', 'order_date', 'deadline', 'status', 'quantity', 
             'weight_grams', 'print_time_hours', 'print_time_minutes', 'extra_costs',
             'unit_cost', 'total_cost', 'unit_price', 'price',
             'shipped_date', 'delivered_date', 'paid_date',
             'platform', 'shipping', 'notes',
             'has_vat', 'has_irpf',
-            'deposit_amount', 'deposit_method', 'final_payment_method', 'payment_notes'
+            'deposit_amount', 'deposit_method', 'final_payment_method', 'payment_notes',
+            'shipping_address', 'shipping_postal_code', 'shipping_city', 'shipping_province',
+            'correos_service', 'tracking_number', 'shipping_cost', 'shipping_cost_paid_by',
+            'shipping_package_weight', 'include_shipping_in_total'
         ]
         widgets = {
+            'client_phone': forms.TextInput(attrs={'placeholder': 'Ej. 612 34 56 78'}),
+            'client_email': forms.EmailInput(attrs={'placeholder': 'Ej. cliente@gmail.com'}),
             'client_contact': forms.TextInput(attrs={'placeholder': 'Email, teléfono o usuario de contacto'}),
+            'shipping_address': forms.TextInput(attrs={'placeholder': 'Calle, número, piso, puerta...'}),
+            'shipping_postal_code': forms.TextInput(attrs={'placeholder': 'Ej. 08186'}),
+            'shipping_city': forms.TextInput(attrs={'placeholder': 'Ej. Lliçà d\'Amunt'}),
+            'shipping_province': forms.TextInput(attrs={'placeholder': 'Ej. Barcelona'}),
+            'tracking_number': forms.TextInput(attrs={'placeholder': 'Ej. PK012345678ES'}),
+            'shipping_cost': forms.NumberInput(attrs={'step': '0.01', 'placeholder': '0.00'}),
+            'shipping_package_weight': forms.NumberInput(attrs={'placeholder': '100'}),
             'order_date': forms.DateInput(attrs={'type': 'date'}),
             'deadline': forms.DateInput(attrs={'type': 'date'}),
             'shipped_date': forms.DateInput(attrs={'type': 'date'}),
@@ -1137,6 +1247,12 @@ class SmartOrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['client_contact'].required = False
+        if 'client_phone' in self.fields:
+            self.fields['client_phone'].required = False
+        if 'client_email' in self.fields:
+            self.fields['client_email'].required = False
+        if 'include_shipping_in_total' in self.fields:
+            self.fields['include_shipping_in_total'].required = False
         self.fields['price'].required = False
         self.fields['unit_price'].required = False
         self.fields['weight_grams'].required = False
@@ -1154,6 +1270,26 @@ class SmartOrderForm(forms.ModelForm):
         self.fields['deposit_method'].required = False
         self.fields['final_payment_method'].required = False
         self.fields['payment_notes'].required = False
+        if 'customer' in self.fields:
+            self.fields['customer'].required = False
+        if 'shipping_address' in self.fields:
+            self.fields['shipping_address'].required = False
+        if 'shipping_postal_code' in self.fields:
+            self.fields['shipping_postal_code'].required = False
+        if 'shipping_city' in self.fields:
+            self.fields['shipping_city'].required = False
+        if 'shipping_province' in self.fields:
+            self.fields['shipping_province'].required = False
+        if 'correos_service' in self.fields:
+            self.fields['correos_service'].required = False
+        if 'tracking_number' in self.fields:
+            self.fields['tracking_number'].required = False
+        if 'shipping_cost' in self.fields:
+            self.fields['shipping_cost'].required = False
+        if 'shipping_cost_paid_by' in self.fields:
+            self.fields['shipping_cost_paid_by'].required = False
+        if 'shipping_package_weight' in self.fields:
+            self.fields['shipping_package_weight'].required = False
         
         # Add Tailwind classes dynamically
         for field in self.fields.values():
@@ -1168,12 +1304,19 @@ def order_create_view(request):
     if request.method == 'POST':
         pieces_json = request.POST.get('pieces_json', '').strip()
         client_name = request.POST.get('client_name', '').strip()
+        client_phone = request.POST.get('client_phone', '').strip()
+        client_email = request.POST.get('client_email', '').strip()
         client_contact = request.POST.get('client_contact', '').strip()
+        if not client_contact:
+            parts = [p for p in [client_phone, client_email] if p]
+            if parts:
+                client_contact = " · ".join(parts)
         order_date = request.POST.get('order_date')
         deadline = request.POST.get('deadline') or None
         platform = request.POST.get('platform', '').strip()
         shipping = request.POST.get('shipping', '').strip()
         notes = request.POST.get('notes', '').strip()
+        include_shipping_in_total = request.POST.get('include_shipping_in_total') in ['true', 'on', '1', True]
         
         parsed_pieces = []
         if pieces_json:
@@ -1198,14 +1341,69 @@ def order_create_view(request):
         final_payment_method_val = request.POST.get('final_payment_method', '').strip()
         payment_notes_val = request.POST.get('payment_notes', '').strip()
 
+        # Cliente y logística
+        customer_id = request.POST.get('customer_id', '').strip()
+        customer = Customer.objects.filter(id=customer_id).first() if customer_id else None
+        shipping_address = request.POST.get('shipping_address', '').strip()
+        shipping_postal_code = request.POST.get('shipping_postal_code', '').strip()
+        shipping_city = request.POST.get('shipping_city', '').strip()
+        shipping_province = request.POST.get('shipping_province', '').strip()
+        correos_service = request.POST.get('correos_service', 'carta_certificada').strip() or 'carta_certificada'
+        correos_tracking = request.POST.get('correos_tracking_number', '').strip()
+        shipping_cost_paid_by = request.POST.get('shipping_cost_paid_by', 'client').strip()
+        
+        raw_ship_cost = request.POST.get('shipping_cost_estimated', '').strip().replace(',', '.')
+        try:
+            ship_cost_val = decimal.Decimal(raw_ship_cost) if raw_ship_cost else decimal.Decimal('0.00')
+        except Exception:
+            ship_cost_val = decimal.Decimal('0.00')
+
+        save_as_cust = request.POST.get('save_as_customer') in ['true', 'on', '1', True]
+        if save_as_cust and client_name:
+            if not customer:
+                customer = Customer.objects.filter(name__iexact=client_name).first()
+            if not customer:
+                customer = Customer(name=client_name)
+            customer.name = client_name
+            if client_phone:
+                customer.phone = client_phone
+            if client_email:
+                customer.email = client_email
+            elif client_contact:
+                if '@' in client_contact:
+                    customer.email = client_contact
+                else:
+                    customer.phone = client_contact
+            if shipping_address:
+                customer.address = shipping_address
+            if shipping_postal_code:
+                customer.postal_code = shipping_postal_code
+            if shipping_city:
+                customer.city = shipping_city
+            if shipping_province:
+                customer.province = shipping_province
+            customer.save()
+
         if client_name and order_date and parsed_pieces:
             order = Order.objects.create(
                 client_name=client_name,
                 client_contact=client_contact,
+                client_phone=client_phone,
+                client_email=client_email,
+                customer=customer,
                 order_date=order_date,
                 deadline=deadline,
                 platform=platform,
                 shipping=shipping,
+                shipping_address=shipping_address,
+                shipping_postal_code=shipping_postal_code,
+                shipping_city=shipping_city,
+                shipping_province=shipping_province,
+                correos_service=correos_service,
+                tracking_number=correos_tracking,
+                shipping_cost=ship_cost_val,
+                shipping_cost_paid_by=shipping_cost_paid_by,
+                include_shipping_in_total=include_shipping_in_total,
                 notes=notes,
                 status=initial_status,
                 has_vat=has_vat,
@@ -1279,8 +1477,13 @@ def order_create_view(request):
             order.payment_notes = payment_notes_val
             order.has_vat = has_vat
             order.has_irpf = has_irpf
+            if client_phone:
+                order.client_phone = client_phone
+            if client_email:
+                order.client_email = client_email
             if client_contact:
                 order.client_contact = client_contact
+            order.include_shipping_in_total = include_shipping_in_total
             order.save()
             OrderItem.objects.create(
                 order=order,
@@ -1326,6 +1529,8 @@ def order_create_view(request):
         'products_with_id': products_with_id,
         'products_json': json.dumps(products_with_id, default=str),
         'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
+        'correos_services': CORREOS_SERVICES,
+        'customers': Customer.objects.all().order_by('-updated_at')[:50],
     })
 
 # =====================================================================
@@ -1426,4 +1631,290 @@ def download_product_model_file(request, slug):
         as_attachment=True,
         filename=product.model_file_name
     )
+
+
+# =====================================================================
+# VISTAS: Logística Correos & Clientes Frecuentes
+# =====================================================================
+
+@staff_member_required
+def order_thermal_label_view(request, order_id):
+    """
+    Renderiza la vista optimizada para imprimir etiqueta de envío en rollo continuo
+    térmico de 58 mm.
+    - Remitente oficial fijo con QR de proprint3d.shop
+    - Destinatario sin teléfono ni email (privacidad y petición expresa)
+    - Al final: datos de control interno (Pedido, peso estimado, servicio) separados
+      por línea de corte discontinua para recortar antes de adherir.
+    """
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Peso estimado: Suma dinámica de piezas + 100g tara (o peso manual si se configuró)
+    weight_g = order.total_shipping_weight_grams
+    if (not weight_g or weight_g <= 100) and order.shipping_package_weight and order.shipping_package_weight > 100:
+        weight_g = order.shipping_package_weight
+        
+    service_names = dict(CORREOS_SERVICES)
+    service_display = service_names.get(order.correos_service, order.correos_service or 'Carta Certificada')
+
+    # Datos destinatario limpios
+    dest_name = order.client_name
+    dest_address = order.shipping_address or (order.customer.address if order.customer else '')
+    dest_cp = order.shipping_postal_code or (order.customer.postal_code if order.customer else '')
+    dest_city = order.shipping_city or (order.customer.city if order.customer else '')
+    dest_province = order.shipping_province or (order.customer.province if order.customer else '')
+    
+    # Si no tiene desglose de dirección pero tiene texto en client_contact o shipping, proveer respaldo legible
+    if not dest_address and order.shipping and order.shipping.lower() not in ['correos', 'envío', 'envio']:
+        dest_address = order.shipping
+
+    context = {
+        'order': order,
+        'dest_name': dest_name,
+        'dest_address': dest_address,
+        'dest_postal_code': dest_cp,
+        'dest_city': dest_city,
+        'dest_province': dest_province,
+        'has_complete_address': bool(dest_address and dest_cp and dest_city),
+        'correos_service_name': service_display,
+        'estimated_weight_g': round(weight_g),
+        'autoprint': request.GET.get('autoprint') == '1',
+    }
+    return render(request, 'shipping_thermal_label.html', context)
+
+
+@staff_member_required
+def api_customers_search(request):
+    """
+    API JSON para autocompletado y búsqueda de clientes habituales.
+    Permite buscar por nombre, teléfono, email, ciudad o código postal.
+    """
+    q = request.GET.get('q', '').strip()
+    customers_qs = Customer.objects.all()
+    if q:
+        customers_qs = customers_qs.filter(
+            Q(name__icontains=q) |
+            Q(phone__icontains=q) |
+            Q(email__icontains=q) |
+            Q(city__icontains=q) |
+            Q(postal_code__icontains=q)
+        )
+    
+    customers_qs = customers_qs.order_by('-updated_at')[:20]
+    
+    results = []
+    for c in customers_qs:
+        results.append({
+            'id': c.id,
+            'name': c.name,
+            'phone': c.phone,
+            'email': c.email,
+            'address': c.address,
+            'postal_code': c.postal_code,
+            'city': c.city,
+            'province': c.province,
+            'notes': c.notes,
+            'full_address': c.full_address,
+            'order_count': c.order_count,
+            'total_spent': float(c.total_spent),
+        })
+        
+    return JsonResponse({'success': True, 'customers': results})
+
+
+@staff_member_required
+def api_customer_save(request):
+    """
+    API JSON para crear o actualizar un cliente habitual.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        cust_id = data.get('id')
+        name = data.get('name', '').strip()
+        if not name:
+            return JsonResponse({'success': False, 'error': 'El nombre del cliente es obligatorio.'}, status=400)
+            
+        if cust_id:
+            customer = get_object_or_404(Customer, id=cust_id)
+        else:
+            customer = Customer()
+            
+        customer.name = name
+        customer.phone = data.get('phone', '').strip()
+        customer.email = data.get('email', '').strip()
+        customer.address = data.get('address', '').strip()
+        customer.postal_code = data.get('postal_code', '').strip()
+        customer.city = data.get('city', '').strip()
+        customer.province = data.get('province', '').strip()
+        customer.notes = data.get('notes', '').strip()
+        customer.save()
+        
+        return JsonResponse({
+            'success': True,
+            'customer': {
+                'id': customer.id,
+                'name': customer.name,
+                'phone': customer.phone,
+                'email': customer.email,
+                'address': customer.address,
+                'postal_code': customer.postal_code,
+                'city': customer.city,
+                'province': customer.province,
+                'notes': customer.notes,
+                'full_address': customer.full_address,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@staff_member_required
+def api_calculate_shipping_rates(request):
+    """
+    API JSON para cotizar tarifas oficiales de Correos España 2026 en tiempo real.
+    Acepta peso real de las piezas en gramos y aplica la tara de 100g de embalaje una sola vez.
+    """
+    weight_grams = float(request.GET.get('weight_grams') or request.POST.get('weight_grams') or 0.0)
+    add_tare = request.GET.get('add_tare', '1') in ['1', 'true', True]
+    packaging_margin = PACKAGING_TARE_DEFAULT_GRAMS if add_tare else 0
+
+    length = request.GET.get('length') or request.POST.get('length')
+    width = request.GET.get('width') or request.POST.get('width')
+    height = request.GET.get('height') or request.POST.get('height')
+    destination = request.GET.get('destination', 'peninsula')
+
+    length_cm = float(length) if length else None
+    width_cm = float(width) if width else None
+    height_cm = float(height) if height else None
+
+    analysis = calculate_all_correos_options(
+        weight_grams=weight_grams,
+        packaging_margin_grams=packaging_margin,
+        length_cm=length_cm,
+        width_cm=width_cm,
+        height_cm=height_cm,
+        destination=destination
+    )
+    
+    return JsonResponse({'success': True, 'shipping_analysis': analysis})
+
+
+@staff_member_required
+def api_update_order_shipping(request, order_id):
+    """
+    API rápida para actualizar datos logísticos y número de seguimiento de un pedido
+    directamente desde la tarjeta del CRM o desde la vista móvil.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        order = get_object_or_404(Order, id=order_id)
+        
+        if 'correos_tracking_number' in data:
+            order.correos_tracking_number = data['correos_tracking_number'].strip() if data['correos_tracking_number'] else ''
+            
+        if 'correos_service' in data and data['correos_service']:
+            order.correos_service = data['correos_service'].strip()
+            
+        if 'shipping_cost_estimated' in data:
+            try:
+                order.shipping_cost_estimated = decimal.Decimal(str(data['shipping_cost_estimated']).replace(',', '.'))
+            except Exception:
+                pass
+
+        if 'shipping_cost_paid_by' in data:
+            order.shipping_cost_paid_by = data['shipping_cost_paid_by']
+            
+        if 'shipping_address' in data:
+            order.shipping_address = data['shipping_address'].strip()
+        if 'shipping_postal_code' in data:
+            order.shipping_postal_code = data['shipping_postal_code'].strip()
+        if 'shipping_city' in data:
+            order.shipping_city = data['shipping_city'].strip()
+        if 'shipping_province' in data:
+            order.shipping_province = data['shipping_province'].strip()
+
+        # Si se solicita avanzar estado a 'Enviado' automáticamente al registrar tracking
+        if data.get('mark_as_shipped') and order.status != 'Enviado':
+            order.status = 'Enviado'
+            order.update_status_dates('Enviado')
+            # También actualizar piezas a Enviado si procede
+            order.items.exclude(status__in=['Enviado', 'Entregado', 'Cobrado']).update(status='Enviado')
+
+        order.save()
+        
+        return JsonResponse({
+            'success': True,
+            'order_id': order.id,
+            'correos_service': order.correos_service,
+            'correos_tracking_number': order.correos_tracking_number,
+            'correos_tracking_url': order.correos_tracking_url,
+            'status': order.status,
+            'formatted_shipping_address': order.formatted_shipping_address,
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+SPANISH_PROVINCES = {
+    '01': 'Álava / Araba', '02': 'Albacete', '03': 'Alicante / Alacant', '04': 'Almería',
+    '05': 'Ávila', '06': 'Badajoz', '07': 'Illes Balears', '08': 'Barcelona', '09': 'Burgos',
+    '10': 'Cáceres', '11': 'Cádiz', '12': 'Castellón / Castelló', '13': 'Ciudad Real',
+    '14': 'Córdoba', '15': 'A Coruña', '16': 'Cuenca', '17': 'Girona', '18': 'Granada',
+    '19': 'Guadalajara', '20': 'Gipuzkoa', '21': 'Huelva', '22': 'Huesca', '23': 'Jaén',
+    '24': 'León', '25': 'Lleida', '26': 'La Rioja', '27': 'Lugo', '28': 'Madrid',
+    '29': 'Málaga', '30': 'Murcia', '31': 'Navarra', '32': 'Ourense', '33': 'Asturias',
+    '34': 'Palencia', '35': 'Las Palmas', '36': 'Pontevedra', '37': 'Salamanca',
+    '38': 'Santa Cruz de Tenerife', '39': 'Cantabria', '40': 'Segovia', '41': 'Sevilla',
+    '42': 'Soria', '43': 'Tarragona', '44': 'Teruel', '45': 'Toledo', '46': 'Valencia / València',
+    '47': 'Valladolid', '48': 'Bizkaia', '49': 'Zamora', '50': 'Zaragoza', '51': 'Ceuta', '52': 'Melilla'
+}
+
+@staff_member_required
+def api_postal_code_lookup(request, cp):
+    """
+    Autocompleta provincia y localidad a partir del código postal español.
+    """
+    cp_clean = str(cp).strip().zfill(5)
+    prefix = cp_clean[:2]
+    province = SPANISH_PROVINCES.get(prefix, '')
+    city = ''
+
+    # 1. Buscar primero en la base de datos local (clientes o pedidos anteriores)
+    cust_match = Customer.objects.filter(postal_code=cp_clean).exclude(city='').first()
+    if cust_match and cust_match.city:
+        city = cust_match.city
+    else:
+        order_match = Order.objects.filter(shipping_postal_code=cp_clean).exclude(shipping_city='').first()
+        if order_match and order_match.shipping_city:
+            city = order_match.shipping_city
+
+    # 2. Si no está en BD, consultar zippopotam.us
+    if not city:
+        import urllib.request
+        import json
+        try:
+            url = f"https://api.zippopotam.us/es/{cp_clean}"
+            req = urllib.request.Request(url, headers={'User-Agent': 'ProPrint3D/1.0'})
+            with urllib.request.urlopen(req, timeout=2.5) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    places = data.get('places', [])
+                    if places:
+                        city = places[0].get('place name', '')
+        except Exception:
+            pass
+
+    return JsonResponse({
+        'success': True,
+        'postal_code': cp_clean,
+        'province': province,
+        'city': city
+    })
+
 

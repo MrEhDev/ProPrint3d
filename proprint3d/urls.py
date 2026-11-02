@@ -32,15 +32,23 @@ urlpatterns = [
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
     path('crm/order/new/', views.order_create_view, name='order_create'),
     path('crm/order/<int:order_id>/quote-pdf/', views.generate_order_quote_pdf_view, name='generate_order_quote_pdf'),
+    path('crm/order/<int:order_id>/thermal-label/', views.order_thermal_label_view, name='order_thermal_label'),
     path('crm/api/order/<int:order_id>/status/', views.update_order_status_api, name='update_order_status_api'),
     path('crm/api/order/<int:order_id>/cost/', views.update_order_cost_api, name='update_order_cost_api'),
     path('crm/api/order/<int:order_id>/dates/', views.update_order_dates_api, name='update_order_dates_api'),
     path('crm/api/order/<int:order_id>/payment/', views.update_order_payment_api, name='update_order_payment_api'),
+    path('crm/api/order/<int:order_id>/shipping/', views.api_update_order_shipping, name='api_update_order_shipping'),
     path('crm/api/order/<int:order_id>/edit/', views.update_order_full_api, name='update_order_full_api'),
     path('crm/api/order/<int:order_id>/delete/', views.delete_order_api, name='delete_order_api'),
     path('crm/api/item/<int:item_id>/status/', views.update_item_status_api, name='update_item_status_api'),
     path('crm/api/item/<int:item_id>/cost/', views.update_item_cost_api, name='update_item_cost_api'),
     path('crm/api/item/<int:item_id>/progress/', views.update_item_progress_api, name='update_item_progress_api'),
+    
+    # APIs Clientes y Envíos Correos
+    path('crm/api/customers/search/', views.api_customers_search, name='api_customers_search'),
+    path('crm/api/customers/save/', views.api_customer_save, name='api_customer_save'),
+    path('crm/api/shipping/calculate/', views.api_calculate_shipping_rates, name='api_calculate_shipping_rates'),
+    path('crm/api/postal-code/<str:cp>/', views.api_postal_code_lookup, name='api_postal_code_lookup'),
     
     # APIs rápidas de producto
     path('api/product/check-title/', views.check_product_title_api, name='check_product_title_api'),

@@ -154,32 +154,84 @@
 
       <!-- SECCIÓN 1: CLIENTE Y FECHA -->
       <div>
-        <h3
-          class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-primary"></span>
-          1. Información del Pedido y Cliente
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="of-field">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h3
+            class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary"></span>
+            1. Información del Pedido y Cliente
+          </h3>
+          <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+            <input type="checkbox" name="save_as_customer" value="true" class="w-4 h-4 rounded text-primary focus:ring-primary transition cursor-pointer">
+            <span>💾 Guardar o actualizar en agenda de clientes</span>
+          </label>
+        </div>
+
+        <!-- Buscador de Cliente Habitual -->
+        <div class="mb-4 relative">
+          <input type="hidden" name="customer_id" id="new-order-customer-id" value="">
+          <div class="flex gap-2">
+            <input type="text" id="new-customer-search-input" placeholder="🔍 Buscar cliente habitual en agenda (nombre, teléfono, email, localidad)..."
+              class="of-input" oninput="onNewOrderCustomerSearch(this.value)" autocomplete="off">
+            <button type="button" onclick="clearNewOrderCustomer()"
+              class="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-bold transition"
+              title="Limpiar selección">✕</button>
+          </div>
+          <div id="new-customer-dropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div class="of-field lg:col-span-1">
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del Cliente *</label>
             {{ form.client_name }}
           </div>
-          <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Contacto (Email/Teléfono/Red - Opcional)</label>
-            {{ form.client_contact }}
+          <div class="of-field lg:col-span-1">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">📞 Teléfono / WhatsApp</label>
+            {{ form.client_phone }}
           </div>
-          <div class="of-field">
+          <div class="of-field lg:col-span-1">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">✉️ Email</label>
+            {{ form.client_email }}
+          </div>
+          <div class="of-field lg:col-span-1">
             <label
               class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 flex justify-between items-center">
-              <span>Fecha de Pedido *</span>
+              <span>Fecha Pedido *</span>
               <button type="button" id="btn-today"
                 class="text-xs bg-gray-200 dark:bg-gray-700 hover:bg-primary hover:text-white px-2 py-0.5 rounded transition-colors text-gray-700 dark:text-gray-300">Hoy</button>
             </label>
             {{ form.order_date }}
           </div>
-          <div class="of-field">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite (Opcional)</label>
+          <div class="of-field lg:col-span-1">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Fecha Límite</label>
             {{ form.deadline }}
+          </div>
+          <div class="hidden">
+            {{ form.client_contact }}
+          </div>
+        </div>
+
+        <!-- Dirección Postal de Envío -->
+        <div class="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-800 space-y-3">
+          <h4 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span>📍</span> Dirección Postal de Envío (Para Correos)
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">Dirección / Calle y número</label>
+              {{ form.shipping_address }}
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">Código Postal</label>
+              {{ form.shipping_postal_code }}
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">Localidad / Ciudad</label>
+              {{ form.shipping_city }}
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">Provincia</label>
+              {{ form.shipping_province }}
+            </div>
           </div>
         </div>
       </div>
@@ -334,6 +386,106 @@
           <div class="of-field">
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Método de Envío</label>
             {{ form.shipping }}
+          </div>
+        </div>
+
+        <!-- Asistente de Tarifas y Comisiones Wallapop (Se activa si la plataforma es Wallapop) -->
+        <div id="wallapop-calc-box" class="hidden mb-4 p-3.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="font-black text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+              <span>🟢</span> Calculadora Wallapop Envíos & Wallapop Protect
+            </span>
+            <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+              Tú cobras el 100% íntegro de la pieza · El comprador asume envío + protección
+            </span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-center">
+            <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800/40">
+              <span class="block text-[10px] text-gray-500 uppercase font-semibold">Tú Cobras</span>
+              <span id="wallapop-seller-receives" class="font-black text-sm text-gray-900 dark:text-white">€0.00</span>
+            </div>
+            <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800/40">
+              <span class="block text-[10px] text-gray-500 uppercase font-semibold">Envío Wallapop (<span id="wallapop-tier-label">0-2kg</span>)</span>
+              <span id="wallapop-ship-cost" class="font-black text-sm text-emerald-600 dark:text-emerald-400">€2.99</span>
+            </div>
+            <div class="p-2 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800/40">
+              <span class="block text-[10px] text-gray-500 uppercase font-semibold">Protección Wallapop (1.95€+5%)</span>
+              <span id="wallapop-buyer-fee" class="font-black text-sm text-amber-600 dark:text-amber-400">€1.95</span>
+            </div>
+            <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-400 dark:border-emerald-700">
+              <span class="block text-[10px] text-emerald-800 dark:text-emerald-300 uppercase font-black">Total Comprador</span>
+              <span id="wallapop-total-buyer" class="font-black text-sm text-emerald-900 dark:text-emerald-200">€4.94</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logística Correos 2026 -->
+        <div class="mb-4 p-4 rounded-xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/60 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h4 class="text-xs font-black uppercase tracking-wider text-cyan-900 dark:text-cyan-300 flex items-center gap-1.5">
+              <span>📦</span> Tarifas Oficiales Correos 2026 & Tracking
+            </h4>
+            <span class="text-[11px] text-cyan-700 dark:text-cyan-400 font-semibold">
+              Carta Certificada predeterminada con seguimiento
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">Servicio de Correos</label>
+              <select name="correos_service" id="id_correos_service" class="of-input font-bold" onchange="onNewOrderCorreosServiceChange()">
+                <option value="carta_certificada" selected>Carta Certificada (Correos)</option>
+                <option value="paq_ligero">Paq Ligero (Correos)</option>
+                <option value="paq_estandar">Paq Estándar (Correos)</option>
+                <option value="paq_premium">Paq Premium (Correos)</option>
+              </select>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300">
+                  Coste Envío Estimado (€)
+                </label>
+                <span id="new-order-shipping-cost-badge" class="font-black text-xs px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 dark:bg-cyan-900/60 dark:text-cyan-300">0.00 €</span>
+              </div>
+              <input type="number" step="0.01" name="shipping_cost_estimated" id="id_shipping_cost_estimated" value="0.00" class="of-input font-bold" oninput="onNewOrderShippingCostInput(this.value)">
+              <p id="new-order-shipping-weight-hint" class="text-[11px] text-cyan-700 dark:text-cyan-400 mt-1 font-semibold">
+                Peso total Correos: 100g (piezas + 100g caja)
+              </p>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">Gasto Pagado Por</label>
+              <select name="shipping_cost_paid_by" id="id_shipping_cost_paid_by" class="of-input">
+                <option value="client" selected>Cliente (Paga envío)</option>
+                <option value="seller">Taller (Envío gratis / asumido)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Checkbox para añadir coste de envío al presupuesto (desactivado por defecto) -->
+          <div class="pt-2 border-t border-cyan-200/60 dark:border-cyan-800/60 flex items-center justify-between flex-wrap gap-2">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-shipping-to-total" name="include_shipping_in_total" value="true"
+                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary transition cursor-pointer"
+                onchange="updateOrderGrandTotals()">
+              <span class="text-xs font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                <span>➕</span> Añadir envío al presupuesto total cobrado
+              </span>
+            </label>
+            <span id="shipping-added-preview-pill" class="text-xs font-bold text-cyan-800 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded hidden">
+              Envío sumado al total
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-cyan-200/60 dark:border-cyan-800/60">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Nº Seguimiento Correos (Tracking)</label>
+              <input type="text" name="correos_tracking_number" id="id_correos_tracking_number" placeholder="Ej. PK012345678ES" class="of-input">
+            </div>
+            <div class="flex items-end">
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Al guardar podrás imprimir la etiqueta de 58 mm y enviar el tracking por WhatsApp con 1 clic.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -535,7 +687,7 @@
       </div>
 
       <!-- Fila 1: Buscador visual interactivo con estética web -->
-      <div class="mb-4 relative">
+      <div class="mb-4 relative piece-autocomplete-container">
         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
           Pieza o Producto del Catálogo *
         </label>
@@ -823,6 +975,22 @@
           handleAutocompleteSearch(this, idx);
         }
       });
+
+      input.addEventListener('blur', function () {
+        const idx = parseInt(this.dataset.index);
+        setTimeout(() => {
+          const dropdown = document.getElementById(`autocomplete-dropdown-${idx}`);
+          if (dropdown) dropdown.classList.add('hidden');
+        }, 220);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.key === 'Enter') {
+          const idx = parseInt(this.dataset.index);
+          const dropdown = document.getElementById(`autocomplete-dropdown-${idx}`);
+          if (dropdown) dropdown.classList.add('hidden');
+        }
+      });
     });
 
     // Métricas de fabricación
@@ -1010,7 +1178,7 @@
 
   // Cerrar desplegables de autocompletado al hacer clic fuera
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('.relative')) {
+    if (!e.target.closest('.piece-autocomplete-container')) {
       document.querySelectorAll('.custom-autocomplete-dropdown').forEach(d => d.classList.add('hidden'));
     }
   });
@@ -1140,8 +1308,28 @@
     const hasVat = vatBox ? vatBox.checked : false;
     const hasIrpf = irpfBox ? irpfBox.checked : false;
 
+    // Checkbox para añadir coste de envío al total presupuestado
+    const shipBox = document.getElementById('add-shipping-to-total');
+    const includeShipping = shipBox ? shipBox.checked : false;
+    let shippingCost = 0;
+    if (includeShipping) {
+      const shipCostInput = document.getElementById('id_shipping_cost_estimated');
+      shippingCost = shipCostInput ? (parseFloat(shipCostInput.value) || 0) : 0;
+    }
+
+    const pill = document.getElementById('shipping-added-preview-pill');
+    if (pill) {
+      if (includeShipping && shippingCost > 0) {
+        pill.textContent = `+${shippingCost.toFixed(2)}€ de envío sumado al total`;
+        pill.classList.remove('hidden');
+      } else {
+        pill.classList.add('hidden');
+      }
+    }
+
     // Si incluye IVA, aumenta un 21% al total del pedido
-    const totalPrice = hasVat ? Math.round(sumBasePrice * 1.21 * 100) / 100 : Math.round(sumBasePrice * 100) / 100;
+    const basePiecesTotal = hasVat ? Math.round(sumBasePrice * 1.21 * 100) / 100 : Math.round(sumBasePrice * 100) / 100;
+    const totalPrice = Math.round((basePiecesTotal + shippingCost) * 100) / 100;
 
     // La ganancia base no aumenta con el IVA (el IVA no es ganancia)
     const baseProfit = Math.round((sumBasePrice - totalCost) * 100) / 100;
@@ -1211,6 +1399,8 @@
     }
 
     syncHiddenInputs(totalPrice, totalCost, hasVat, hasIrpf);
+    autoCalculateNewOrderShippingRates();
+    updateWallapopEstimator(totalPrice, totalWeight);
   }
 
   // Sincronizar campo JSON oculto y fallbacks de SmartOrderForm
@@ -1294,6 +1484,292 @@
     }
 
     renderPieces();
+  });
+
+  // Funciones de Cliente habitual y Cotización Correos 2026
+  let newCustSearchTimeout = null;
+  function onNewOrderCustomerSearch(query) {
+    clearTimeout(newCustSearchTimeout);
+    const dropdown = document.getElementById('new-customer-dropdown');
+    if (!dropdown) return;
+
+    if (!query || query.trim().length < 1) {
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+      return;
+    }
+
+    newCustSearchTimeout = setTimeout(() => {
+      fetch(`/crm/api/customers/search/?q=${encodeURIComponent(query.trim())}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.customers && data.customers.length > 0) {
+            dropdown.innerHTML = data.customers.map(c => `
+              <div class="p-2.5 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 cursor-pointer border-b border-gray-100 dark:border-gray-700/60 transition last:border-b-0"
+                onclick='selectNewOrderCustomer(${JSON.stringify(c)})'>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">${c.name}</span>
+                  <span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold">${c.order_count || 0} pedidos</span>
+                </div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                  ${c.phone ? `<span>📞 ${c.phone}</span>` : ''}
+                  ${c.city ? `<span>📍 ${c.city}</span>` : ''}
+                </div>
+              </div>
+            `).join('');
+            dropdown.classList.remove('hidden');
+          } else {
+            dropdown.innerHTML = '<div class="p-3 text-xs text-gray-400 text-center">No se encontraron clientes habituales.</div>';
+            dropdown.classList.remove('hidden');
+          }
+        })
+        .catch(() => {
+          dropdown.classList.add('hidden');
+        });
+    }, 250);
+  }
+
+  function selectNewOrderCustomer(cust) {
+    if (!cust) return;
+    const custIdField = document.getElementById('new-order-customer-id');
+    if (custIdField) custIdField.value = cust.id;
+
+    const searchInput = document.getElementById('new-customer-search-input');
+    if (searchInput) searchInput.value = cust.name;
+
+    const nameField = document.getElementById('id_client_name');
+    if (nameField) nameField.value = cust.name;
+
+    const phoneField = document.getElementById('id_client_phone');
+    if (phoneField && cust.phone) phoneField.value = cust.phone;
+
+    const emailField = document.getElementById('id_client_email');
+    if (emailField && cust.email) emailField.value = cust.email;
+
+    const contactField = document.getElementById('id_client_contact');
+    if (contactField) {
+      contactField.value = [cust.phone, cust.email].filter(Boolean).join(' · ');
+    }
+
+    const addrField = document.getElementById('id_shipping_address');
+    if (addrField && cust.address) addrField.value = cust.address;
+
+    const cpField = document.getElementById('id_shipping_postal_code');
+    if (cpField && cust.postal_code) cpField.value = cust.postal_code;
+
+    const cityField = document.getElementById('id_shipping_city');
+    if (cityField && cust.city) cityField.value = cust.city;
+
+    const provField = document.getElementById('id_shipping_province');
+    if (provField && cust.province) provField.value = cust.province;
+
+    const dropdown = document.getElementById('new-customer-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+  }
+
+  function clearNewOrderCustomer() {
+    const custIdField = document.getElementById('new-order-customer-id');
+    if (custIdField) custIdField.value = '';
+    const searchInput = document.getElementById('new-customer-search-input');
+    if (searchInput) searchInput.value = '';
+    const dropdown = document.getElementById('new-customer-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+  }
+
+  let newOrderShippingOptionsMap = {};
+  function autoCalculateNewOrderShippingRates() {
+    const totalWeight = piecesState.reduce((sum, p) => sum + ((parseFloat(p.weight) || 0) * (parseInt(p.quantity) || 1)), 0);
+    const hint = document.getElementById('new-order-shipping-weight-hint');
+    if (hint) {
+      hint.textContent = `Peso total Correos: ${(totalWeight + 100).toFixed(0)}g (${totalWeight.toFixed(0)}g piezas + 100g caja)`;
+    }
+
+    fetch(`/crm/api/shipping/calculate/?weight_grams=${totalWeight}&add_tare=1`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.shipping_analysis) {
+          const analysis = data.shipping_analysis;
+          newOrderShippingOptionsMap = {};
+          const servField = document.getElementById('id_correos_service');
+          if (!servField) return;
+
+          analysis.options.forEach(opt => {
+            const key = opt.service_key || (opt.code.includes('Carta') ? 'carta_certificada' : opt.code.includes('Ligero') ? 'paq_ligero' : opt.code.includes('Estándar') || opt.code.includes('Estandar') ? 'paq_estandar' : 'paq_premium');
+            newOrderShippingOptionsMap[key] = opt;
+            const optionEl = servField.querySelector(`option[value="${key}"]`);
+            if (optionEl) {
+              if (opt.is_available && opt.price_float !== null) {
+                // Solo el nombre limpio en el desplegable
+                optionEl.textContent = opt.name;
+                optionEl.disabled = false;
+              } else {
+                optionEl.textContent = `${opt.name} (Supera peso máx)`;
+                optionEl.disabled = true;
+              }
+            }
+          });
+
+          // Rellenar coste con el servicio seleccionado actualmente
+          onNewOrderCorreosServiceChange();
+        }
+      })
+      .catch(() => {});
+  }
+
+  function onNewOrderCorreosServiceChange() {
+    const servField = document.getElementById('id_correos_service');
+    const costField = document.getElementById('id_shipping_cost_estimated');
+    const badgeEl = document.getElementById('new-order-shipping-cost-badge');
+    if (!servField || !costField) return;
+
+    const selectedKey = servField.value;
+    const opt = newOrderShippingOptionsMap[selectedKey];
+    if (opt && opt.is_available && opt.price_float !== null) {
+      costField.value = opt.price_float.toFixed(2);
+      if (badgeEl) badgeEl.textContent = `${opt.price_float.toFixed(2)} €`;
+    } else {
+      if (badgeEl) badgeEl.textContent = 'No disp.';
+    }
+    updateOrderGrandTotals();
+  }
+
+  function onNewOrderShippingCostInput(val) {
+    const badgeEl = document.getElementById('new-order-shipping-cost-badge');
+    const num = parseFloat(val) || 0;
+    if (badgeEl) badgeEl.textContent = `${num.toFixed(2)} €`;
+    updateOrderGrandTotals();
+  }
+
+  // Calculadora interactiva Wallapop Envíos & Wallapop Protect
+  function updateWallapopEstimator(totalPrice, totalPiecesWeight) {
+    const calcBox = document.getElementById('wallapop-calc-box');
+    const platformEl = document.getElementById('id_platform');
+    if (!calcBox || !platformEl) return;
+
+    const isWallapop = (platformEl.value || '').toLowerCase().includes('wallapop');
+    if (!isWallapop) {
+      calcBox.classList.add('hidden');
+      return;
+    }
+    calcBox.classList.remove('hidden');
+
+    const totalWeight = (totalPiecesWeight || 0) + 100;
+    let shipCost = 2.99;
+    let tierLabel = '0-2kg';
+    if (totalWeight <= 2000) {
+      shipCost = 2.99;
+      tierLabel = '0-2kg';
+    } else if (totalWeight <= 5000) {
+      shipCost = 4.99;
+      tierLabel = '2-5kg';
+    } else if (totalWeight <= 10000) {
+      shipCost = 7.99;
+      tierLabel = '5-10kg';
+    } else if (totalWeight <= 20000) {
+      shipCost = 11.99;
+      tierLabel = '10-20kg';
+    } else {
+      shipCost = 16.99;
+      tierLabel = '+20kg';
+    }
+
+    // Seguro de protección Wallapop: 1.95€ fijos hasta 25€, o 1.95€ + 5% del producto
+    const sellerPrice = Math.max(0, parseFloat(totalPrice) || 0);
+    let buyerFee = 1.95;
+    if (sellerPrice > 25) {
+      buyerFee = 1.95 + (sellerPrice * 0.05);
+    }
+    const totalBuyer = sellerPrice + shipCost + buyerFee;
+
+    const elSeller = document.getElementById('wallapop-seller-receives');
+    const elShip = document.getElementById('wallapop-ship-cost');
+    const elTier = document.getElementById('wallapop-tier-label');
+    const elFee = document.getElementById('wallapop-buyer-fee');
+    const elTotal = document.getElementById('wallapop-total-buyer');
+
+    if (elSeller) elSeller.textContent = `€${sellerPrice.toFixed(2)}`;
+    if (elShip) elShip.textContent = `€${shipCost.toFixed(2)}`;
+    if (elTier) elTier.textContent = tierLabel;
+    if (elFee) elFee.textContent = `€${buyerFee.toFixed(2)}`;
+    if (elTotal) elTotal.textContent = `€${totalBuyer.toFixed(2)}`;
+  }
+
+  // Autocompletado de Código Postal -> Provincia y Localidad
+  function setupPostalCodeAutocomplete(cpInputId, provInputId, cityInputId) {
+    const cpInput = document.getElementById(cpInputId);
+    const provInput = document.getElementById(provInputId);
+    const cityInput = document.getElementById(cityInputId);
+    if (!cpInput) return;
+
+    const provincesMap = {
+      '01': 'Álava', '02': 'Albacete', '03': 'Alicante', '04': 'Almería', '05': 'Ávila',
+      '06': 'Badajoz', '07': 'Baleares', '08': 'Barcelona', '09': 'Burgos', '10': 'Cáceres',
+      '11': 'Cádiz', '12': 'Castellón', '13': 'Ciudad Real', '14': 'Córdoba', '15': 'A Coruña',
+      '16': 'Cuenca', '17': 'Girona', '18': 'Granada', '19': 'Guadalajara', '20': 'Gipuzkoa',
+      '21': 'Huelva', '22': 'Huesca', '23': 'Jaén', '24': 'León', '25': 'Lleida',
+      '26': 'La Rioja', '27': 'Lugo', '28': 'Madrid', '29': 'Málaga', '30': 'Murcia',
+      '31': 'Navarra', '32': 'Ourense', '33': 'Asturias', '34': 'Palencia', '35': 'Las Palmas',
+      '36': 'Pontevedra', '37': 'Salamanca', '38': 'Santa Cruz de Tenerife', '39': 'Cantabria',
+      '40': 'Segovia', '41': 'Sevilla', '42': 'Soria', '43': 'Tarragona', '44': 'Teruel',
+      '45': 'Toledo', '46': 'Valencia', '47': 'Valladolid', '48': 'Bizkaia', '49': 'Zamora',
+      '50': 'Zaragoza', '51': 'Ceuta', '52': 'Melilla'
+    };
+
+    let lookupTimer = null;
+    function doLookup() {
+      const val = cpInput.value.trim().replace(/\D/g, '');
+      if (val.length === 5) {
+        const prefix = val.substring(0, 2);
+        if (provincesMap[prefix] && provInput && (!provInput.value || provInput.dataset.autofilled === 'true')) {
+          provInput.value = provincesMap[prefix];
+          provInput.dataset.autofilled = 'true';
+        }
+
+        fetch(`/crm/api/postal-code/${val}/`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              if (data.province && provInput) provInput.value = data.province;
+              if (data.city && cityInput && (!cityInput.value || cityInput.dataset.autofilled === 'true')) {
+                cityInput.value = data.city;
+                cityInput.dataset.autofilled = 'true';
+              }
+            }
+          })
+          .catch(() => {
+            fetch(`https://api.zippopotam.us/es/${val}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.places && data.places.length > 0 && cityInput && (!cityInput.value || cityInput.dataset.autofilled === 'true')) {
+                  cityInput.value = data.places[0]['place name'];
+                  cityInput.dataset.autofilled = 'true';
+                }
+              })
+              .catch(() => {});
+          });
+      }
+    }
+
+    cpInput.addEventListener('input', function() {
+      clearTimeout(lookupTimer);
+      lookupTimer = setTimeout(doLookup, 300);
+    });
+    cpInput.addEventListener('blur', doLookup);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setupPostalCodeAutocomplete('id_shipping_postal_code', 'id_shipping_province', 'id_shipping_city');
+    const platEl = document.getElementById('id_platform');
+    if (platEl) {
+      platEl.addEventListener('change', () => updateOrderGrandTotals());
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#new-customer-dropdown') && !e.target.closest('#new-customer-search-input')) {
+      const d = document.getElementById('new-customer-dropdown');
+      if (d) d.classList.add('hidden');
+    }
   });
 </script>
 {% endblock %}

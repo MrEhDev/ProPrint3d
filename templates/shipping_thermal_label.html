@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta Térmica 58mm - Pedido #{{ order.id }}</title>
+    <style>
+        /* Configuración para rollo continuo de 58mm */
+        @page {
+            size: 58mm auto;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
+            background-color: #f3f4f6;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .label-container {
+            width: 58mm;
+            min-height: 50mm;
+            background: #fff;
+            padding: 3mm 2.5mm;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-size: 11px;
+            line-height: 1.25;
+            color: #000;
+        }
+
+        /* Estilo de impresión térmica pura */
+        @media print {
+            body {
+                background: transparent;
+                padding: 0;
+                margin: 0;
+            }
+            .label-container {
+                width: 58mm;
+                box-shadow: none;
+                padding: 1.5mm 2mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .divider {
+            border-top: 1.5px solid #000;
+            margin: 2.5mm 0;
+        }
+
+        .divider-dashed {
+            border-top: 1.5px dashed #000;
+            margin: 3mm 0 2mm 0;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1mm;
+        }
+
+        .sender-box {
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        .recipient-box {
+            font-size: 11.5px;
+            line-height: 1.25;
+            font-weight: 700;
+            padding: 1mm 0;
+        }
+
+        .recipient-name {
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 1mm;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 2mm 0;
+        }
+
+        .qr-img {
+            width: 32mm;
+            height: 32mm;
+            margin: 0 auto;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .qr-caption {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-top: 1mm;
+            letter-spacing: 0.2px;
+        }
+
+        /* Zona de corte para control interno */
+        .cut-notice {
+            font-size: 8.5px;
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .internal-info {
+            font-size: 10px;
+            line-height: 1.3;
+            background: #fafafa;
+            padding: 1.5mm;
+            border: 1px solid #000;
+            border-radius: 1mm;
+            margin-top: 1.5mm;
+        }
+
+        /* Barra de control en pantalla (no se imprime) */
+        .toolbar {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .btn {
+            background: #0ea5e9;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: #0284c7;
+        }
+
+        .btn-secondary {
+            background: #4b5563;
+        }
+        .btn-secondary:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botones de Acción (Ocultos al Imprimir) -->
+    <div class="toolbar no-print">
+        <button class="btn" onclick="window.print()">
+            🖨️ Imprimir Etiqueta
+        </button>
+        <button class="btn btn-secondary" onclick="window.close()">
+            ✕ Cerrar
+        </button>
+    </div>
+
+    <!-- Etiqueta Térmica de 58 mm -->
+    <div class="label-container">
+        
+        <!-- Cabecera -->
+        <div class="header-title">PROPRINT3D</div>
+
+        <div class="divider"></div>
+
+        <!-- Remitente Oficial -->
+        <div class="sender-box">
+            <div class="section-label">REMITENTE:</div>
+            <div style="font-weight: bold;">Eleazar Hernández</div>
+            <div>C/ Empordá 136</div>
+            <div>08186 Lliçà d'Amunt (Barcelona)</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Destinatario (Grande y Visible) -->
+        <div class="recipient-box">
+            <div class="section-label">DESTINATARIO:</div>
+            <div class="recipient-name">{{ order.client_name }}</div>
+            {% if order.shipping_address %}
+                <div>{{ order.shipping_address }}</div>
+            {% elif order.customer and order.customer.address %}
+                <div>{{ order.customer.address }}</div>
+            {% endif %}
+
+            <div>
+                {% if order.shipping_postal_code %}
+                    {{ order.shipping_postal_code }}
+                {% elif order.customer and order.customer.postal_code %}
+                    {{ order.customer.postal_code }}
+                {% endif %}
+                
+                {% if order.shipping_city %}
+                    {{ order.shipping_city }}
+                {% elif order.customer and order.customer.city %}
+                    {{ order.customer.city }}
+                {% endif %}
+                
+                {% if order.shipping_province %}
+                    ({{ order.shipping_province }})
+                {% elif order.customer and order.customer.province %}
+                    ({{ order.customer.province }})
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Código QR con enlace a https://proprint3d.shop/ -->
+        <div class="qr-section">
+            <img class="qr-img" 
+                 src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fproprint3d.shop%2F&format=svg" 
+                 alt="QR ProPrint3D">
+            <div class="qr-caption">proprint3d.shop</div>
+        </div>
+
+        <!-- Línea de corte discontinua -->
+        <div class="divider-dashed"></div>
+        <div class="cut-notice">✂ - - - CORTAR ANTES DE PEGAR - - - ✂</div>
+
+        <!-- Datos internos del pedido (al final, recortable) -->
+        <div class="internal-info">
+            <div><strong>Pedido:</strong> #{{ order.id }}</div>
+            <div><strong>Peso est.:</strong> {{ estimated_weight_g }}g <span style="font-size: 8.5px; opacity: 0.8;">(piezas + 100g caja)</span></div>
+            <div><strong>Envío:</strong> Correos - {{ correos_service_name|default:"Carta Certificada" }}</div>
+            {% if order.correos_tracking_number %}
+            <div><strong>Tracking:</strong> {{ order.correos_tracking_number }}</div>
+            {% endif %}
+            <div style="font-size: 8.5px; opacity: 0.75; margin-top: 1mm;">Fecha: {{ order.order_date|date:"d/m/Y" }}</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Si viene con parámetro ?autoprint=1, abre directamente el diálogo de impresión
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autoprint') === '1') {
+            window.addEventListener('load', () => {
+                setTimeout(() => window.print(), 350);
+            });
+        }
+    </script>
+</body>
+</html>

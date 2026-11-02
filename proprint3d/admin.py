@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, Quote, QuoteItem, Order, OrderItem, Review
+from .models import Category, Product, ProductImage, Quote, QuoteItem, Order, OrderItem, Review, Customer
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'city', 'province', 'platform', 'total_orders', 'total_spent', 'created_at')
+    list_filter = ('platform', 'province', 'created_at')
+    search_fields = ('name', 'phone', 'email', 'address', 'city', 'postal_code', 'notes')
+    ordering = ('name',)
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -40,7 +47,7 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'description', 'client_name', 'quantity', 'price', 'deposit_amount', 'deposit_method', 'final_payment_method', 'profit', 'status', 'platform', 'shipping', 'order_date')
     list_filter = ('status', 'platform', 'shipping', 'order_date')
-    search_fields = ('description', 'client_name', 'notes')
+    search_fields = ('description', 'client_name', 'client_phone', 'client_email', 'client_contact', 'tracking_number', 'notes')
     inlines = [OrderItemInline]
 
 @admin.register(OrderItem)
