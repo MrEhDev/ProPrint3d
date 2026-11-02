@@ -546,7 +546,7 @@ def crm_dashboard_view(request):
             orders_map[oid]['group_price'] += float(item.price or 0)
             orders_map[oid]['group_cost'] += float(item.total_cost or 0)
             orders_map[oid]['group_weight'] += float(item.weight_grams or 0)
-            item_mins = ((item.print_time_hours or 0.0) * 60 + (item.print_time_minutes or 0)) * (item.quantity or 1)
+            item_mins = ((item.print_time_hours or 0.0) * 60 + (item.print_time_minutes or 0)) * item.remaining_quantity
             orders_map[oid]['group_print_minutes'] = orders_map[oid].get('group_print_minutes', 0) + item_mins
 
         card_groups = []
@@ -730,6 +730,47 @@ def update_item_cost_api(request, item_id):
                     item.order.update_totals_from_items()
                     return JsonResponse({'success': True, 'total_cost': str(item.total_cost)})
             return JsonResponse({'success': False, 'error': 'Coste inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@staff_member_required
+def update_item_progress_api(request, item_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item = OrderItem.objects.select_related('order').get(id=item_id)
+            delta = data.get('delta')
+            set_val = data.get('completed_quantity')
+            
+            total_qty = item.quantity or 1
+            if delta is not None:
+                new_completed = (item.completed_quantity or 0) + int(delta)
+            elif set_val is not None:
+                new_completed = int(set_val)
+            else:
+                return JsonResponse({'success': False, 'error': 'Valor no especificado'})
+            
+            # Limitar entre 0 y total_qty
+            item.completed_quantity = max(0, min(total_qty, new_completed))
+            item.save()
+
+            order = item.order
+            all_order_items = list(order.items.all())
+            all_items_completed = all((i.completed_quantity or 0) >= (i.quantity or 1) for i in all_order_items)
+
+            return JsonResponse({
+                'success': True,
+                'item_id': item.id,
+                'order_id': order.id,
+                'completed_quantity': item.completed_quantity,
+                'total_quantity': total_qty,
+                'remaining_quantity': item.remaining_quantity,
+                'is_item_fully_completed': (item.completed_quantity >= total_qty),
+                'all_items_completed': all_items_completed,
+                'remaining_print_time_hours': item.remaining_print_time_hours,
+                'remaining_print_time_str': item.remaining_print_time_str,
+            })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Método no permitido'})

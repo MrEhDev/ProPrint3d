@@ -563,18 +563,42 @@
                         <div class="space-y-1.5 my-2.5">
                             {% for item in group.items %}
                             <div class="p-2 rounded-lg bg-gray-50/90 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-sm transition-all kanban-piece"
-                                draggable="true" ondragstart="dragPiece(event)" data-item-id="{{ item.id }}"
-                                data-order-id="{{ group.order.id }}" title="{{ item.description }}">
+                                draggable="true" ondragstart="dragPiece(event)"
+                                data-item-id="{{ item.id }}"
+                                data-order-id="{{ group.order.id }}"
+                                data-quantity="{{ item.quantity }}"
+                                data-completed="{{ item.completed_quantity|default:0 }}"
+                                data-unit-hours="{{ item.print_time_hours|default:0|unlocalize }}"
+                                data-unit-minutes="{{ item.print_time_minutes|default:0 }}"
+                                title="{{ item.description }}">
                                 <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5 min-w-0">
+                                    <div class="flex items-center gap-1.5 min-w-0 flex-wrap">
                                         <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0"
                                             title="{{ item.description }}">
                                             {{ item.description }}
                                         </span>
-                                        <span
-                                            class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold flex-shrink-0">
+
+                                        <!-- Contador interactivo de piezas hechas [-] X/Y [+] en En proceso y Presupuestado -->
+                                        {% if status_name == 'En proceso' or status_name == 'Presupuestado' %}
+                                        <div class="inline-flex items-center gap-0.5 bg-white dark:bg-gray-900 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-2xs text-xs select-none flex-shrink-0"
+                                            onclick="event.stopPropagation();"
+                                            title="Unidades ya fabricadas (pulsa + al terminar una impresión)">
+                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, -1, this, event)"
+                                                class="w-4 h-4 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black transition text-[11px] active:scale-90"
+                                                title="Restar 1 unidad hecha">-</button>
+                                            <span id="item-badge-{{ item.id }}" class="font-black px-1 text-center min-w-[2.4rem] text-[11px]
+                                                {% if item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400{% elif item.completed_quantity > 0 %}text-primary{% else %}text-gray-500 dark:text-gray-400{% endif %}">
+                                                <span class="completed-val">{{ item.completed_quantity|default:0 }}</span>/{{ item.quantity }}
+                                            </span>
+                                            <button type="button" onclick="adjustItemProgressLive({{ item.id }}, 1, this, event)"
+                                                class="w-4 h-4 flex items-center justify-center rounded bg-primary/10 hover:bg-primary text-primary hover:text-white font-black transition text-[11px] active:scale-90"
+                                                title="Sumar 1 unidad terminada">+</button>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold flex-shrink-0">
                                             x{{ item.quantity }}
                                         </span>
+                                        {% endif %}
                                         {% if item.display_notes %}
                                         <span class="relative group/note inline-flex items-center text-sm text-amber-500 hover:text-amber-600 cursor-help select-none flex-shrink-0" onclick="event.stopPropagation();">
                                             📝
@@ -591,9 +615,11 @@
                                         {% endif %}
                                     </div>
                                     <div
-                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                                        class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5 flex-wrap">
                                         {% if item.weight_grams %}<span>⚖️ {{ item.weight_grams }}g</span>{% endif %}
-                                        {% if item.print_time_hours %}<span>⏱️ {{ item.print_time_hours }}h{% if item.print_time_minutes %} {{ item.print_time_minutes }}m{% endif %}</span>{% endif %}
+                                        <span id="item-rem-time-{{ item.id }}" class="font-medium {% if item.completed_quantity >= item.quantity %}text-emerald-600 dark:text-emerald-400 font-bold{% endif %}">
+                                            ⏱️ {% if item.completed_quantity >= item.quantity %}¡Hecha! (0h rest.){% elif item.completed_quantity > 0 %}{{ item.remaining_print_time_str }} rest.{% else %}{{ item.remaining_print_time_str }}{% endif %}
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0 flex items-center gap-1">
@@ -2674,6 +2700,93 @@
         if (h === 0) return `${m}m`;
         if (m === 0) return `${h}h`;
         return `${h}h ${m}m`;
+    }
+
+    function adjustItemProgressLive(itemId, delta, btnEl, ev) {
+        if (ev) ev.stopPropagation();
+        const pieceEl = btnEl.closest('.kanban-piece');
+        if (!pieceEl) return;
+
+        const totalQty = parseInt(pieceEl.dataset.quantity, 10) || 1;
+        let currentCompleted = parseInt(pieceEl.dataset.completed, 10) || 0;
+        let newCompleted = currentCompleted + delta;
+        if (newCompleted < 0) newCompleted = 0;
+        if (newCompleted > totalQty) newCompleted = totalQty;
+        if (newCompleted === currentCompleted) return;
+
+        // 1. Actualización optimista inmediata en el DOM
+        pieceEl.dataset.completed = newCompleted;
+        const badgeEl = document.getElementById(`item-badge-${itemId}`);
+        if (badgeEl) {
+            const valSpan = badgeEl.querySelector('.completed-val');
+            if (valSpan) valSpan.textContent = newCompleted;
+            if (newCompleted >= totalQty) {
+                badgeEl.className = "font-black px-1 text-center min-w-[2.4rem] text-[11px] text-emerald-600 dark:text-emerald-400";
+            } else if (newCompleted > 0) {
+                badgeEl.className = "font-black px-1 text-center min-w-[2.4rem] text-[11px] text-primary";
+            } else {
+                badgeEl.className = "font-black px-1 text-center min-w-[2.4rem] text-[11px] text-gray-500 dark:text-gray-400";
+            }
+        }
+
+        // 2. Recalcular horas restantes de esta pieza
+        const unitHours = parseFloat(pieceEl.dataset.unitHours) || 0;
+        const unitMins = parseFloat(pieceEl.dataset.unitMinutes) || 0;
+        const remQty = Math.max(0, totalQty - newCompleted);
+        const itemRemMins = Math.round((unitHours * 60 + unitMins) * remQty);
+        const remH = Math.floor(itemRemMins / 60);
+        const remM = itemRemMins % 60;
+        const remStr = (remH === 0) ? `${remM}m` : ((remM === 0) ? `${remH}h` : `${remH}h ${remM}m`);
+
+        const timeSpan = document.getElementById(`item-rem-time-${itemId}`);
+        if (timeSpan) {
+            if (newCompleted >= totalQty) {
+                timeSpan.textContent = "⏱️ ¡Hecha! (0h rest.)";
+                timeSpan.className = "font-bold text-xs text-emerald-600 dark:text-emerald-400";
+            } else if (newCompleted > 0) {
+                timeSpan.textContent = `⏱️ ${remStr} rest.`;
+                timeSpan.className = "font-medium text-xs text-primary dark:text-cyan-400";
+            } else {
+                timeSpan.textContent = `⏱️ ${remStr}`;
+                timeSpan.className = "font-medium text-xs text-gray-500 dark:text-gray-400";
+            }
+        }
+
+        // 3. Recalcular horas restantes de toda la tarjeta
+        const cardEl = pieceEl.closest('.kanban-card');
+        if (cardEl) {
+            let cardTotalRemainingMins = 0;
+            cardEl.querySelectorAll('.kanban-piece').forEach(p => {
+                const pQty = parseInt(p.dataset.quantity, 10) || 1;
+                const pComp = parseInt(p.dataset.completed, 10) || 0;
+                const pUnitH = parseFloat(p.dataset.unitHours) || 0;
+                const pUnitM = parseFloat(p.dataset.unitMinutes) || 0;
+                const pRem = Math.max(0, pQty - pComp);
+                cardTotalRemainingMins += (pUnitH * 60 + pUnitM) * pRem;
+            });
+            const cardRemainingHours = cardTotalRemainingMins / 60.0;
+            cardEl.dataset.printHours = cardRemainingHours.toFixed(2);
+        }
+
+        // 4. Actualizar métricas de cola de taller y cabeceras de columnas en tiempo real
+        updateWorkshopQueueMetrics();
+
+        // 5. Enviar actualización persistente al servidor
+        fetch(`/crm/api/item/${itemId}/progress/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ completed_quantity: newCompleted })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                console.error("Error al actualizar progreso:", data.error);
+            }
+        })
+        .catch(err => console.error("Error de conexión al actualizar progreso:", err));
     }
 
     function updateWorkshopQueueMetrics() {

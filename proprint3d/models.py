@@ -625,10 +625,11 @@ class Order(models.Model):
         today = datetime.date.today()
         days_left = (self.deadline - today).days
 
-        # Duración acumulada de impresión en horas
+        # Duración acumulada de impresión restante (descontando piezas ya hechas o completadas)
         items = list(self.items.all())
         if items:
-            total_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * (i.quantity or 1) for i in items)
+            pending_items = [i for i in items if i.status not in ['Realizado', 'Enviado', 'Entregado', 'Cobrado']]
+            total_mins = sum(((i.print_time_hours or 0.0) * 60 + (i.print_time_minutes or 0)) * i.remaining_quantity for i in pending_items)
         else:
             total_mins = ((self.print_time_hours or 0.0) * 60 + (self.print_time_minutes or 0)) * (self.quantity or 1)
         print_hours = total_mins / 60.0
@@ -890,6 +891,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.CharField(max_length=250, help_text="Nombre o descripción de la pieza")
     quantity = models.IntegerField(default=1, help_text="Cantidad de esta pieza")
+    completed_quantity = models.PositiveIntegerField(default=0, help_text="Unidades ya fabricadas/impresas")
     
     # Métricas de fabricación individuales por unidad
     weight_grams = models.FloatField(null=True, blank=True, default=0.0, help_text="Peso en gramos (por unidad)")
@@ -906,6 +908,36 @@ class OrderItem(models.Model):
     status = models.CharField(max_length=20, choices=Order.STATUS_CHOICES, default='Presupuestado')
     notes = models.TextField(blank=True, null=True, default='', help_text="Notas o especificaciones de la pieza")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def remaining_quantity(self):
+        """Cantidad de unidades pendientes de fabricar."""
+        q = self.quantity or 1
+        c = self.completed_quantity or 0
+        return max(0, q - c)
+
+    @property
+    def remaining_print_time_hours(self):
+        """Horas pendientes de impresión de esta pieza."""
+        rem_qty = self.remaining_quantity
+        h = float(self.print_time_hours or 0)
+        m = float(self.print_time_minutes or 0)
+        return round(((h * 60 + m) * rem_qty) / 60.0, 2)
+
+    @property
+    def remaining_print_time_str(self):
+        """Texto formateado de horas pendientes de impresión."""
+        rem_qty = self.remaining_quantity
+        h = float(self.print_time_hours or 0)
+        m = float(self.print_time_minutes or 0)
+        total_mins = int((h * 60 + m) * rem_qty)
+        hours = total_mins // 60
+        mins = total_mins % 60
+        if hours == 0:
+            return f"{mins}m"
+        if mins == 0:
+            return f"{hours}h"
+        return f"{hours}h {mins}m"
 
     @property
     def display_notes(self):
