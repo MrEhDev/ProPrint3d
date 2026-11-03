@@ -68,8 +68,12 @@
                 {% endif %}
 
                 {% if product.main_image or product.images.all %}
-                <!-- Visor Principal Cuadrado con Fondo Suave -->
-                <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-b from-gray-100/90 to-gray-200/90 dark:from-slate-800/80 dark:to-slate-900/90 group" id="product-carousel">
+                <!-- Visor Principal Cuadrado con Fondo Suave y Apertura Lightbox al hacer clic -->
+                <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-b from-gray-100/90 to-gray-200/90 dark:from-slate-800/80 dark:to-slate-900/90 group cursor-zoom-in" 
+                     id="product-carousel" 
+                     onclick="openLightbox()" 
+                     title="Haz clic para ver en pantalla completa">
+                    
                     {% if product.main_image %}
                     <img src="{{ product.main_image.url }}" alt="{{ product.title }}"
                         class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 opacity-100 carousel-image group-hover:scale-105">
@@ -79,17 +83,23 @@
                         class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 {% if not product.main_image and forloop.first %}opacity-100{% else %}opacity-0{% endif %} carousel-image group-hover:scale-105">
                     {% endfor %}
 
-                    <!-- Botones de Navegación Glass -->
-                    {% if product.images.all.count > 0 or product.main_image %}
-                    <button onclick="prevImage()"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none"
+                    <!-- Indicador Flotante Pantalla Completa -->
+                    <div class="absolute bottom-3 right-3 z-10 pointer-events-none px-2.5 py-1 rounded-xl bg-black/50 text-white/90 text-xs font-semibold backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                        <span>Pantalla completa</span>
+                    </div>
+
+                    <!-- Botones de Navegación Glass (Solo visibles si hay más de 1 imagen) -->
+                    {% if product.images.all.count > 0 %}
+                    <button onclick="event.stopPropagation(); prevImage();"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
                         aria-label="Foto anterior">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    <button onclick="nextImage()"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none"
+                    <button onclick="event.stopPropagation(); nextImage();"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
                         aria-label="Siguiente foto">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -127,6 +137,7 @@
                     let currentImg = 0;
                     const images = document.querySelectorAll('.carousel-image');
                     const thumbs = document.querySelectorAll('.carousel-thumb');
+                    
                     function updateCarousel() {
                         images.forEach((img, idx) => {
                             img.classList.toggle('opacity-100', idx === currentImg);
@@ -137,9 +148,55 @@
                             thumb.classList.toggle('border-transparent', idx !== currentImg);
                         });
                     }
-                    function nextImage() { currentImg = (currentImg + 1) % images.length; updateCarousel(); }
-                    function prevImage() { currentImg = (currentImg - 1 + images.length) % images.length; updateCarousel(); }
-                    function goToImage(idx) { currentImg = idx; updateCarousel(); }
+                    function nextImage() { 
+                        if (images.length <= 1) return;
+                        currentImg = (currentImg + 1) % images.length; 
+                        updateCarousel(); 
+                    }
+                    function prevImage() { 
+                        if (images.length <= 1) return;
+                        currentImg = (currentImg - 1 + images.length) % images.length; 
+                        updateCarousel(); 
+                    }
+                    function goToImage(idx) { 
+                        currentImg = idx; 
+                        updateCarousel(); 
+                    }
+
+                    // Sincronización y Apertura del Lightbox Fullscreen
+                    function syncLightbox() {
+                        const lightboxImg = document.getElementById('lightbox-img');
+                        const lightboxCounter = document.getElementById('lightbox-counter');
+                        if (images[currentImg] && lightboxImg) {
+                            lightboxImg.src = images[currentImg].src;
+                            if (lightboxCounter) {
+                                lightboxCounter.textContent = `${currentImg + 1} / ${images.length}`;
+                            }
+                        }
+                    }
+
+                    function openLightbox() {
+                        const lightbox = document.getElementById('product-lightbox');
+                        if (!lightbox || images.length === 0) return;
+                        syncLightbox();
+                        lightbox.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    }
+
+                    function closeLightbox() {
+                        const lightbox = document.getElementById('product-lightbox');
+                        if (!lightbox) return;
+                        lightbox.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+
+                    document.addEventListener('keydown', function(e) {
+                        const lightbox = document.getElementById('product-lightbox');
+                        if (!lightbox || lightbox.classList.contains('hidden')) return;
+                        if (e.key === 'Escape') closeLightbox();
+                        if (e.key === 'ArrowRight') { nextImage(); syncLightbox(); }
+                        if (e.key === 'ArrowLeft') { prevImage(); syncLightbox(); }
+                    });
                 </script>
 
                 {% else %}
@@ -255,6 +312,19 @@
                             <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"></path>
                         </svg>
                         <span class="pointer-events-none">Pedir por WhatsApp</span>
+                    </a>
+                </div>
+
+                <!-- Garantía de Confianza / Wallapop -->
+                <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-gray-700 dark:text-gray-300">
+                    <div class="flex items-center gap-1.5 font-medium">
+                        <span class="text-amber-400">★★★★★</span>
+                        <span class="font-bold text-teal-700 dark:text-teal-400">5.0 en Wallapop</span>
+                        <span class="hidden sm:inline text-gray-400">• Vendedor 100% recomendado</span>
+                    </div>
+                    <a href="https://es.wallapop.com/user/proprint3-444369027" target="_blank" rel="noopener noreferrer" class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold hover:underline inline-flex items-center gap-1">
+                        <span>Ver perfil</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
                 </div>
 
@@ -561,4 +631,40 @@ checked
     </script>
 </div>
 {% endif %}
+
+<!-- =====================================================================
+     MODAL LIGHTBOX PANTALLA COMPLETA
+====================================================================== -->
+<div id="product-lightbox" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-4 sm:p-6 select-none" onclick="closeLightbox()">
+    <!-- Botón Cerrar -->
+    <button onclick="closeLightbox()" class="absolute top-5 right-5 z-20 text-white/80 hover:text-white p-3 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all cursor-pointer" title="Cerrar (Esc)">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    
+    <!-- Contador / Título -->
+    <div class="absolute top-6 left-6 text-white/80 text-xs sm:text-sm font-semibold tracking-wider flex items-center gap-2">
+        <span id="lightbox-counter" class="px-2 py-0.5 rounded-lg bg-white/10">1 / 1</span>
+        <span class="hidden sm:inline text-white/50">&bull;</span>
+        <span class="hidden sm:inline truncate max-w-md">{{ product.title }}</span>
+    </div>
+
+    <!-- Contenedor Imagen Central -->
+    <div class="relative max-w-5xl max-h-[85vh] w-full flex items-center justify-center p-2" onclick="event.stopPropagation()">
+        <img id="lightbox-img" src="" alt="{{ product.title }}" class="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl transition-all duration-300">
+    </div>
+
+    <!-- Controles Next/Prev en Lightbox (solo visibles si hay más de 1 imagen) -->
+    {% if product.images.all.count > 0 %}
+    <button onclick="event.stopPropagation(); prevImage(); syncLightbox();" class="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/10 hover:bg-white/25 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 cursor-pointer" aria-label="Foto anterior">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="event.stopPropagation(); nextImage(); syncLightbox();" class="absolute right-4 sm:left-auto sm:right-8 top-1/2 -translate-y-1/2 p-3 sm:p-4 rounded-full bg-white/10 hover:bg-white/25 text-white backdrop-blur-md border border-white/20 transition-all hover:scale-110 active:scale-95 cursor-pointer" aria-label="Siguiente foto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    {% endif %}
+
+    <div class="absolute bottom-6 text-white/50 text-xs hidden sm:block">
+        Presiona <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono">Esc</kbd> para salir {% if product.images.all.count > 0 %}o usa las flechas del teclado <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono">&larr;</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono">&rarr;</kbd>{% endif %}
+    </div>
+</div>
 {% endblock %}

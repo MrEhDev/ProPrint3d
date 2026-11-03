@@ -58,6 +58,6 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('client_name', 'rating', 'is_active', 'created_at')
-    list_filter = ('rating', 'is_active')
-    search_fields = ('client_name', 'text')
+    list_display = ('client_name', 'rating', 'source', 'client_details', 'time_ago', 'is_active', 'created_at')
+    list_filter = ('rating', 'source', 'is_active')
+    search_fields = ('client_name', 'text', 'client_details')

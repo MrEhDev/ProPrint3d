@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from functools import wraps
 from django.contrib.auth import authenticate, login, logout
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def staff_member_required(view_func):
     """
@@ -74,35 +75,55 @@ def admin_logout_view(request):
 # Propósito: Mostrar el catálogo público a los clientes.
 # =====================================================================
 def catalog_view(request):
-    """Renderiza la vista principal pública con productos y filtros."""
-    # Admins ven todos los productos (activos e inactivos), el público solo los activos
-    if request.user.is_staff:
-        products = Product.objects.all().prefetch_related('categories').order_by('-created_at')
+    """Renderiza la vista principal pública con productos, filtros y paginación."""
+    category_slug = request.GET.get('category', '').strip()
+    search_query = request.GET.get('q', '').strip()
+    
+    # Manejo de productos activos vs ocultos:
+    # Los artículos ocultos (is_active=False) NUNCA se muestran en el catálogo normal,
+    # solo en la pestaña exclusiva de categoría 'ocultos' para administradores.
+    if category_slug == 'ocultos' and request.user.is_staff:
+        products_qs = Product.objects.filter(is_active=False).prefetch_related('categories').order_by('-created_at')
     else:
-        products = Product.objects.filter(is_active=True).prefetch_related('categories').order_by('-created_at')
+        products_qs = Product.objects.filter(is_active=True).prefetch_related('categories').order_by('-created_at')
+        
     categories = Category.objects.all()
     
-    # Manejo de búsqueda por texto y categoría
-    search_query = request.GET.get('q', '')
-    category_slug = request.GET.get('category', '')
-    
+    # Manejo de búsqueda por texto
     if search_query:
-        # Busca en título o descripción usando Q objects (OR lógico)
-        products = products.filter(
+        products_qs = products_qs.filter(
             Q(title__icontains=search_query) | Q(description__icontains=search_query)
         )
         
+    # Filtro por categoría
     if category_slug:
         if category_slug == 'ofertas':
-            products = products.filter(is_on_sale=True)
+            products_qs = products_qs.filter(is_on_sale=True)
+        elif category_slug == 'ocultos':
+            # Ya filtrado arriba
+            pass
         else:
-            products = products.filter(categories__slug=category_slug).distinct()
+            products_qs = products_qs.filter(categories__slug=category_slug).distinct()
         
+    # Conteo de productos ocultos para el badge de administración
+    hidden_count = Product.objects.filter(is_active=False).count() if request.user.is_staff else 0
+
+    # Paginación a 10 filas (en grid de 4 columnas en desktop = 40 piezas por página)
+    paginator = Paginator(products_qs, 40)
+    page_number = request.GET.get('page')
+    try:
+        products = paginator.page(page_number)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
     context = {
         'products': products,
         'categories': categories,
         'search_query': search_query,
         'category_slug': category_slug,
+        'hidden_count': hidden_count,
         'reviews': Review.objects.filter(is_active=True).order_by('-created_at')[:10],
     }
     return render(request, 'catalog.html', context)

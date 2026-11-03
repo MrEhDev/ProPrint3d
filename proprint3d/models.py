@@ -1280,11 +1280,14 @@ class Review(models.Model):
     client_name = models.CharField(max_length=150, help_text="Nombre del cliente")
     text = models.TextField(help_text="Texto de la valoración")
     rating = models.PositiveSmallIntegerField(default=5, help_text="Puntuación (1-5 estrellas)")
+    source = models.CharField(max_length=50, default='Wallapop', blank=True, help_text="Origen: Wallapop, Web, Google, etc.")
+    client_details = models.CharField(max_length=100, blank=True, default='', help_text="Detalles del cliente (ej. 11 años en Wallapop)")
+    time_ago = models.CharField(max_length=50, blank=True, default='', help_text="Tiempo relativo de la opinión (ej. Hace 2 meses)")
     is_active = models.BooleanField(default=True, help_text="¿Mostrar en la web pública?")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.client_name} - {self.rating} estrellas"
+        return f"{self.client_name} - {self.rating} estrellas ({self.source})"
 
 # =====================================================================
 # MODELO: Cart y CartItem
