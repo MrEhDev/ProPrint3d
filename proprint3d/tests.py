@@ -250,6 +250,16 @@ class CustomerAndOrderShippingTestCase(TestCase):
         self.assertContains(response, "Test User")
         self.assertContains(response, "Excelente calidad")
 
+    def test_reviews_auto_seed_when_empty(self):
+        """Verifica que si no hay reviews en la base de datos, get_verified_reviews siembra automáticamente."""
+        from proprint3d.models import Review
+        from proprint3d.utils.reviews_seed import get_verified_reviews
+        Review.objects.all().delete()
+        self.assertEqual(Review.objects.count(), 0)
+        reviews = get_verified_reviews(limit=10)
+        self.assertGreaterEqual(len(reviews), 5)
+        self.assertEqual(Review.objects.count(), 9)
+
     def test_catalog_pdf_generation_view(self):
         """Verifica la generación del PDF del catálogo para staff."""
         from proprint3d.models import Category, Product

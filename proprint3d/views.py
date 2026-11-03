@@ -29,6 +29,7 @@ from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, Produ
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
+from .utils.reviews_seed import get_verified_reviews
 from .utils.correos_rates import (
     calculate_all_correos_options,
     calculate_correos_rate,
@@ -124,7 +125,7 @@ def catalog_view(request):
         'search_query': search_query,
         'category_slug': category_slug,
         'hidden_count': hidden_count,
-        'reviews': Review.objects.filter(is_active=True).order_by('-created_at')[:10],
+        'reviews': get_verified_reviews(limit=10),
     }
     return render(request, 'catalog.html', context)
 
@@ -140,7 +141,7 @@ def custom_order_view(request):
 
 def about_view(request):
     """Muestra la página de '¿Quiénes somos?' con información del taller, tecnología y opiniones."""
-    reviews = Review.objects.filter(is_active=True).order_by('-created_at')[:6]
+    reviews = get_verified_reviews(limit=9)
     return render(request, 'about.html', {'reviews': reviews})
 def product_detail_view(request, slug):
     """Muestra detalles extendidos de una pieza del catálogo."""
@@ -497,45 +498,67 @@ def generate_category_catalog_pdf_view(request, category_slug=None):
     - Personalización de portada (título, subtítulo, lema, descripción)
     Solo accesible por administradores.
     """
-    from .utils.catalog_pdf import generate_catalog_pdf_bytes
+    import logging
+    import traceback
+    view_logger = logging.getLogger(__name__)
 
-    # Obtener categorías (puede ser lista en GET/POST o slug de la ruta)
-    categories_param = request.GET.getlist('categories') or request.POST.getlist('categories')
-    if not categories_param:
-        cat_str = category_slug or request.GET.get('category', '').strip() or request.POST.get('category', '').strip()
-        if cat_str:
-            categories_param = [c.strip() for c in cat_str.split(',') if c.strip()]
+    try:
+        from .utils.catalog_pdf import generate_catalog_pdf_bytes
 
-    # Opciones de producto
-    raw_prices = request.GET.get('include_prices', request.POST.get('include_prices', '1'))
-    include_prices = str(raw_prices).lower() in ('1', 'true', 'on', 'yes')
+        # Obtener categorías (puede ser lista en GET/POST o slug de la ruta)
+        categories_param = request.GET.getlist('categories') or request.POST.getlist('categories')
+        if not categories_param:
+            cat_str = category_slug or request.GET.get('category', '').strip() or request.POST.get('category', '').strip()
+            if cat_str:
+                categories_param = [c.strip() for c in cat_str.split(',') if c.strip()]
 
-    raw_desc = request.GET.get('include_descriptions', request.POST.get('include_descriptions', '0'))
-    include_descriptions = str(raw_desc).lower() in ('1', 'true', 'on', 'yes')
+        # Opciones de producto
+        raw_prices = request.GET.get('include_prices', request.POST.get('include_prices', '1'))
+        include_prices = str(raw_prices).lower() in ('1', 'true', 'on', 'yes')
 
-    # Personalización de portada
-    custom_title = request.GET.get('custom_title', request.POST.get('custom_title', '')).strip()
-    custom_subtitle = request.GET.get('custom_subtitle', request.POST.get('custom_subtitle', '')).strip()
-    custom_slogan = request.GET.get('custom_slogan', request.POST.get('custom_slogan', '')).strip()
-    custom_description = request.GET.get('custom_description', request.POST.get('custom_description', '')).strip()
+        raw_desc = request.GET.get('include_descriptions', request.POST.get('include_descriptions', '0'))
+        include_descriptions = str(raw_desc).lower() in ('1', 'true', 'on', 'yes')
 
-    pdf_bytes, filename = generate_catalog_pdf_bytes(
-        category_slugs=categories_param,
-        include_prices=include_prices,
-        include_descriptions=include_descriptions,
-        custom_title=custom_title,
-        custom_subtitle=custom_subtitle,
-        custom_slogan=custom_slogan,
-        custom_description=custom_description,
-    )
+        # Personalización de portada
+        custom_title = request.GET.get('custom_title', request.POST.get('custom_title', '')).strip()
+        custom_subtitle = request.GET.get('custom_subtitle', request.POST.get('custom_subtitle', '')).strip()
+        custom_slogan = request.GET.get('custom_slogan', request.POST.get('custom_slogan', '')).strip()
+        custom_description = request.GET.get('custom_description', request.POST.get('custom_description', '')).strip()
 
-    # Si viene con ?preview=1 se muestra en el navegador (inline), por defecto se descarga (attachment)
-    preview = request.GET.get('preview', request.POST.get('preview', '0'))
-    disposition = 'inline' if str(preview) in ('1', 'true') else 'attachment'
+        pdf_bytes, filename = generate_catalog_pdf_bytes(
+            category_slugs=categories_param,
+            include_prices=include_prices,
+            include_descriptions=include_descriptions,
+            custom_title=custom_title,
+            custom_subtitle=custom_subtitle,
+            custom_slogan=custom_slogan,
+            custom_description=custom_description,
+        )
 
-    response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
-    return response
+        # Si viene con ?preview=1 se muestra en el navegador (inline), por defecto se descarga (attachment)
+        preview = request.GET.get('preview', request.POST.get('preview', '0'))
+        disposition = 'inline' if str(preview) in ('1', 'true') else 'attachment'
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+        return response
+
+    except Exception as e:
+        tb = traceback.format_exc()
+        view_logger.error(f"Error generando catálogo PDF: {e}\n{tb}")
+        if request.user.is_staff:
+            error_html = (
+                f"<div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:850px;margin:40px auto;padding:24px;background:#fef2f2;border:1px solid #f87171;border-radius:16px;color:#991b1b;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);'>"
+                f"<h2 style='margin-top:0;display:flex;align-items:center;gap:8px;'>⚠️ Error al generar el Catálogo PDF</h2>"
+                f"<p style='font-size:15px;margin-bottom:12px;'><strong>Detalle:</strong> {e}</p>"
+                f"<details style='margin-top:16px;' open><summary style='cursor:pointer;font-weight:bold;margin-bottom:8px;'>Ver traza técnica del servidor:</summary>"
+                f"<pre style='background:#ffffff;padding:16px;border-radius:10px;border:1px solid #fca5a5;overflow-x:auto;font-size:12px;color:#7f1d1d;line-height:1.5;'>{tb}</pre>"
+                f"</details>"
+                f"<div style='margin-top:20px;'><a href='/crm/' style='display:inline-block;padding:10px 18px;background:#dc2626;color:#ffffff;text-decoration:none;font-weight:bold;border-radius:8px;'>Volver al CRM</a></div>"
+                f"</div>"
+            )
+            return HttpResponse(error_html, status=500)
+        return HttpResponse("Error interno al procesar el catálogo PDF.", status=500)
 
 # =====================================================================
 # VISTA: crm_dashboard_view
