@@ -1,74 +1,128 @@
 {% extends 'base.html' %}
-{% load l10n %}
+{% load static l10n %}
+
+{% block title %}{{ product.title }} | ProPrint3D{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:25|striptags }}{% endblock %}
+
+{% block og_title %}{{ product.title }} - Impresión 3D Profesional{% endblock %}
+{% block og_description %}{{ product.description|truncatewords:20|striptags }}{% endblock %}
+{% block og_image %}{% if product.main_image %}https://proprint3d.shop{{ product.main_image.url }}{% else %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endif %}{% endblock %}
+{% block twitter_image %}{% if product.main_image %}https://proprint3d.shop{{ product.main_image.url }}{% else %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<!-- Schema.org Product para Google Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.title|escapejs }}",
+  {% if product.main_image %}"image": ["https://proprint3d.shop{{ product.main_image.url }}"],{% else %}"image": ["https://proprint3d.shop{% static 'images/hero_3d_render.png' %}"],{% endif %}
+  "description": "{{ product.description|truncatewords:30|striptags|escapejs }}",
+  "sku": "PROPRINT-{{ product.id }}",
+  "offers": {
+    "@type": "Offer",
+    "url": "https://proprint3d.shop{{ product.get_absolute_url }}",
+    "priceCurrency": "EUR",
+    "price": "{% if product.is_on_sale and product.sale_price %}{{ product.sale_price|unlocalize }}{% else %}{{ product.price|unlocalize }}{% endif %}",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "ProPrint3D"
+    }
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- =====================================================================
   VISTA: product_detail.html
   Propósito: Detalle de producto y CTA (WhatsApp / Presupuesto).
 ====================================================================== -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-    <!-- Botón volver -->
+    <!-- Botón volver con estilo Glass -->
     <a href="{% url 'catalog' %}"
-        class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary mb-8 transition-colors">
-        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-            </path>
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-dark/60 hover:bg-white dark:hover:bg-dark hover:text-primary dark:hover:text-primary border border-gray-200/60 dark:border-gray-800 shadow-sm backdrop-blur-md mb-8 transition-all hover:-translate-x-0.5">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
-        Volver al Catálogo
+        <span>Volver al Catálogo</span>
     </a>
 
-    <div
-        class="bg-white dark:bg-dark rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
-        <div class="md:flex">
-            <!-- Imagen / Carrusel -->
-            <div class="md:w-1/2 relative bg-gray-100 dark:bg-gray-800 flex flex-col min-h-[400px]">
+    <!-- Layout Principal: Galería Sticky a la izquierda y Detalles a la derecha -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        
+        <!-- =============================================================
+             COLUMNA IZQUIERDA: Galería Fotográfica Flotante (Sticky)
+        ============================================================== -->
+        <div class="lg:col-span-6 xl:col-span-6 lg:sticky lg:top-24 space-y-4">
+            <!-- Tarjeta Glass de la Galería -->
+            <div class="bg-white/80 dark:bg-dark/80 backdrop-blur-xl rounded-3xl p-3 sm:p-4 border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-slate-900/5 dark:shadow-black/40 relative">
+                
+                <!-- Badge Oferta Especial -->
+                {% if product.is_on_sale %}
+                <div class="absolute top-6 left-6 z-20 backdrop-blur-md bg-red-600/90 text-white text-xs font-black px-3.5 py-1.5 rounded-full shadow-lg border border-red-400/30 uppercase tracking-wider transform -rotate-1">
+                    ¡Oferta Especial!
+                </div>
+                {% endif %}
+
                 {% if product.main_image or product.images.all %}
-                <!-- Carrusel -->
-                <div class="relative w-full aspect-square" id="product-carousel">
+                <!-- Visor Principal Cuadrado con Fondo Suave -->
+                <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-b from-gray-100/90 to-gray-200/90 dark:from-slate-800/80 dark:to-slate-900/90 group" id="product-carousel">
                     {% if product.main_image %}
                     <img src="{{ product.main_image.url }}" alt="{{ product.title }}"
-                        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 carousel-image">
+                        class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 opacity-100 carousel-image group-hover:scale-105">
                     {% endif %}
                     {% for img in product.images.all %}
                     <img src="{{ img.image.url }}" alt="{{ product.title }}"
-                        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 {% if not product.main_image and forloop.first %}opacity-100{% else %}opacity-0{% endif %} carousel-image">
+                        class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 {% if not product.main_image and forloop.first %}opacity-100{% else %}opacity-0{% endif %} carousel-image group-hover:scale-105">
                     {% endfor %}
 
+                    <!-- Botones de Navegación Glass -->
                     {% if product.images.all.count > 0 or product.main_image %}
                     <button onclick="prevImage()"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 focus:outline-none transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                            </path>
+                        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none"
+                        aria-label="Foto anterior">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
                     <button onclick="nextImage()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 focus:outline-none transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                            </path>
+                        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none"
+                        aria-label="Siguiente foto">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
                     {% endif %}
                 </div>
+
+                <!-- Tira de Miniaturas Glass -->
                 {% if product.images.all.count > 0 %}
-                <div class="flex p-4 space-x-2 overflow-x-auto bg-gray-200 dark:bg-gray-900">
+                <div class="mt-3 flex p-2 gap-2.5 overflow-x-auto bg-gray-100/70 dark:bg-slate-900/60 rounded-2xl backdrop-blur-sm border border-gray-200/60 dark:border-gray-800/80 scrollbar-none">
                     {% if product.main_image %}
-                    <img src="{{ product.main_image.url }}" onclick="goToImage(0)"
-                        class="w-20 h-20 object-cover cursor-pointer rounded border-2 border-primary carousel-thumb hover:border-primary/50 transition-colors">
+                    <div onclick="goToImage(0)"
+                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-primary overflow-hidden carousel-thumb transition-all hover:border-primary p-1 shadow-sm">
+                        <img src="{{ product.main_image.url }}" class="w-full h-full object-contain">
+                    </div>
                     {% for img in product.images.all %}
-                    <img src="{{ img.image.url }}" onclick="goToImage({{ forloop.counter }})"
-                        class="w-20 h-20 object-cover cursor-pointer rounded border-2 border-transparent carousel-thumb hover:border-primary/50 transition-colors">
+                    <div onclick="goToImage({{ forloop.counter }})"
+                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-transparent overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
+                        <img src="{{ img.image.url }}" class="w-full h-full object-contain">
+                    </div>
                     {% endfor %}
                     {% else %}
                     {% for img in product.images.all %}
-                    <img src="{{ img.image.url }}" onclick="goToImage({{ forloop.counter0 }})"
-                        class="w-20 h-20 object-cover cursor-pointer rounded border-2 {% if forloop.first %}border-primary{% else %}border-transparent{% endif %} carousel-thumb hover:border-primary/50 transition-colors">
+                    <div onclick="goToImage({{ forloop.counter0 }})"
+                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 {% if forloop.first %}border-primary{% else %}border-transparent{% endif %} overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
+                        <img src="{{ img.image.url }}" class="w-full h-full object-contain">
+                    </div>
                     {% endfor %}
                     {% endif %}
                 </div>
                 {% endif %}
+
                 <script>
                     let currentImg = 0;
                     const images = document.querySelectorAll('.carousel-image');
@@ -87,112 +141,163 @@
                     function prevImage() { currentImg = (currentImg - 1 + images.length) % images.length; updateCarousel(); }
                     function goToImage(idx) { currentImg = idx; updateCarousel(); }
                 </script>
+
                 {% else %}
-                <div class="w-full h-full flex flex-1 items-center justify-center text-gray-400">
-                    <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-full aspect-square flex flex-col items-center justify-center text-gray-400 bg-gray-100 dark:bg-gray-800/60 rounded-2xl">
+                    <svg class="w-24 h-24 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                         </path>
                     </svg>
-                </div>
-                {% endif %}
-
-                {% if product.is_on_sale %}
-                <div
-                    class="absolute top-4 left-4 bg-red-600 text-white text-sm font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wider transform -rotate-2">
-                    ¡Oferta Especial!
+                    <span class="text-sm font-semibold">Fotografía en preparación</span>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Info -->
-            <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                <div class="flex flex-wrap items-center gap-2 mb-3">
+            <!-- Badges de Confianza / Garantía (Bajo la Galería Sticky) -->
+            <div class="grid grid-cols-3 gap-2.5 p-3.5 bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl border border-gray-200/70 dark:border-gray-800/70 text-center shadow-sm">
+                <div class="flex flex-col items-center justify-center py-1">
+                    <span class="text-primary text-base sm:text-lg mb-0.5">🛡️</span>
+                    <span class="text-[11px] font-bold text-gray-800 dark:text-gray-200">Alta Calidad</span>
+                    <span class="text-[10px] text-gray-400">Garantía taller</span>
+                </div>
+                <div class="flex flex-col items-center justify-center py-1 border-x border-gray-200/60 dark:border-gray-800/60">
+                    <span class="text-amber-400 text-base sm:text-lg mb-0.5">⚡</span>
+                    <span class="text-[11px] font-bold text-gray-800 dark:text-gray-200">Fabricación</span>
+                    <span class="text-[10px] text-gray-400">24/48h lista</span>
+                </div>
+                <div class="flex flex-col items-center justify-center py-1">
+                    <span class="text-emerald-400 text-base sm:text-lg mb-0.5">📦</span>
+                    <span class="text-[11px] font-bold text-gray-800 dark:text-gray-200">Envío Seguro</span>
+                    <span class="text-[10px] text-gray-400">Con seguimiento</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- =============================================================
+             COLUMNA DERECHA: Datos del Producto, Precio y CTAs
+        ============================================================== -->
+        <div class="lg:col-span-6 xl:col-span-6 space-y-6">
+            <div class="bg-white/80 dark:bg-dark/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 lg:p-9 border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-slate-900/5 dark:shadow-black/40 space-y-6">
+                
+                <!-- Categorías -->
+                <div class="flex flex-wrap items-center gap-2">
                     {% for cat in product.categories.all %}
-                    <a href="{% url 'catalog' %}?category={{ cat.slug }}" class="inline-flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors duration-200 shadow-sm" title="Ver más productos en {{ cat.name }}">
+                    <a href="{% url 'catalog' %}?category={{ cat.slug }}" 
+                       class="inline-flex items-center text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all shadow-sm backdrop-blur-sm" 
+                       title="Ver más productos en {{ cat.name }}">
                         {{ cat.name }}
                     </a>
                     {% empty %}
-                    <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                    <span class="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         General
                     </span>
                     {% endfor %}
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">{{ product.title }}
-                </h2>
 
-                <p class="text-gray-600 dark:text-gray-300 text-lg mb-6 leading-relaxed">
-                    {{ product.description|linebreaksbr }}
-                </p>
+                <!-- Título del Producto -->
+                <h1 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+                    {{ product.title }}
+                </h1>
 
-                <!-- Especificaciones Rápidas -->
+                <!-- Bloque de Precio y Estado con Efecto Glass -->
+                <div class="p-5 rounded-2xl bg-gradient-to-br from-gray-50/90 via-slate-50/70 to-gray-100/80 dark:from-slate-800/60 dark:via-slate-800/40 dark:to-slate-900/60 border border-gray-200/70 dark:border-gray-700/60 flex items-center justify-between flex-wrap gap-4 shadow-inner">
+                    <div>
+                        <span class="block text-xs uppercase tracking-wider font-semibold text-gray-400 mb-0.5">Precio de venta</span>
+                        {% if product.is_on_sale and product.sale_price %}
+                        <div class="flex items-baseline gap-3">
+                            <span class="text-3xl sm:text-4xl font-black text-red-600 dark:text-red-400">€{{ product.sale_price }}</span>
+                            <span class="text-xl font-medium text-gray-400 line-through">€{{ product.price }}</span>
+                        </div>
+                        {% else %}
+                        <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">€{{ product.price }}</div>
+                        {% endif %}
+                    </div>
+
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 backdrop-blur-sm shadow-sm">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Disponible
+                    </span>
+                </div>
+
+                <!-- Especificaciones Rápidas (Medidas) -->
                 {% if product.dimensions %}
-                <div class="mb-8 flex items-center gap-3 p-3.5 bg-gray-50 dark:bg-gray-800/60 rounded-2xl border border-gray-200 dark:border-gray-700 w-fit">
-                    <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary">
+                <div class="flex items-center gap-3 p-3.5 bg-gray-50/80 dark:bg-slate-800/50 rounded-2xl border border-gray-200/70 dark:border-gray-700/60">
+                    <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
                     </span>
                     <div>
-                        <span class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Medidas</span>
+                        <span class="block text-[11px] font-bold uppercase tracking-wider text-gray-400">Dimensiones de la pieza</span>
                         <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ product.dimensions }}</span>
                     </div>
                 </div>
                 {% endif %}
 
-                <div class="mb-8">
-                    {% if product.is_on_sale and product.sale_price %}
-                    <div class="text-2xl font-medium text-gray-400 line-through mb-1">€{{ product.price }}</div>
-                    <div class="text-5xl font-black text-red-600 dark:text-red-400">€{{ product.sale_price }}</div>
-                    {% else %}
-                    <div class="text-4xl font-black text-gray-900 dark:text-white">€{{ product.price }}</div>
-                    {% endif %}
-                </div>
-
-                <!-- Acciones -->
-                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                <!-- Botones de Acción (CTAs Modernos con Gradiente y Glass) -->
+                <div class="flex flex-col sm:flex-row gap-3.5 pt-2">
                     <!-- Añadir al carrito -->
                     <form method="POST" action="{% url 'add_to_cart' product.id %}" class="flex-1">
                         {% csrf_token %}
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 border border-transparent text-base font-bold rounded-2xl shadow-lg shadow-primary/25 text-white bg-primary hover:bg-secondary hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            <span>Añadir al carrito</span>
+                        <button type="submit" 
+                                class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 border border-transparent text-base font-bold rounded-2xl shadow-lg shadow-primary/25 text-white bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl hover:shadow-primary/40 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 cursor-pointer">
+                            <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            <span class="pointer-events-none">Añadir al carrito</span>
                         </button>
                     </form>
                     
                     <!-- WhatsApp (Compra Rápida) -->
-                    <a href="{{ wa_url }}" target="_blank"
-                        class="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 border border-green-500/30 text-base font-bold rounded-2xl shadow-lg shadow-green-600/20 text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 hover:shadow-xl hover:shadow-green-600/35 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 cursor-pointer">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                            <path
-                                d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z">
-                            </path>
+                    <a href="{{ wa_url }}" target="_blank" rel="noopener noreferrer"
+                        class="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 border border-emerald-500/30 text-base font-bold rounded-2xl shadow-lg shadow-emerald-600/20 text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 hover:shadow-xl hover:shadow-emerald-600/35 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 cursor-pointer">
+                        <svg class="w-5 h-5 fill-current pointer-events-none" viewBox="0 0 24 24">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"></path>
                         </svg>
-                        <span>Pedir por WhatsApp</span>
+                        <span class="pointer-events-none">Pedir por WhatsApp</span>
                     </a>
+                </div>
+
+                <!-- Sección de Descripción Detallada -->
+                <div class="pt-6 border-t border-gray-200/70 dark:border-gray-800/80">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Descripción y Acabados de la Pieza
+                    </h2>
+                    <div class="text-gray-700 dark:text-gray-300 text-base leading-relaxed space-y-2 whitespace-pre-line font-normal">
+                        {{ product.description }}
+                    </div>
                 </div>
 
             </div>
         </div>
+
     </div>
 
     <!-- PRODUCTOS RELACIONADOS -->
     {% if related_products %}
     <div class="mt-16 mb-8">
-        <h3 class="text-2xl font-extrabold text-gray-900 dark:text-white mb-6">Productos Relacionados</h3>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="text-primary">✨</span> Piezas Relacionadas
+            </h3>
+            <a href="{% url 'catalog' %}" class="text-xs sm:text-sm font-bold text-primary hover:text-secondary transition-colors">Ver catálogo completo &rarr;</a>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {% for related in related_products %}
-            <a href="{% url 'product_detail' related.slug %}" class="group block bg-white dark:bg-dark rounded-2xl shadow hover:shadow-lg transition-all overflow-hidden border border-gray-100 dark:border-gray-800">
-                <div class="aspect-square bg-gray-100 dark:bg-gray-800 relative">
+            <a href="{% url 'product_detail' related.slug %}" class="group block bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200/70 dark:border-gray-800/80 hover:-translate-y-1">
+                <div class="aspect-square bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-800/50 dark:to-slate-900/60 relative overflow-hidden p-2">
                     {% if related.main_image %}
-                    <img src="{{ related.main_image.url }}" alt="{{ related.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ related.main_image.url }}" alt="{{ related.title }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     {% else %}
                     <div class="w-full h-full flex flex-1 items-center justify-center text-gray-400">
-                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     {% endif %}
                 </div>
-                <div class="p-4">
-                    <h4 class="font-bold text-gray-900 dark:text-white line-clamp-2 text-sm">{{ related.title }}</h4>
-                    <p class="text-primary font-bold mt-1">€{% if related.is_on_sale and related.sale_price %}{{ related.sale_price }}{% else %}{{ related.price }}{% endif %}</p>
+                <div class="p-3.5">
+                    <h4 class="font-bold text-gray-900 dark:text-white line-clamp-1 text-sm group-hover:text-primary transition-colors">{{ related.title }}</h4>
+                    <p class="text-primary font-black mt-1 text-sm">€{% if related.is_on_sale and related.sale_price %}{{ related.sale_price }}{% else %}{{ related.price }}{% endif %}</p>
                 </div>
             </a>
             {% endfor %}

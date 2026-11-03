@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /custom-order/
+Allow: /product/
+Allow: /static/
+Allow: /media/
+
+Disallow: /gestion-taller/
+Disallow: /crm/
+Disallow: /CRM/
+Disallow: /dashboard/
+Disallow: /login/
+Disallow: /quotes/
+Disallow: /quote/
+Disallow: /order-print/
+
+Sitemap: https://proprint3d.shop/sitemap.xml
+

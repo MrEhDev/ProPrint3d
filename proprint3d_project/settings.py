@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'proprint3d', # Nuestra app principal
 ]
 
@@ -92,3 +93,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración de Autenticación Personalizada
+LOGIN_URL = 'admin_login'
+LOGIN_REDIRECT_URL = 'crm_dashboard'
+LOGOUT_REDIRECT_URL = 'catalog'

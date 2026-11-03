@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}¿Quiénes Somos? | ProPrint3D - Taller de Impresión 3D{% endblock %}
+{% block meta_description %}Conoce ProPrint3D: taller de impresión 3D profesional y prototipado rápido en España. Fabricamos piezas de alta precisión con acabados técnicos y envíos directos.{% endblock %}
+
+{% block content %}
+<!-- =====================================================================
+  VISTA: about.html
+  Propósito: Presentación de la marca, taller de fabricación 3D, valores
+  y confianza para el cliente y los motores de búsqueda (E-E-A-T).
+====================================================================== -->
+
+<div class="relative overflow-hidden py-12 sm:py-16">
+    <!-- Luces de fondo ambientales -->
+    <div class="pointer-events-none absolute -top-20 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50"></div>
+    <div class="pointer-events-none absolute top-1/2 -right-20 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl opacity-40"></div>
+
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        
+        <!-- Encabezado Principal -->
+        <div class="text-center space-y-4">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm backdrop-blur-sm">
+                <span>🚀</span> Fabricación Aditiva de Alta Precisión
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
+                Pasión por el detalle, <br class="hidden sm:inline">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-secondary">
+                    precisión en cada capa.
+                </span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
+                En <strong>ProPrint3D</strong> transformamos ideas digitales en piezas físicas terminadas, resistentes y listas para su uso real.
+            </p>
+        </div>
+
+        <!-- Tarjeta Principal con Render 3D e Historia -->
+        <div class="bg-white/80 dark:bg-dark/80 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-gray-200/80 dark:border-gray-800 shadow-xl shadow-slate-900/5 dark:shadow-black/40 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            
+            <div class="md:col-span-5 flex justify-center">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
+                    <img src="{% static 'images/hero_3d_render.png' %}" alt="ProPrint3D Taller" class="relative z-10 w-64 sm:w-72 object-contain drop-shadow-[0_15px_30px_rgba(14,165,233,0.35)] transform group-hover:scale-105 transition-all duration-500">
+                </div>
+            </div>
+
+            <div class="md:col-span-7 space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed text-base">
+                <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                    <span>🛠️</span> Nuestro Taller
+                </h2>
+                <p>
+                    Ubicados en <strong>Lliçà d'Amunt (Barcelona, España)</strong>, nacemos con el objetivo de ofrecer una alternativa real a la producción tradicional: piezas funcionales, repuestos descatalogados, accesorios especializados y elementos decorativos con acabados de calidad industrial.
+                </p>
+                <p>
+                    No nos limitamos a "vender archivos": <strong>nosotros mismos fabricamos, inspeccionamos y embalamos cada pieza</strong> con mimo artesanal y tecnología de control milimétrico antes de que llegue a tu puerta.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">FDM Profesional</span>
+                    <span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PLA+ · PETG · ABS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Pilares de Compromiso -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Pilar 1 -->
+            <div class="bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/70 dark:border-gray-800 shadow-sm space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-primary border border-primary/20 flex items-center justify-center text-2xl">
+                    💎
+                </div>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Materiales de Primera</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Utilizamos filamentos técnicos certificados de alta resistencia química, térmica y mecánica para garantizar máxima durabilidad en cada proyecto.
+                </p>
+            </div>
+
+            <!-- Pilar 2 -->
+            <div class="bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/70 dark:border-gray-800 shadow-sm space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center text-2xl">
+                    ⚡
+                </div>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Fabricación Ágil (24/48h)</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Ponemos a trabajar las impresoras del taller en cuanto confirmas tu pedido para despachar tu envío de forma rápida y sin esperas innecesarias.
+                </p>
+            </div>
+
+            <!-- Pilar 3 -->
+            <div class="bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/70 dark:border-gray-800 shadow-sm space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center text-2xl">
+                    🤝
+                </div>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Trato Cercano y Directo</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Hablamos contigo directamente por WhatsApp o redes para asesorarte sobre tolerancias, colores y materiales según la necesidad de tu pieza.
+                </p>
+            </div>
+        </div>
+
+        <!-- Bloque de Redes Sociales y Comunidad -->
+        <div class="bg-gradient-to-br from-primary/10 via-darker to-primary/5 rounded-3xl p-8 sm:p-10 border border-primary/20 text-center space-y-6">
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                Síguenos en nuestras redes sociales
+            </h2>
+            <p class="max-w-xl mx-auto text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                Mostramos el proceso de impresión en directo, pruebas de resistencia y nuevos modelos cada semana.
+            </p>
+            
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@proprint3d_spain" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-white bg-black hover:bg-gray-900 border border-gray-800 shadow-lg hover:shadow-black/40 transform hover:-translate-y-0.5 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                    <span>TikTok @proprint3d_spain</span>
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/proprint3d_spain/" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 hover:opacity-95 shadow-lg hover:shadow-pink-600/30 transform hover:-translate-y-0.5 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    <span>Instagram @proprint3d_spain</span>
+                </a>
+
+                <!-- WhatsApp -->
+                <a href="https://wa.me/34660904515" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"/></svg>
+                    <span>WhatsApp</span>
+                </a>
+
+                <!-- Email -->
+                <a href="mailto:info@proprint3d.shop"
+                   class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 shadow-lg hover:shadow-sky-600/30 transform hover:-translate-y-0.5 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span>Email</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Botones de Navegación Final -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <a href="{% url 'catalog' %}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 shadow-lg shadow-primary/25 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all text-base">
+                Explorar Catálogo de Piezas
+            </a>
+            <a href="{% url 'custom_order' %}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-md transform hover:-translate-y-0.5 transition-all text-base">
+                Solicitar Encargo Personalizado
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

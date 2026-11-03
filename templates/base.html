@@ -4,9 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPrint3D - Catálogo y Presupuestos</title>
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <link rel="alternate icon" type="image/jpeg" href="{% static 'images/favicon.jpg' %}">
+    <title>{% block title %}ProPrint3D - Taller de Impresión 3D y Piezas a Medida{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}ProPrint3D: Taller de fabricación e impresión 3D profesional en España. Piezas terminadas de alta precisión, acabados finos y presupuestos a medida en minutos.{% endblock %}">
+    <meta name="keywords" content="impresión 3D España, piezas 3D terminadas, comprar piezas 3D impresas, taller de impresión 3D Barcelona, prototipado rápido, piezas a medida PLA PETG, taller 3D, encargos 3D, ProPrint3D">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <!-- Favicon & Iconos Multi-Resolución Google & Navegadores -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}?v=3">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}?v=3">
+    <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon-48x48.png' %}?v=3">
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'images/favicon-96x96.png' %}?v=3">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/favicon-192x192.png' %}?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}?v=3">
+
+    <!-- Open Graph / Redes Sociales & WhatsApp -->
+    <meta property="og:site_name" content="ProPrint3D">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{% block og_title %}ProPrint3D - Fabricación 3D de Alta Precisión{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Taller de impresión 3D profesional. Piezas terminadas listas para entrega y presupuestos a medida en minutos.{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endblock %}">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}ProPrint3D - Taller de Impresión 3D Profesional{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Piezas terminadas e impresas en 3D listas para su uso con acabados profesionales.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endblock %}">
+
+    <!-- Datos Estructurados JSON-LD (Schema.org) para Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "ProPrint3D",
+      "image": "https://proprint3d.shop{% static 'images/hero_3d_render.png' %}",
+      "telephone": "+34660904515",
+      "url": "https://proprint3d.shop/",
+      "priceRange": "€",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "C/Empordá 136",
+        "postalCode": "08186",
+        "addressCountry": "ES"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      },
+      "sameAs": [
+        "https://www.instagram.com/proprint3d_spain/",
+        "https://www.tiktok.com/@proprint3d_spain"
+      ],
+      "description": "Taller de fabricación e impresión 3D profesional en España. Piezas terminadas de alta precisión y modelado a medida."
+    }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+
     <!-- Tailwind CSS vía CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Configuración personalizada de Tailwind -->
@@ -55,19 +115,29 @@
                 </div>
                 
                 <!-- Menú Desktop -->
-                <div class="hidden md:flex items-center space-x-1 lg:space-x-3">
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-2">
                     <a href="{% url 'catalog' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
                         Catálogo
                     </a>
+                    <a href="{% url 'about_us' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                        ¿Quiénes somos?
+                    </a>
+                    <a href="{% url 'custom_order' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                        A medida
+                    </a>
                     {% if request.user.is_staff %}
-                    <a href="{% url 'admin_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
-                        Añadir
+                    <span class="h-4 w-px bg-gray-300 dark:bg-gray-700 mx-1"></span>
+                    <a href="{% url 'admin_dashboard' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all flex items-center gap-1">
+                        <span>➕</span> Añadir
                     </a>
-                    <a href="{% url 'crm_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-bold text-primary hover:bg-primary/10 transition-colors">
-                        CRM
+                    <a href="{% url 'crm_dashboard' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 transition-all flex items-center gap-1 shadow-xs">
+                        <span>📋</span> CRM
                     </a>
-                    <a href="{% url 'quote_builder' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
-                        Presupuestos
+                    <a href="{% url 'quote_builder' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 transition-all flex items-center gap-1">
+                        <span>🧾</span> Presupuestos
+                    </a>
+                    <a href="{% url 'admin_logout' %}" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" title="Cerrar sesión administrador">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </a>
                     {% endif %}
                 </div>
@@ -115,15 +185,27 @@
                 <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
                     <span>🛍️</span> Catálogo
                 </a>
+                <a href="{% url 'about_us' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                    <span>ℹ️</span> ¿Quiénes somos?
+                </a>
+                <a href="{% url 'custom_order' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                    <span>✨</span> Encargo a medida
+                </a>
                 {% if request.user.is_staff %}
-                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                <div class="pt-2 border-t border-gray-200 dark:border-gray-800 my-1">
+                    <span class="px-3 text-[10px] uppercase font-bold text-amber-500 tracking-wider">Herramientas Administrador</span>
+                </div>
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-colors">
                     <span>➕</span> Añadir Producto
                 </a>
-                <a href="{% url 'crm_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-primary bg-primary/10 transition-colors">
+                <a href="{% url 'crm_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 transition-colors">
                     <span>📋</span> CRM Pedidos
                 </a>
-                <a href="{% url 'quote_builder' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+                <a href="{% url 'quote_builder' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition-colors">
                     <span>🧾</span> Presupuestos
+                </a>
+                <a href="{% url 'admin_logout' %}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                    <span>🚪</span> Cerrar sesión administrador
                 </a>
                 {% endif %}
             </div>
@@ -135,10 +217,90 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            &copy; 2026 ProPrint3D. Desarrollado para revolucionar la impresión 3D.
+    <!-- Footer Moderno con Redes Sociales y Enlaces SEO -->
+    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 pt-12 pb-8 mt-16 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-10 border-b border-gray-100 dark:border-gray-800/80">
+                
+                <!-- Columna 1: Marca y Taller (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <img src="{% static 'images/logo_square.png' %}" alt="ProPrint3D Logo" class="h-8 w-8 object-contain drop-shadow-[0_2px_8px_rgba(14,165,233,0.3)]">
+                        <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-secondary tracking-tight">
+                            ProPrint<span class="text-primary font-black">3D</span>
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 max-w-sm leading-relaxed">
+                        Taller especializado en fabricación aditiva e impresión 3D profesional. Prototipado rápido, piezas técnicas terminadas y encargos personalizados listos para entregar.
+                    </p>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <span>📍</span>
+                        <span>Lliçà d'Amunt, 08186 (Barcelona, España)</span>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Navegación Rápida (3 cols) -->
+                <div class="lg:col-span-3 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Navegación</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="{% url 'catalog' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">Catálogo de Piezas</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'about_us' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">¿Quiénes somos?</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'custom_order' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">Encargo Personalizado</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Redes Sociales y Contacto (4 cols) -->
+                <div class="lg:col-span-4 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Comunidad & Contacto</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Síguenos para ver impresiones en directo, pruebas de filamento y nuevos proyectos:
+                    </p>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- TikTok -->
+                        <a href="https://www.tiktok.com/@proprint3d_spain" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 border border-gray-800 shadow-sm transition-all transform hover:-translate-y-0.5" 
+                           title="TikTok ProPrint3D">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                            <span>TikTok</span>
+                        </a>
+
+                        <!-- Instagram -->
+                        <a href="https://www.instagram.com/proprint3d_spain/" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 hover:opacity-95 shadow-sm transition-all transform hover:-translate-y-0.5" 
+                           title="Instagram ProPrint3D">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            <span>Instagram</span>
+                        </a>
+
+                        <!-- WhatsApp -->
+                        <a href="https://wa.me/34660904515" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-sm transition-all transform hover:-translate-y-0.5" 
+                           title="WhatsApp ProPrint3D">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"/></svg>
+                            <span>WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Fila Inferior de Copyright -->
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 dark:text-gray-400 gap-3">
+                <div>
+                    &copy; 2026 ProPrint3D. Taller de Fabricación e Impresión 3D.
+                </div>
+                <div class="flex items-center gap-4">
+                    <span>Envíos seguros con Correos</span>
+                    <span>•</span>
+                    <span>Garantía de calidad</span>
+                </div>
+            </div>
         </div>
     </footer>
 

@@ -8,6 +8,7 @@ from . import views
 urlpatterns = [
     # Catálogo público
     path('', views.catalog_view, name='catalog'),
+    path('quienes-somos/', views.about_view, name='about_us'),
     
     # Formulario personalizado
     path('custom-order/', views.custom_order_view, name='custom_order'),
@@ -28,8 +29,13 @@ urlpatterns = [
     # Creador de Presupuestos
     path('quotes/build/', views.quote_builder_view, name='quote_builder'),
     
-    # CRM de Pedidos
+    # Autenticación Admin Integrada
+    path('login/', views.admin_login_view, name='admin_login'),
+    path('logout/', views.admin_logout_view, name='admin_logout'),
+
+    # CRM de Pedidos (admite /crm/ y /CRM/)
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
+    path('CRM/', views.crm_dashboard_view),
     path('crm/order/new/', views.order_create_view, name='order_create'),
     path('crm/order/<int:order_id>/quote-pdf/', views.generate_order_quote_pdf_view, name='generate_order_quote_pdf'),
     path('crm/order/<int:order_id>/thermal-label/', views.order_thermal_label_view, name='order_thermal_label'),

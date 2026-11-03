@@ -5,7 +5,21 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.db.models import Q
 
-from django.contrib.admin.views.decorators import staff_member_required
+from functools import wraps
+from django.contrib.auth import authenticate, login, logout
+
+def staff_member_required(view_func):
+    """
+    Decorador que asegura que el usuario sea staff.
+    Si no está autenticado o no es staff, redirige al login personalizado con su parámetro next.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            path = request.get_full_path()
+            return redirect(f"{reverse('admin_login')}?next={path}")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
 # Utilidades PDF
 import io
@@ -20,6 +34,40 @@ from .utils.correos_rates import (
     CORREOS_SERVICES,
     PACKAGING_TARE_DEFAULT_GRAMS
 )
+
+# =====================================================================
+# VISTAS DE AUTENTICACIÓN ADMIN INTEGRADA
+# =====================================================================
+def admin_login_view(request):
+    """
+    Inicio de sesión de administradores con el estilo y diseño visual de ProPrint3D.
+    Si ya está logueado como staff, redirige directamente al destino o al CRM.
+    """
+    next_url = request.GET.get('next') or request.POST.get('next') or reverse('crm_dashboard')
+    
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect(next_url)
+        
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_staff:
+                login(request, user)
+                return redirect(next_url)
+            else:
+                error = "Tu cuenta no tiene privilegios de administración del taller."
+        else:
+            error = "Usuario o contraseña incorrectos. Verifica tus credenciales."
+            
+    return render(request, 'admin_login.html', {'error': error, 'next': next_url})
+
+def admin_logout_view(request):
+    """Cierra la sesión del administrador y vuelve al catálogo."""
+    logout(request)
+    return redirect('catalog')
 
 # =====================================================================
 # VISTA: catalog_view
@@ -68,6 +116,10 @@ def catalog_view(request):
 def custom_order_view(request):
     """Muestra el formulario para pedir una pieza personalizada por WhatsApp."""
     return render(request, 'custom_order.html')
+
+def about_view(request):
+    """Muestra la página de '¿Quiénes somos?' con información del taller y tecnología."""
+    return render(request, 'about.html')
 def product_detail_view(request, slug):
     """Muestra detalles extendidos de una pieza del catálogo."""
     # Admins pueden ver productos ocultos (is_active=False)

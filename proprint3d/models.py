@@ -166,6 +166,10 @@ class Product(models.Model):
             
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_detail', kwargs={'slug': self.slug})
+
     def calculate_production_cost(self):
         """
         Calcula el coste de producción igual que la calculadora JS:
