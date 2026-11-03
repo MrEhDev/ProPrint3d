@@ -1,4 +1,4 @@
-from .models import Cart
+from .models import Cart, Category
 
 def cart_context(request):
     cart_item_count = 0
@@ -18,4 +18,5 @@ def cart_context(request):
     return {
         'cart_item_count': cart_item_count,
         'cart_total_price': cart_total_price,
+        'all_categories': Category.objects.all().order_by('name'),
     }

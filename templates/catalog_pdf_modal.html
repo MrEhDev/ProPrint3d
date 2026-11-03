@@ -1,0 +1,235 @@
+<!-- =====================================================================
+     MODAL CONFIGURADOR DE CATÁLOGO PDF (ADMIN)
+     Propósito: Personalizar y exportar catálogos en PDF con selección de
+     categorías, inclusión de precios/descripción y textos de portada.
+====================================================================== -->
+<div id="catalog-pdf-config-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none" onclick="closeCatalogPdfModal()">
+    <div class="bg-white dark:bg-dark max-w-xl w-full max-h-[90vh] rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        
+        <!-- Cabecera del Modal -->
+        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0 bg-gray-50/60 dark:bg-gray-900/40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl flex-shrink-0">
+                    📄
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Configurar Catálogo PDF</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona categorías, precios y textos de portada</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeCatalogPdfModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl font-bold p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
+                &times;
+            </button>
+        </div>
+
+        <!-- Contenido desplazable -->
+        <form id="catalog-pdf-form" onsubmit="event.preventDefault();" class="overflow-y-auto flex-1 p-5 sm:p-6 space-y-6">
+            
+            <!-- 1. SELECCIÓN DE CATEGORÍAS -->
+            <div>
+                <div class="flex items-center justify-between mb-2.5">
+                    <label class="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                        <span>📁</span> Categorías a Incluir:
+                    </label>
+                    <button type="button" onclick="toggleAllCatalogCategories()" id="btn-toggle-all-cats" class="text-xs font-bold text-primary hover:underline cursor-pointer">
+                        Seleccionar todas
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 max-h-40 overflow-y-auto">
+                    {% for cat in all_categories %}
+                    <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white dark:bg-dark border border-gray-200/80 dark:border-gray-700/80 hover:border-primary cursor-pointer text-xs font-semibold text-gray-800 dark:text-gray-200 transition">
+                        <input type="checkbox" name="categories" value="{{ cat.slug }}" class="cat-checkbox rounded text-primary focus:ring-primary w-4 h-4">
+                        <span class="truncate">{{ cat.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1.5">
+                    * Si no seleccionas ninguna, se incluirán todas las piezas activas del catálogo general.
+                </p>
+            </div>
+
+            <!-- 2. OPCIONES DE FICHA DE PRODUCTO -->
+            <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 space-y-3">
+                <label class="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 block">
+                    ⚙️ Opciones de los Productos:
+                </label>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Toggle Precios -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 cursor-pointer">
+                        <input type="checkbox" id="cfg-include-prices" name="include_prices" value="1" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 dark:text-white block">Mostrar Precios</span>
+                            <span class="text-[10px] text-gray-400">Si se desmarca, muestra "A consultar"</span>
+                        </div>
+                    </label>
+
+                    <!-- Toggle Descripciones -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-dark border border-gray-200 dark:border-gray-700 cursor-pointer">
+                        <input type="checkbox" id="cfg-include-desc" name="include_descriptions" value="1" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 dark:text-white block">Mostrar Descripción</span>
+                            <span class="text-[10px] text-gray-400">Texto breve explicativo de cada modelo</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 3. PERSONALIZACIÓN DE PORTADA -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                        <span>🎨</span> Personalizar Portada (Opcional):
+                    </label>
+                    <button type="button" onclick="resetCatalogCoverDefaults()" class="text-[11px] font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                        Restablecer valores
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Título de Portada:</label>
+                            <input type="text" id="cfg-custom-title" placeholder="Ej: Catálogo Navidad 2026" 
+                                   class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark text-xs text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Subtítulo superior:</label>
+                            <input type="text" id="cfg-custom-subtitle" value="Colección Exclusiva" 
+                                   class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark text-xs text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Frase / Lema destacado:</label>
+                        <input type="text" id="cfg-custom-slogan" value="Fabricado con calidad y precisión" 
+                               class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark text-xs text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Texto introductorio:</label>
+                        <textarea id="cfg-custom-description" rows="2" placeholder="Dejar en blanco para usar el texto automático del taller..." 
+                                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark text-xs text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- Pie del Modal con Acciones -->
+        <div class="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3 flex-shrink-0 bg-gray-50/60 dark:bg-gray-900/40">
+            <button type="button" onclick="closeCatalogPdfModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition cursor-pointer">
+                Cancelar
+            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="executeCatalogPdfGeneration(true)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-primary hover:bg-secondary text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <span>👁️</span> Vista Previa
+                </button>
+                <button type="button" onclick="executeCatalogPdfGeneration(false)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <span>⬇️</span> Descargar PDF
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function openCatalogPdfModal(preselectedSlug) {
+    const modal = document.getElementById('catalog-pdf-config-modal');
+    if (!modal) return;
+
+    // Resetear o preseleccionar categorías
+    const checkboxes = modal.querySelectorAll('.cat-checkbox');
+    checkboxes.forEach(cb => {
+        if (preselectedSlug && preselectedSlug !== 'ocultos' && preselectedSlug !== 'ofertas') {
+            cb.checked = (cb.value === preselectedSlug);
+        } else {
+            cb.checked = false;
+        }
+    });
+
+    // Título dinámico sugerido si hay slug
+    const titleInput = document.getElementById('cfg-custom-title');
+    if (titleInput) {
+        if (preselectedSlug && preselectedSlug !== 'ocultos' && preselectedSlug !== 'ofertas') {
+            titleInput.value = preselectedSlug.charAt(0).toUpperCase() + preselectedSlug.slice(1);
+        } else {
+            titleInput.value = '';
+        }
+    }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCatalogPdfModal() {
+    const modal = document.getElementById('catalog-pdf-config-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function toggleAllCatalogCategories() {
+    const modal = document.getElementById('catalog-pdf-config-modal');
+    if (!modal) return;
+    const checkboxes = modal.querySelectorAll('.cat-checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+    
+    const btn = document.getElementById('btn-toggle-all-cats');
+    if (btn) {
+        btn.textContent = allChecked ? 'Seleccionar todas' : 'Deseleccionar todas';
+    }
+}
+
+function resetCatalogCoverDefaults() {
+    const title = document.getElementById('cfg-custom-title');
+    const subtitle = document.getElementById('cfg-custom-subtitle');
+    const slogan = document.getElementById('cfg-custom-slogan');
+    const desc = document.getElementById('cfg-custom-description');
+    if (title) title.value = '';
+    if (subtitle) subtitle.value = 'Colección Exclusiva';
+    if (slogan) slogan.value = 'Fabricado con calidad y precisión';
+    if (desc) desc.value = '';
+}
+
+function executeCatalogPdfGeneration(isPreview) {
+    const modal = document.getElementById('catalog-pdf-config-modal');
+    if (!modal) return;
+
+    const checkboxes = modal.querySelectorAll('.cat-checkbox:checked');
+    const selectedSlugs = Array.from(checkboxes).map(cb => cb.value);
+
+    const includePrices = document.getElementById('cfg-include-prices').checked ? '1' : '0';
+    const includeDesc = document.getElementById('cfg-include-desc').checked ? '1' : '0';
+
+    const customTitle = (document.getElementById('cfg-custom-title').value || '').trim();
+    const customSubtitle = (document.getElementById('cfg-custom-subtitle').value || '').trim();
+    const customSlogan = (document.getElementById('cfg-custom-slogan').value || '').trim();
+    const customDesc = (document.getElementById('cfg-custom-description').value || '').trim();
+
+    const params = new URLSearchParams();
+    selectedSlugs.forEach(s => params.append('categories', s));
+    params.set('include_prices', includePrices);
+    params.set('include_descriptions', includeDesc);
+    if (customTitle) params.set('custom_title', customTitle);
+    if (customSubtitle) params.set('custom_subtitle', customSubtitle);
+    if (customSlogan) params.set('custom_slogan', customSlogan);
+    if (customDesc) params.set('custom_description', customDesc);
+    if (isPreview) params.set('preview', '1');
+
+    const url = "{% url 'generate_catalog_pdf' %}?" + params.toString();
+    window.open(url, '_blank');
+    closeCatalogPdfModal();
+}
+
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('catalog-pdf-config-modal');
+    if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
+        closeCatalogPdfModal();
+    }
+});
+</script>
+

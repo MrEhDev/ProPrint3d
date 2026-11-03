@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etiqueta Térmica 58mm - Pedido #{{ order.id }}</title>
+    <!-- Librería html2canvas para convertir la etiqueta en imagen PNG nítida sin diálogo de impresora -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Configuración para rollo continuo de 58mm */
         @page {
@@ -22,8 +24,9 @@
             background-color: #f3f4f6;
             color: #000;
             display: flex;
-            justify-content: center;
-            padding: 20px 0;
+            flex-direction: column;
+            align-items: center;
+            padding: 70px 10px 40px 10px;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -32,8 +35,8 @@
             width: 58mm;
             min-height: 50mm;
             background: #fff;
-            padding: 3mm 2.5mm;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 3.5mm 3mm;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             font-size: 11px;
             line-height: 1.25;
             color: #000;
@@ -107,8 +110,8 @@
         }
 
         .qr-img {
-            width: 32mm;
-            height: 32mm;
+            width: 30mm;
+            height: 30mm;
             margin: 0 auto;
             display: block;
             image-rendering: pixelated;
@@ -141,40 +144,77 @@
             margin-top: 1.5mm;
         }
 
-        /* Barra de control en pantalla (no se imprime) */
+        /* Barra de control flotante en pantalla (no se imprime) */
         .toolbar {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
+            align-items: center;
             gap: 8px;
             z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            max-width: 95vw;
+            overflow-x: auto;
         }
 
         .btn {
-            background: #0ea5e9;
+            background: #10b981;
             color: #fff;
             border: none;
             padding: 8px 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
         }
-
         .btn:hover {
-            background: #0284c7;
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: scale(0.98);
         }
 
-        .btn-secondary {
-            background: #4b5563;
+        .btn-share {
+            background: #0ea5e9;
         }
-        .btn-secondary:hover {
-            background: #374151;
+        .btn-copy {
+            background: #6366f1;
+        }
+        .btn-print {
+            background: #334155;
+        }
+        .btn-close {
+            background: #475569;
+            padding: 8px 10px;
+        }
+
+        /* Notificación Toast */
+        #toast-msg {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 200;
         }
     </style>
 </head>
@@ -182,16 +222,25 @@
 
     <!-- Botones de Acción (Ocultos al Imprimir) -->
     <div class="toolbar no-print">
-        <button class="btn" onclick="window.print()">
-            🖨️ Imprimir Etiqueta
+        <button class="btn btn-share" onclick="shareLabelImage()" title="Enviar a la app de tu impresora o compartir por Bluetooth/WhatsApp">
+            📱 Compartir Imagen
         </button>
-        <button class="btn btn-secondary" onclick="window.close()">
-            ✕ Cerrar
+        <button class="btn" onclick="downloadLabelImage()" title="Guardar imagen PNG nítida de 58mm para abrir en la app de la impresora">
+            ⬇️ Descargar PNG
+        </button>
+        <button class="btn btn-copy" onclick="copyLabelImage()" title="Copiar imagen al portapapeles">
+            📋 Copiar
+        </button>
+        <button class="btn btn-print" onclick="window.print()" title="Imprimir por diálogo de sistema si tienes driver instalado">
+            🖨️ Sistema
+        </button>
+        <button class="btn btn-close" onclick="window.close()" title="Cerrar pestaña">
+            ✕
         </button>
     </div>
 
     <!-- Etiqueta Térmica de 58 mm -->
-    <div class="label-container">
+    <div class="label-container" id="thermal-label">
         
         <!-- Cabecera -->
         <div class="header-title">PROPRINT3D</div>
@@ -243,9 +292,13 @@
 
         <!-- Código QR con enlace a https://proprint3d.shop/ -->
         <div class="qr-section">
+            {% if qr_base64 %}
+            <img class="qr-img" src="{{ qr_base64 }}" alt="QR ProPrint3D">
+            {% else %}
             <img class="qr-img" 
                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fproprint3d.shop%2F&format=svg" 
                  alt="QR ProPrint3D">
+            {% endif %}
             <div class="qr-caption">proprint3d.shop</div>
         </div>
 
@@ -266,13 +319,92 @@
 
     </div>
 
+    <div id="toast-msg">Mensaje</div>
+
     <script>
-        // Si viene con parámetro ?autoprint=1, abre directamente el diálogo de impresión
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('autoprint') === '1') {
-            window.addEventListener('load', () => {
-                setTimeout(() => window.print(), 350);
+        function showToast(text) {
+            const toast = document.getElementById('toast-msg');
+            if (!toast) return;
+            toast.textContent = text;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        async function generateLabelCanvas() {
+            const el = document.getElementById('thermal-label');
+            if (!el) return null;
+            // Generar canvas con escala 3 para que sea 100% nítido en térmicas
+            return await html2canvas(el, {
+                scale: 3,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
             });
+        }
+
+        async function downloadLabelImage() {
+            showToast('Generando imagen PNG...');
+            const canvas = await generateLabelCanvas();
+            if (!canvas) return;
+
+            const link = document.createElement('a');
+            link.download = 'Etiqueta_58mm_Pedido_{{ order.id }}.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('✓ Imagen descargada');
+        }
+
+        async function shareLabelImage() {
+            showToast('Preparando imagen...');
+            const canvas = await generateLabelCanvas();
+            if (!canvas) return;
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    downloadLabelImage();
+                    return;
+                }
+
+                const file = new File([blob], 'Etiqueta_58mm_Pedido_{{ order.id }}.png', { type: 'image/png' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Etiqueta Pedido #{{ order.id }}',
+                            text: 'Etiqueta térmica para impresora 58mm - Pedido #{{ order.id }}'
+                        });
+                        showToast('✓ Compartido');
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            downloadLabelImage();
+                        }
+                    }
+                } else {
+                    // Fallback directo a descarga si el navegador no tiene menú de compartir
+                    downloadLabelImage();
+                    showToast('Descargada (ábrela en tu app de impresora)');
+                }
+            }, 'image/png');
+        }
+
+        async function copyLabelImage() {
+            showToast('Copiando imagen...');
+            const canvas = await generateLabelCanvas();
+            if (!canvas) return;
+
+            canvas.toBlob(async (blob) => {
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    showToast('✓ Imagen copiada al portapapeles');
+                } catch (e) {
+                    downloadLabelImage();
+                }
+            }, 'image/png');
         }
     </script>
 </body>

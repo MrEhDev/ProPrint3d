@@ -371,5 +371,9 @@
             });
         }
     </script>
+
+    {% if request.user.is_staff %}
+    {% include 'catalog_pdf_modal.html' %}
+    {% endif %}
 </body>
 </html>

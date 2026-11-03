@@ -139,8 +139,9 @@ def custom_order_view(request):
     return render(request, 'custom_order.html')
 
 def about_view(request):
-    """Muestra la página de '¿Quiénes somos?' con información del taller y tecnología."""
-    return render(request, 'about.html')
+    """Muestra la página de '¿Quiénes somos?' con información del taller, tecnología y opiniones."""
+    reviews = Review.objects.filter(is_active=True).order_by('-created_at')[:6]
+    return render(request, 'about.html', {'reviews': reviews})
 def product_detail_view(request, slug):
     """Muestra detalles extendidos de una pieza del catálogo."""
     # Admins pueden ver productos ocultos (is_active=False)
@@ -483,6 +484,60 @@ def generate_order_quote_pdf_view(request, order_id):
     return response
 
 # =====================================================================
+# VISTA: generate_category_catalog_pdf_view
+# Propósito: Exportar catálogo PDF de una categoría o general.
+# =====================================================================
+@staff_member_required
+def generate_category_catalog_pdf_view(request, category_slug=None):
+    """
+    Genera y descarga el catálogo oficial en formato PDF con opciones completas:
+    - Selección de múltiples categorías o general
+    - Incluir o excluir precios de venta
+    - Incluir o excluir descripciones de producto
+    - Personalización de portada (título, subtítulo, lema, descripción)
+    Solo accesible por administradores.
+    """
+    from .utils.catalog_pdf import generate_catalog_pdf_bytes
+
+    # Obtener categorías (puede ser lista en GET/POST o slug de la ruta)
+    categories_param = request.GET.getlist('categories') or request.POST.getlist('categories')
+    if not categories_param:
+        cat_str = category_slug or request.GET.get('category', '').strip() or request.POST.get('category', '').strip()
+        if cat_str:
+            categories_param = [c.strip() for c in cat_str.split(',') if c.strip()]
+
+    # Opciones de producto
+    raw_prices = request.GET.get('include_prices', request.POST.get('include_prices', '1'))
+    include_prices = str(raw_prices).lower() in ('1', 'true', 'on', 'yes')
+
+    raw_desc = request.GET.get('include_descriptions', request.POST.get('include_descriptions', '0'))
+    include_descriptions = str(raw_desc).lower() in ('1', 'true', 'on', 'yes')
+
+    # Personalización de portada
+    custom_title = request.GET.get('custom_title', request.POST.get('custom_title', '')).strip()
+    custom_subtitle = request.GET.get('custom_subtitle', request.POST.get('custom_subtitle', '')).strip()
+    custom_slogan = request.GET.get('custom_slogan', request.POST.get('custom_slogan', '')).strip()
+    custom_description = request.GET.get('custom_description', request.POST.get('custom_description', '')).strip()
+
+    pdf_bytes, filename = generate_catalog_pdf_bytes(
+        category_slugs=categories_param,
+        include_prices=include_prices,
+        include_descriptions=include_descriptions,
+        custom_title=custom_title,
+        custom_subtitle=custom_subtitle,
+        custom_slogan=custom_slogan,
+        custom_description=custom_description,
+    )
+
+    # Si viene con ?preview=1 se muestra en el navegador (inline), por defecto se descarga (attachment)
+    preview = request.GET.get('preview', request.POST.get('preview', '0'))
+    disposition = 'inline' if str(preview) in ('1', 'true') else 'attachment'
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+    return response
+
+# =====================================================================
 # VISTA: crm_dashboard_view
 # Propósito: Panel de control de pedidos para administradores.
 # =====================================================================
@@ -730,6 +785,7 @@ def crm_dashboard_view(request):
         'customers': Customer.objects.all().order_by('-updated_at')[:50],
         'products_with_id': products_with_id,
         'products_json': json.dumps(products_with_id, default=str),
+        'categories': Category.objects.all().order_by('name'),
     }
     
     return render(request, 'crm_dashboard.html', context)
@@ -1741,6 +1797,9 @@ def order_thermal_label_view(request, order_id):
     if not dest_address and order.shipping and order.shipping.lower() not in ['correos', 'envío', 'envio']:
         dest_address = order.shipping
 
+    from .utils.catalog_pdf import generate_qr_base64
+    qr_base64 = generate_qr_base64('https://proprint3d.shop/')
+
     context = {
         'order': order,
         'dest_name': dest_name,
@@ -1752,6 +1811,7 @@ def order_thermal_label_view(request, order_id):
         'correos_service_name': service_display,
         'estimated_weight_g': round(weight_g),
         'autoprint': request.GET.get('autoprint') == '1',
+        'qr_base64': qr_base64,
     }
     return render(request, 'shipping_thermal_label.html', context)
 

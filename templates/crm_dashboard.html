@@ -132,6 +132,14 @@
                 trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
+            <!-- Botón Generar Catálogo PDF -->
+            <button type="button" onclick="openCatalogPdfModal()"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base cursor-pointer"
+                title="Generar catálogo en PDF por categoría con códigos QR para clientes">
+                <span>📄</span>
+                <span>Catálogo PDF</span>
+            </button>
+
             <a href="{% url 'order_create' %}"
                 class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,7 +492,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="flex items-center gap-1.5">
-                                    <a href="{% url 'order_thermal_label' group.order.id %}?autoprint=1" target="_blank" onclick="event.stopPropagation()"
+                                    <a href="{% url 'order_thermal_label' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
                                         class="h-8 w-8 rounded-lg bg-cyan-50 dark:bg-cyan-950/50 hover:bg-cyan-100 text-cyan-700 dark:text-cyan-300 border border-cyan-300/80 font-bold text-xs flex items-center justify-center transition active:scale-95 shadow-2xs"
                                         title="Imprimir etiqueta térmica 58mm">
                                         🖨️
@@ -810,7 +818,7 @@
 
                             <!-- Fila 3: Logística Correos (Etiqueta Térmica 58mm / Copiar Dirección / Tracking) -->
                             <div class="flex items-center justify-between gap-1.5 pt-1 border-t border-gray-100/80 dark:border-gray-800/80">
-                                <a href="{% url 'order_thermal_label' group.order.id %}?autoprint=1" target="_blank" onclick="event.stopPropagation()"
+                                <a href="{% url 'order_thermal_label' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
                                     class="h-9 px-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800/80 font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
                                     title="Imprimir etiqueta en rollo continuo térmico de 58mm con QR a proprint3d.shop y datos de remitente y destinatario">
                                     <span>🖨️</span> 58mm
@@ -1387,9 +1395,9 @@
                             <div>{{ order.platform|default:"-" }}</div>
                             <div class="text-xs text-gray-400 mt-0.5">{{ order.shipping|default:"" }}</div>
                             <div class="flex items-center justify-center gap-1 mt-1">
-                                <a href="{% url 'order_thermal_label' order.id %}?autoprint=1" target="_blank"
+                                <a href="{% url 'order_thermal_label' order.id %}" target="_blank"
                                     class="p-1 rounded hover:bg-cyan-100 dark:hover:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 transition text-xs font-bold"
-                                    title="Imprimir etiqueta térmica 58mm">
+                                    title="Ver o compartir etiqueta térmica 58mm">
                                     🖨️ 58mm
                                 </a>
                                 <button type="button" onclick="copyOrderShippingAddress({{ order.id }}, this, event)"
@@ -1434,10 +1442,10 @@
                                             title="Editar este pedido y gestionar piezas">
                                             <span>✏️</span> Editar Pedido
                                         </button>
-                                        <a href="{% url 'order_thermal_label' order.id %}?autoprint=1" target="_blank"
+                                        <a href="{% url 'order_thermal_label' order.id %}" target="_blank"
                                             onclick="event.stopPropagation();"
                                             class="px-3 py-1.5 rounded-lg text-sm font-bold bg-cyan-50 hover:bg-cyan-600 text-cyan-800 hover:text-white dark:bg-cyan-950/50 dark:hover:bg-cyan-600 dark:text-cyan-300 dark:hover:text-white border border-cyan-200 dark:border-cyan-800 transition flex items-center gap-1.5 shadow-sm"
-                                            title="Imprimir etiqueta térmica en rollo de 58mm">
+                                            title="Ver o compartir etiqueta térmica de 58mm">
                                             <span>🖨️</span> Etiqueta 58mm
                                         </a>
                                         <a href="{% url 'generate_order_quote_pdf' order.id %}"

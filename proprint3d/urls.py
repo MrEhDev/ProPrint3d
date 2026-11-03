@@ -36,6 +36,8 @@ urlpatterns = [
     # CRM de Pedidos (admite /crm/ y /CRM/)
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
     path('CRM/', views.crm_dashboard_view),
+    path('crm/catalogo-pdf/', views.generate_category_catalog_pdf_view, name='generate_catalog_pdf'),
+    path('crm/catalogo-pdf/<slug:category_slug>/', views.generate_category_catalog_pdf_view, name='generate_catalog_pdf_category'),
     path('crm/order/new/', views.order_create_view, name='order_create'),
     path('crm/order/<int:order_id>/quote-pdf/', views.generate_order_quote_pdf_view, name='generate_order_quote_pdf'),
     path('crm/order/<int:order_id>/thermal-label/', views.order_thermal_label_view, name='order_thermal_label'),

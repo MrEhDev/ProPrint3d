@@ -240,3 +240,30 @@ class CustomerAndOrderShippingTestCase(TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(data['postal_code'], '08186')
         self.assertEqual(data['province'], 'Barcelona')
+
+    def test_about_view_renders_reviews(self):
+        """Verifica que la vista 'quienes-somos' cargue las reviews activas."""
+        from proprint3d.models import Review
+        Review.objects.create(client_name="Test User", text="Excelente calidad", rating=5, is_active=True)
+        response = self.client.get('/quienes-somos/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test User")
+        self.assertContains(response, "Excelente calidad")
+
+    def test_catalog_pdf_generation_view(self):
+        """Verifica la generación del PDF del catálogo para staff."""
+        from proprint3d.models import Category, Product
+        cat = Category.objects.create(name="Navidad", slug="navidad")
+        Product.objects.create(title="Árbol 3D", price=Decimal('15.00'), is_active=True)
+        
+        # Como admin logueado con opciones personalizadas
+        response = self.client.get('/crm/catalogo-pdf/?categories=navidad&include_prices=0&include_descriptions=1&custom_title=Edicion+Especial')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('Catalogo_ProPrint3D_Edicion_Especial_', response['Content-Disposition'])
+
+        # Como usuario no autenticado -> redirige al login
+        anon_client = Client()
+        anon_res = anon_client.get('/crm/catalogo-pdf/navidad/')
+        self.assertEqual(anon_res.status_code, 302)
+        self.assertIn('/login/', anon_res['Location'])

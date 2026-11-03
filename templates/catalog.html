@@ -158,6 +158,22 @@
             </a>
             {% endif %}
         </div>
+
+        {% if request.user.is_staff %}
+        <!-- Barra de Herramientas Admin: Catálogo en PDF -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 pt-3">
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:inline">
+                Herramienta de ventas:
+            </span>
+            <button type="button" 
+               onclick="openCatalogPdfModal('{% if category_slug and category_slug != 'ocultos' and category_slug != 'ofertas' %}{{ category_slug }}{% endif %}')"
+               class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300/70 dark:border-emerald-800/70 shadow-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+               title="Personalizar y generar catálogo en PDF">
+                <span>📄</span>
+                <span>Configurar Catálogo PDF {% if category_slug and category_slug != 'ocultos' and category_slug != 'ofertas' %}de <strong>{{ category_slug|title }}</strong>{% else %}General{% endif %}</span>
+            </button>
+        </div>
+        {% endif %}
     </div>
 
     {% if category_slug == 'ocultos' and request.user.is_staff %}
@@ -328,7 +344,7 @@
             {% for review in reviews %}
             <div class="bg-white/80 dark:bg-dark/80 backdrop-blur-xl p-6 sm:p-7 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200/70 dark:border-gray-800/80 flex flex-col justify-between group hover:-translate-y-1">
                 <div>
-                    <!-- Estrellas + Insignia -->
+                    <!-- Estrellas + Compra Verificada -->
                     <div class="flex items-center justify-between mb-4 gap-2">
                         <div class="flex items-center text-amber-400 gap-0.5">
                             {% for i in "12345" %}
@@ -340,9 +356,9 @@
                             {% endfor %}
                         </div>
 
-                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#13C1AC]/10 text-[#0fa997] dark:text-[#13C1AC] border border-[#13C1AC]/20 whitespace-nowrap">
-                            <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                            {{ review.source|default:"Wallapop" }}
+                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 whitespace-nowrap">
+                            <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            Compra verificada
                         </span>
                     </div>
 
@@ -352,7 +368,7 @@
                     </p>
                 </div>
 
-                <!-- Autor y Antigüedad -->
+                <!-- Autor -->
                 <div class="pt-4 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-teal-500/20 text-primary dark:text-teal-400 font-bold flex items-center justify-center text-sm border border-primary/20">
@@ -360,15 +376,8 @@
                         </div>
                         <div>
                             <p class="font-bold text-sm text-gray-900 dark:text-white leading-tight">{{ review.client_name }}</p>
-                            {% if review.client_details %}
-                            <p class="text-xs text-gray-400 leading-tight">{{ review.client_details }}</p>
-                            {% endif %}
                         </div>
                     </div>
-
-                    {% if review.time_ago %}
-                    <span class="text-xs text-gray-400 font-medium">{{ review.time_ago }}</span>
-                    {% endif %}
                 </div>
             </div>
             {% endfor %}
