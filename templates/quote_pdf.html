@@ -139,10 +139,27 @@
 
     <div class="header">
         <div class="company-info">
-            <h1>ProPrint3D</h1>
-            <p><strong>Servicios de Impresión 3D Profesional</strong></p>
-            <p>Lliça d'Amunt, Vallès Oriental, Barcelona, España</p>
-            <p>contacto@proprint3d.es | 660.90.45.15 </p>
+            <table style="width: 100%; border: none; margin: 0 0 8px 0; border-collapse: collapse;">
+                <tr>
+                    {% if logo_b64 %}
+                    <td style="width: 60px; vertical-align: middle; border: none; padding: 0 12px 0 0;">
+                        <img src="{{ logo_b64 }}" alt="ProPrint3D" style="height: 52px; max-width: 60px; object-fit: contain;">
+                    </td>
+                    {% endif %}
+                    <td style="vertical-align: middle; border: none; padding: 0;">
+                        <h1 style="margin: 0; line-height: 1.1; font-size: 24pt; color: #0ea5e9;">ProPrint3D</h1>
+                        <p style="margin: 2px 0 0 0; color: #64748b; font-size: 9.5pt;"><strong>Servicios de Impresión 3D Profesional</strong></p>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin: 0 0 3px 0; font-size: 9.5pt; color: #475569;">Lliçà d'Amunt, Vallès Oriental, Barcelona, España</p>
+            <p style="margin: 0; font-size: 9.5pt;">
+                <a href="https://proprint3d.shop" target="_blank" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">www.proprint3d.shop</a>
+                <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
+                <span style="color: #475569;">info@proprint3d.shop</span>
+                <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
+                <span style="color: #475569;">660.90.45.15</span>
+            </p>
         </div>
         <div class="quote-info">
             <h2 style="font-size: 22pt; color: #cbd5e1; text-transform: uppercase;">Presupuesto</h2>
@@ -157,17 +174,6 @@
         <h2>Datos del Cliente</h2>
         <p><strong>Nombre/Empresa:</strong> {{ quote.client_name }}</p>
         <p><strong>Contacto:</strong> {{ quote.client_contact }}</p>
-        {% if quote.tracking_number %}
-        <p style="margin-top: 8px;">
-            <strong>Nº Seguimiento (Correos):</strong> 
-            <span style="font-family: monospace; font-size: 10pt; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: bold; border: 1px solid #bae6fd;">{{ quote.tracking_number }}</span>
-            {% if quote.tracking_url %}
-            <span style="margin-left: 8px; font-size: 9.5pt;">
-                (<a href="{{ quote.tracking_url }}" target="_blank" style="color: #0284c7; text-decoration: underline;">Localizador oficial de Correos</a>)
-            </span>
-            {% endif %}
-        </p>
-        {% endif %}
         {% if quote.notes %}
         <p style="margin-top: 10px;"><strong>Notas Adicionales:</strong><br>{{ quote.notes }}</p>
         {% endif %}
@@ -228,7 +234,7 @@
                 <td style="border: none; padding: 5px;">
                     {{ quote.shipping_title|default:"Envío certificado" }}:
                     {% if quote.tracking_number %}
-                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: <strong>{{ quote.tracking_number }}</strong></span>
+                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: {% if quote.tracking_url %}<a href="{{ quote.tracking_url }}" target="_blank" style="color: #0284c7; text-decoration: underline; font-weight: bold; font-family: monospace;">{{ quote.tracking_number }}</a>{% else %}<strong style="font-family: monospace;">{{ quote.tracking_number }}</strong>{% endif %}</span>
                     {% endif %}
                 </td>
                 <td class="text-right" style="border: none; padding: 5px; vertical-align: top;">€{{ quote.shipping_cost }}</td>
@@ -237,7 +243,7 @@
             <tr>
                 <td style="border: none; padding: 5px;">
                     {{ quote.shipping_title|default:"Envío certificado" }}:
-                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: <strong>{{ quote.tracking_number }}</strong></span>
+                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: {% if quote.tracking_url %}<a href="{{ quote.tracking_url }}" target="_blank" style="color: #0284c7; text-decoration: underline; font-weight: bold; font-family: monospace;">{{ quote.tracking_number }}</a>{% else %}<strong style="font-family: monospace;">{{ quote.tracking_number }}</strong>{% endif %}</span>
                 </td>
                 <td class="text-right" style="border: none; padding: 5px; vertical-align: top;">Incluido</td>
             </tr>

@@ -299,9 +299,15 @@ class CustomerAndOrderShippingTestCase(TestCase):
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertIn('Presupuesto_Enrique_Puig_', response['Content-Disposition'])
 
-        # Comprobar que en el HTML renderizado aparezca el número de tracking
+        # Comprobar que en el HTML renderizado aparezca el número de tracking, link y web
         from django.template.loader import render_to_string
+        from proprint3d.views import get_quote_logo_base64
+
+        logo_b64 = get_quote_logo_base64()
+        self.assertTrue(logo_b64.startswith("data:image/png;base64,"))
+
         html = render_to_string('quote_pdf.html', {
+            'logo_b64': logo_b64,
             'quote': {
                 'id': order.id,
                 'client_name': order.client_name,
@@ -317,3 +323,9 @@ class CustomerAndOrderShippingTestCase(TestCase):
         })
         self.assertIn("CD0C8E0000199330028907K", html)
         self.assertIn("Envío certificado", html)
+        self.assertIn(order.correos_tracking_url, html)
+        self.assertIn("www.proprint3d.shop", html)
+
+        # Verificar que el número de seguimiento NO está en Datos del Cliente
+        client_section = html.split('<div class="client-section">')[1].split('</div>')[0]
+        self.assertNotIn(order.tracking_number, client_section)

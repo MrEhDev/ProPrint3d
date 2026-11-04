@@ -1,5 +1,9 @@
+import os
 import io
 import decimal
+import unicodedata
+import re
+import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
@@ -383,6 +387,26 @@ def get_quote_pdf_filename(client_name, date_val=None):
 
     return f"Presupuesto_{clean_name}_{date_str}.pdf"
 
+def get_quote_logo_base64():
+    """Obtiene el logo de ProPrint3D optimizado en base64 para incluir en los presupuestos PDF."""
+    try:
+        from django.conf import settings
+        from PIL import Image
+        import base64
+        import io
+        static_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
+        for fname in ['proprint3d_logo_transparent.png', 'logo_square.png', 'favicon-192x192.png']:
+            img_path = os.path.join(static_dir, fname)
+            if os.path.exists(img_path):
+                with Image.open(img_path) as img:
+                    img.thumbnail((260, 120), Image.Resampling.LANCZOS)
+                    buf = io.BytesIO()
+                    img.save(buf, format='PNG', optimize=True)
+                    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode('utf-8')
+    except Exception:
+        pass
+    return None
+
 def generate_quote_pdf_view(request, quote_id):
     """
     Busca el presupuesto, genera un PDF en memoria usando una plantilla HTML
@@ -393,6 +417,7 @@ def generate_quote_pdf_view(request, quote_id):
     # Generar el HTML
     context = {
         'quote': quote,
+        'logo_b64': get_quote_logo_base64(),
         'request': request,
     }
     html_string = render_to_string('quote_pdf.html', context)
@@ -506,6 +531,7 @@ def generate_order_quote_pdf_view(request, order_id):
     context = {
         'quote': quote_data,
         'order': order,
+        'logo_b64': get_quote_logo_base64(),
         'request': request,
     }
     
