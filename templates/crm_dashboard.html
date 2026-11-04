@@ -5174,11 +5174,24 @@
             phoneClean = '34' + phoneClean;
         }
 
-        const trackingNum = order.correosTrackingNumber || '';
-        const trackingUrl = order.correosTrackingUrl || `https://www.correos.es/es/es/herramientas/localizador/envios/detalle?tracking-number=${trackingNum}`;
-        const serviceName = order.correosService ? order.correosService.replace('_', ' ') : 'Carta Certificada';
+        const trackingNum = (order.correosTrackingNumber || '').trim();
+        const trackingUrl = `https://www.correos.es/es/es/herramientas/localizador/envios/detalle?tracking-number=${encodeURIComponent(trackingNum)}`;
+        
+        let serviceDisplay = 'certificado';
+        const s = (order.correosService || '').toLowerCase();
+        if (s.includes('carta') || s.includes('certificad')) {
+            serviceDisplay = 'certificado';
+        } else if (s.includes('ligero')) {
+            serviceDisplay = 'paquete ligero';
+        } else if (s.includes('premium')) {
+            serviceDisplay = 'paquete premium';
+        } else if (s.includes('estandar') || s.includes('estándar')) {
+            serviceDisplay = 'paquete estándar';
+        } else if (order.correosService) {
+            serviceDisplay = order.correosService.replace(/_/g, ' ').toLowerCase();
+        }
 
-        const msg = `¡Hola ${order.clientName}! 👋 Te confirmamos que tu pedido #${orderId} de ProPrint3D ya ha sido enviado mediante Correos España (${serviceName}).\n\n📦 *Número de Seguimiento:* ${trackingNum}\n🌐 *Localizador directo:* ${trackingUrl}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
+        const msg = `¡Hola ${order.clientName}! 👋\nTe confirmamos que tu pedido de ProPrint3D ya ha sido enviado mediante Correos España (${serviceDisplay}).\n\n📦 *Número de Seguimiento:* ${trackingNum}\n🌐 *Localizador directo:* ${trackingUrl}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
 
         const waUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
         window.open(waUrl, '_blank');

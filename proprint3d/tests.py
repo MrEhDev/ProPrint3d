@@ -277,3 +277,24 @@ class CustomerAndOrderShippingTestCase(TestCase):
         anon_res = anon_client.get('/crm/catalogo-pdf/navidad/')
         self.assertEqual(anon_res.status_code, 302)
         self.assertIn('/login/', anon_res['Location'])
+
+    def test_order_quote_pdf_with_shipping(self):
+        """Verifica que el PDF del presupuesto de pedido incluya el envío tras el subtotal."""
+        order = Order.objects.create(
+            client_name="Enrique Puig",
+            client_contact="660112233",
+            order_date=datetime.date.today(),
+            shipping="Correos",
+            correos_service="carta_certificada",
+            tracking_number="CD0C8E0000199330028907K",
+            shipping_cost=Decimal('5.50'),
+            include_shipping_in_total=True,
+            unit_price=Decimal('20.00'),
+            price=Decimal('25.50')
+        )
+        self.assertIn("tracking-number=CD0C8E0000199330028907K", order.correos_tracking_url)
+
+        response = self.client.get(f'/crm/order/{order.id}/quote-pdf/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('Presupuesto_Enrique_Puig_', response['Content-Disposition'])

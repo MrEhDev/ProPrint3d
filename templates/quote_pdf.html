@@ -212,6 +212,12 @@
                 <td style="border: none; padding: 5px;">Subtotal:</td>
                 <td class="text-right" style="border: none; padding: 5px;">€{{ quote.subtotal }}</td>
             </tr>
+            {% if quote.shipping_cost and quote.shipping_cost != "0.00" %}
+            <tr>
+                <td style="border: none; padding: 5px;">{{ quote.shipping_title|default:"Envío certificado" }}:</td>
+                <td class="text-right" style="border: none; padding: 5px;">€{{ quote.shipping_cost }}</td>
+            </tr>
+            {% endif %}
             {% if quote.include_tax %}
             <tr>
                 <td style="border: none; padding: 5px;">{{ quote.tax_name }} ({{ quote.tax_percentage|floatformat:0 }}%):</td>

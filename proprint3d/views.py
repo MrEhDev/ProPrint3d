@@ -416,11 +416,13 @@ def generate_order_quote_pdf_view(request, order_id):
     
     items = []
     order_items = list(order.items.all())
+    sum_items_price = 0.0
     if order_items:
         for item in order_items:
             unit_price_val = float(item.unit_price or 0.00)
             qty_val = int(item.quantity or 1)
             line_price_val = float(item.price or (unit_price_val * qty_val))
+            sum_items_price += line_price_val
             items.append({
                 'custom_title': item.description or (item.product.title if item.product else 'Pieza a medida'),
                 'product': item.product,
@@ -433,6 +435,7 @@ def generate_order_quote_pdf_view(request, order_id):
         unit_price_val = float(order.unit_price or order.price or 0.00)
         qty_val = int(order.quantity or 1)
         line_price_val = float(order.price or (unit_price_val * qty_val))
+        sum_items_price += line_price_val
         items.append({
             'custom_title': order.description or (order.product.title if order.product else 'Pieza a medida'),
             'product': order.product,
@@ -442,18 +445,41 @@ def generate_order_quote_pdf_view(request, order_id):
             'dimensions': order.product.dimensions if (order.product and order.product.dimensions) else None
         })
 
-    total_val = float(order.price or 0.00)
+    shipping_cost_val = float(order.shipping_cost or 0.00)
+    has_shipping = shipping_cost_val > 0
+    shipping_title = "Envío certificado"
+    if has_shipping:
+        service_lower = str(order.correos_service or '').lower()
+        shipping_lower = str(order.shipping or '').lower()
+        if 'certificad' in service_lower or 'certificad' in shipping_lower or order.shipping == 'Correos':
+            shipping_title = "Envío certificado"
+        elif order.shipping and order.shipping not in ['Otro', '']:
+            shipping_title = f"Envío ({order.shipping})"
+        else:
+            shipping_title = "Envío"
+
     include_tax = order.has_vat
+    if sum_items_price <= 0 and order.price:
+        base_order_p = float(order.price)
+        if order.include_shipping_in_total and has_shipping:
+            base_order_p = max(0.00, base_order_p - shipping_cost_val)
+        if include_tax:
+            subtotal_val = round(base_order_p / 1.21, 2)
+        else:
+            subtotal_val = round(base_order_p, 2)
+    else:
+        subtotal_val = round(sum_items_price, 2)
+
     if include_tax:
-        subtotal_val = round(total_val / 1.21, 2)
-        tax_amount_val = round(total_val - subtotal_val, 2)
+        tax_amount_val = round(subtotal_val * 0.21, 2)
         tax_name = "IVA incl."
         tax_percentage = 21.00
+        total_val = round(subtotal_val + tax_amount_val + (shipping_cost_val if has_shipping else 0.00), 2)
     else:
-        subtotal_val = total_val
         tax_amount_val = 0.00
         tax_name = "Sin IVA"
         tax_percentage = 0.00
+        total_val = round(subtotal_val + (shipping_cost_val if has_shipping else 0.00), 2)
 
     quote_data = {
         'id': order.id,
@@ -463,6 +489,8 @@ def generate_order_quote_pdf_view(request, order_id):
         'notes': order.notes,
         'items': items,
         'subtotal': f"{subtotal_val:.2f}",
+        'shipping_cost': f"{shipping_cost_val:.2f}" if has_shipping else None,
+        'shipping_title': shipping_title if has_shipping else None,
         'include_tax': include_tax,
         'tax_name': tax_name,
         'tax_percentage': tax_percentage,

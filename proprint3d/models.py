@@ -688,7 +688,7 @@ class Order(models.Model):
         """Genera el enlace directo al localizador web oficial de Correos."""
         if not self.tracking_number:
             return None
-        return f"https://www.correos.es/es/es/herramientas/localizador/envios/detalle?numero={self.tracking_number.strip()}"
+        return f"https://www.correos.es/es/es/herramientas/localizador/envios/detalle?tracking-number={self.tracking_number.strip()}"
 
     @property
     def correos_tracking_number(self):
