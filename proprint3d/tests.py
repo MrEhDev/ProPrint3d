@@ -298,3 +298,22 @@ class CustomerAndOrderShippingTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertIn('Presupuesto_Enrique_Puig_', response['Content-Disposition'])
+
+        # Comprobar que en el HTML renderizado aparezca el número de tracking
+        from django.template.loader import render_to_string
+        html = render_to_string('quote_pdf.html', {
+            'quote': {
+                'id': order.id,
+                'client_name': order.client_name,
+                'client_contact': order.client_contact,
+                'subtotal': '20.00',
+                'shipping_cost': '5.50',
+                'shipping_title': 'Envío certificado',
+                'tracking_number': order.tracking_number,
+                'tracking_url': order.correos_tracking_url,
+                'total_price': '25.50',
+                'items': [],
+            }
+        })
+        self.assertIn("CD0C8E0000199330028907K", html)
+        self.assertIn("Envío certificado", html)

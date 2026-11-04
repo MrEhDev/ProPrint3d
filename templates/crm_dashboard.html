@@ -5191,9 +5191,15 @@
             serviceDisplay = order.correosService.replace(/_/g, ' ').toLowerCase();
         }
 
-        const msg = `¡Hola ${order.clientName}! 👋\nTe confirmamos que tu pedido de ProPrint3D ya ha sido enviado mediante Correos España (${serviceDisplay}).\n\n📦 *Número de Seguimiento:* ${trackingNum}\n🌐 *Localizador directo:* ${trackingUrl}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
+        // Emoticonos para WhatsApp
+        const wave = '👋';
+        const pkg = '📦';
+        const globe = '🌐';
+        const rocket = '🚀';
 
-        const waUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
+        const msg = `¡Hola ${order.clientName}! ${wave}\nTe confirmamos que tu pedido de ProPrint3D ya ha sido enviado mediante Correos España (${serviceDisplay}).\n\n${pkg} *Número de Seguimiento:* ${trackingNum}\n${globe} *Localizador directo:* ${trackingUrl}\n\n¡Muchas gracias por confiar en nosotros! ${rocket}`;
+
+        const waUrl = `https://api.whatsapp.com/send?phone=${phoneClean}&text=${encodeURIComponent(msg)}`;
         window.open(waUrl, '_blank');
     }
 

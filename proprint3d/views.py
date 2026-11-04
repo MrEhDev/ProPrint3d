@@ -481,6 +481,9 @@ def generate_order_quote_pdf_view(request, order_id):
         tax_percentage = 0.00
         total_val = round(subtotal_val + (shipping_cost_val if has_shipping else 0.00), 2)
 
+    tracking_num = (order.tracking_number or '').strip()
+    tracking_url = order.correos_tracking_url if tracking_num else None
+
     quote_data = {
         'id': order.id,
         'client_name': order.client_name,
@@ -491,6 +494,8 @@ def generate_order_quote_pdf_view(request, order_id):
         'subtotal': f"{subtotal_val:.2f}",
         'shipping_cost': f"{shipping_cost_val:.2f}" if has_shipping else None,
         'shipping_title': shipping_title if has_shipping else None,
+        'tracking_number': tracking_num if tracking_num else None,
+        'tracking_url': tracking_url,
         'include_tax': include_tax,
         'tax_name': tax_name,
         'tax_percentage': tax_percentage,

@@ -157,6 +157,17 @@
         <h2>Datos del Cliente</h2>
         <p><strong>Nombre/Empresa:</strong> {{ quote.client_name }}</p>
         <p><strong>Contacto:</strong> {{ quote.client_contact }}</p>
+        {% if quote.tracking_number %}
+        <p style="margin-top: 8px;">
+            <strong>Nº Seguimiento (Correos):</strong> 
+            <span style="font-family: monospace; font-size: 10pt; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: bold; border: 1px solid #bae6fd;">{{ quote.tracking_number }}</span>
+            {% if quote.tracking_url %}
+            <span style="margin-left: 8px; font-size: 9.5pt;">
+                (<a href="{{ quote.tracking_url }}" target="_blank" style="color: #0284c7; text-decoration: underline;">Localizador oficial de Correos</a>)
+            </span>
+            {% endif %}
+        </p>
+        {% endif %}
         {% if quote.notes %}
         <p style="margin-top: 10px;"><strong>Notas Adicionales:</strong><br>{{ quote.notes }}</p>
         {% endif %}
@@ -214,8 +225,21 @@
             </tr>
             {% if quote.shipping_cost and quote.shipping_cost != "0.00" %}
             <tr>
-                <td style="border: none; padding: 5px;">{{ quote.shipping_title|default:"Envío certificado" }}:</td>
-                <td class="text-right" style="border: none; padding: 5px;">€{{ quote.shipping_cost }}</td>
+                <td style="border: none; padding: 5px;">
+                    {{ quote.shipping_title|default:"Envío certificado" }}:
+                    {% if quote.tracking_number %}
+                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: <strong>{{ quote.tracking_number }}</strong></span>
+                    {% endif %}
+                </td>
+                <td class="text-right" style="border: none; padding: 5px; vertical-align: top;">€{{ quote.shipping_cost }}</td>
+            </tr>
+            {% elif quote.tracking_number %}
+            <tr>
+                <td style="border: none; padding: 5px;">
+                    {{ quote.shipping_title|default:"Envío certificado" }}:
+                    <br><span style="font-size: 8pt; color: #0369a1; font-weight: normal;">Ref. envío: <strong>{{ quote.tracking_number }}</strong></span>
+                </td>
+                <td class="text-right" style="border: none; padding: 5px; vertical-align: top;">Incluido</td>
             </tr>
             {% endif %}
             {% if quote.include_tax %}
