@@ -17,11 +17,20 @@ class BranchAdmin(admin.ModelAdmin):
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
+    verbose_name = 'Sede Asignada'
     verbose_name_plural = 'Sede Asignada'
+    extra = 0
+    fields = ('branch',)
 
 
 class UserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
+
+    def get_inline_instances(self, request, obj=None):
+        # Al crear un nuevo usuario no mostramos inlines para evitar errores de formulario
+        if not obj:
+            return list()
+        return super().get_inline_instances(request, obj)
 
 
 try:
