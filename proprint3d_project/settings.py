@@ -53,6 +53,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'proprint3d.context_processors.cart_context',
+                'proprint3d.context_processors.branch_context',
             ],
         },
     },

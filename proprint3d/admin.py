@@ -1,10 +1,40 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, Quote, QuoteItem, Order, OrderItem, Review, Customer
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import (
+    Branch, UserProfile, Category, Product, ProductImage,
+    Quote, QuoteItem, Order, OrderItem, Review, Customer
+)
+
+@admin.register(Branch)
+class BranchAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'whatsapp', 'phone', 'email', 'greeting_name', 'is_main', 'is_active')
+    list_filter = ('is_main', 'is_active')
+    search_fields = ('name', 'slug', 'whatsapp', 'phone', 'email')
+    prepopulated_fields = {'slug': ('name',)}
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'Sede Asignada'
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+admin.site.register(User, UserAdmin)
+
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'city', 'province', 'platform', 'total_orders', 'total_spent', 'created_at')
-    list_filter = ('platform', 'province', 'created_at')
+    list_display = ('name', 'branch', 'phone', 'city', 'province', 'platform', 'total_orders', 'total_spent', 'created_at')
+    list_filter = ('branch', 'platform', 'province', 'created_at')
     search_fields = ('name', 'phone', 'email', 'address', 'city', 'postal_code', 'notes')
     ordering = ('name',)
 
@@ -35,8 +65,8 @@ class QuoteItemInline(admin.TabularInline):
 
 @admin.register(Quote)
 class QuoteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'client_name', 'total_price', 'status', 'created_at')
-    list_filter = ('status', 'created_at')
+    list_display = ('id', 'client_name', 'branch', 'total_price', 'status', 'created_at')
+    list_filter = ('branch', 'status', 'created_at')
     inlines = [QuoteItemInline]
 
 class OrderItemInline(admin.TabularInline):
@@ -45,8 +75,8 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'description', 'client_name', 'quantity', 'price', 'deposit_amount', 'deposit_method', 'final_payment_method', 'profit', 'status', 'platform', 'shipping', 'order_date')
-    list_filter = ('status', 'platform', 'shipping', 'order_date')
+    list_display = ('id', 'branch', 'description', 'client_name', 'quantity', 'price', 'deposit_amount', 'deposit_method', 'final_payment_method', 'profit', 'status', 'platform', 'shipping', 'order_date')
+    list_filter = ('branch', 'status', 'platform', 'shipping', 'order_date')
     search_fields = ('description', 'client_name', 'client_phone', 'client_email', 'client_contact', 'tracking_number', 'notes')
     inlines = [OrderItemInline]
 

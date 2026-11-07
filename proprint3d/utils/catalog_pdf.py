@@ -93,9 +93,18 @@ def build_catalog_context(
     custom_subtitle=None,
     custom_slogan=None,
     custom_description=None,
+    branch=None,
 ):
     """Construye el contexto de datos para la plantilla del catálogo PDF agrupando por categoría."""
-    from proprint3d.models import Category, Product
+    from proprint3d.models import Category, Product, Branch
+
+    if not branch:
+        branch = Branch.objects.filter(is_main=True, is_active=True).first()
+
+    wa_phone = branch.whatsapp if branch else "34660904515"
+    whatsapp_display = branch.display_phone_national if branch else "660 904 515"
+    location = branch.display_location if branch else "Lliçà d'Amunt (Barcelona, España)"
+    greeting = branch.greeting_name if branch else "ProPrint3D"
 
     static_dir = os.path.join(settings.BASE_DIR, 'static', 'images')
     logo_path = os.path.join(static_dir, 'logo_square.png')
@@ -146,7 +155,6 @@ def build_catalog_context(
         category_description or "Piezas terminadas con tecnología FDM de alta definición, filamentos técnicos y revisión artesanal en cada pedido."
     )
 
-    wa_phone = "34660904515"
     # Si incluye descripciones -> tarjeta a lo ancho (3 por página) para evitar desbordamientos
     # Si no incluye descripciones -> rejilla compacta 2x2 (4 por página)
     chunk_size = 3 if include_descriptions else 4
@@ -166,7 +174,7 @@ def build_catalog_context(
             seen_product_ids.add(p.id)
 
             p_title = str(p.title or 'Pieza 3D')
-            msg = f"Hola, me interesa la pieza '{p_title}' del catálogo de {cat.name}."
+            msg = f"Hola {greeting}, me interesa la pieza '{p_title}' del catálogo de {cat.name}."
             wa_url = f"https://wa.me/{wa_phone}?text={urllib.parse.quote(msg)}"
             qr_b64 = generate_qr_base64(wa_url)
 
@@ -225,7 +233,7 @@ def build_catalog_context(
             seen_product_ids.add(p.id)
 
             p_title = str(p.title or 'Pieza 3D')
-            msg = f"Hola, me interesa la pieza '{p_title}' del catálogo."
+            msg = f"Hola {greeting}, me interesa la pieza '{p_title}' del catálogo."
             wa_url = f"https://wa.me/{wa_phone}?text={urllib.parse.quote(msg)}"
             qr_b64 = generate_qr_base64(wa_url)
             img_b64 = get_optimized_image_base64(p.main_image, max_dim=400, quality=80) or hero_b64
@@ -277,9 +285,10 @@ def build_catalog_context(
         'logo_b64': logo_b64,
         'hero_b64': hero_b64,
         'current_year': datetime.now().year,
-        'whatsapp_display': "660 904 515",
+        'whatsapp_display': whatsapp_display,
         'slogan': display_slogan,
-        'location': "Lliçà d'Amunt (Barcelona, España)",
+        'location': location,
+        'branch': branch,
         'include_prices': bool(include_prices),
         'include_descriptions': bool(include_descriptions),
     }
@@ -293,6 +302,7 @@ def generate_catalog_pdf_bytes(
     custom_subtitle=None,
     custom_slogan=None,
     custom_description=None,
+    branch=None,
 ):
     """Genera el PDF del catálogo de manera eficiente y devuelve (pdf_bytes, filename)."""
     context = build_catalog_context(
@@ -304,6 +314,7 @@ def generate_catalog_pdf_bytes(
         custom_subtitle=custom_subtitle,
         custom_slogan=custom_slogan,
         custom_description=custom_description,
+        branch=branch,
     )
     html_string = render_to_string('catalog_pdf.html', context)
     

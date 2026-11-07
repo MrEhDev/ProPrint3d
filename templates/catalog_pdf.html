@@ -244,6 +244,8 @@
             flex-direction: column;
             justify-content: space-between;
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+            text-decoration: none;
+            color: inherit;
         }
 
         .product-img-wrap {
@@ -318,6 +320,8 @@
             height: 68mm;
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
             box-sizing: border-box;
+            text-decoration: none;
+            color: inherit;
         }
 
         .product-horizontal-img-wrap {
@@ -657,7 +661,7 @@
         <!-- FORMATO HORIZONTAL (A LO ANCHO - 3 POR PÁGINA CON DESCRIPCIÓN) -->
         <div class="product-horizontal-list">
             {% for prod in page_data.products %}
-            <div class="product-horizontal-card">
+            <a href="{{ prod.wa_url }}" class="product-horizontal-card" target="_blank">
                 <!-- Imagen grande a la izquierda -->
                 <div class="product-horizontal-img-wrap">
                     {% if prod.image_b64 %}
@@ -698,12 +702,12 @@
                         {% endif %}
 
                         <div class="qr-box">
-                            <div class="qr-text">Escanea para pedir</div>
+                            <div class="qr-text">Clic o escanea</div>
                             <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
 
@@ -711,7 +715,7 @@
         <!-- FORMATO REJILLA 2x2 (4 POR PÁGINA SIN DESCRIPCIÓN) -->
         <div class="product-grid">
             {% for prod in page_data.products %}
-            <div class="product-card">
+            <a href="{{ prod.wa_url }}" class="product-card" target="_blank">
                 <div>
                     <!-- Imagen del Producto -->
                     <div class="product-img-wrap">
@@ -751,11 +755,11 @@
 
                     <!-- QR directo a WhatsApp con mensaje pre-cargado -->
                     <div class="qr-box">
-                        <div class="qr-text">Escanea para pedir</div>
+                        <div class="qr-text">Clic o escanea</div>
                         <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
                     </div>
                 </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
         {% endif %}

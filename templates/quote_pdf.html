@@ -152,13 +152,29 @@
                     </td>
                 </tr>
             </table>
-            <p style="margin: 0 0 3px 0; font-size: 9.5pt; color: #475569;">Lliçà d'Amunt, Vallès Oriental, Barcelona, España</p>
+            <p style="margin: 0 0 3px 0; font-size: 9.5pt; color: #475569;">
+                {% if quote_branch %}
+                    {{ quote_branch.display_location }}
+                {% elif quote.branch %}
+                    {{ quote.branch.display_location }}
+                {% else %}
+                    Lliçà d'Amunt, Vallès Oriental, Barcelona, España
+                {% endif %}
+            </p>
             <p style="margin: 0; font-size: 9.5pt;">
                 <a href="https://proprint3d.shop" target="_blank" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">www.proprint3d.shop</a>
                 <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
                 <span style="color: #475569;">info@proprint3d.shop</span>
                 <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
-                <span style="color: #475569;">660.90.45.15</span>
+                <span style="color: #475569;">
+                    {% if quote_branch %}
+                        +34 {{ quote_branch.display_phone_national }}
+                    {% elif quote.branch %}
+                        +34 {{ quote.branch.display_phone_national }}
+                    {% else %}
+                        660.90.45.15
+                    {% endif %}
+                </span>
             </p>
         </div>
         <div class="quote-info">

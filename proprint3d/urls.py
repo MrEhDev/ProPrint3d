@@ -9,6 +9,7 @@ urlpatterns = [
     # Catálogo público
     path('', views.catalog_view, name='catalog'),
     path('quienes-somos/', views.about_view, name='about_us'),
+    path('cambiar-sede/<slug:branch_slug>/', views.switch_branch_view, name='switch_branch'),
     
     # Formulario personalizado
     path('custom-order/', views.custom_order_view, name='custom_order'),

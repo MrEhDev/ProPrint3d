@@ -29,7 +29,7 @@ def staff_member_required(view_func):
 # Utilidades PDF
 import io
 
-from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer
+from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer, Branch
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
@@ -162,10 +162,21 @@ def product_detail_view(request, slug):
             is_active=True
         ).exclude(id=product.id).distinct().order_by('?')[:5]
     
+    # Sede activa para generar enlace WhatsApp
+    branch_slug = request.session.get('branch_slug')
+    current_branch = None
+    if branch_slug:
+        current_branch = Branch.objects.filter(slug=branch_slug, is_active=True).first()
+    if not current_branch:
+        current_branch = Branch.objects.filter(is_main=True, is_active=True).first()
+    
+    greeting = current_branch.greeting_name if current_branch else "ProPrint3D"
+    whatsapp_num = current_branch.whatsapp if current_branch else "34660904515"
+
     absolute_url = request.build_absolute_uri()
-    wa_message = f"Hola ProPrint3d, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
+    wa_message = f"Hola {greeting}, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
     import urllib.parse
-    wa_url = f"https://wa.me/34660904515?text={urllib.parse.quote(wa_message)}"
+    wa_url = f"https://wa.me/{whatsapp_num}?text={urllib.parse.quote(wa_message)}"
     
     context = {
         'product': product,
@@ -417,6 +428,7 @@ def generate_quote_pdf_view(request, quote_id):
     # Generar el HTML
     context = {
         'quote': quote,
+        'quote_branch': quote.branch,
         'logo_b64': get_quote_logo_base64(),
         'request': request,
     }
@@ -584,6 +596,21 @@ def generate_category_catalog_pdf_view(request, category_slug=None):
         custom_slogan = request.GET.get('custom_slogan', request.POST.get('custom_slogan', '')).strip()
         custom_description = request.GET.get('custom_description', request.POST.get('custom_description', '')).strip()
 
+        # Detección de sede para el catálogo PDF (teléfono, QR y dirección)
+        catalog_branch = None
+        branch_param = (request.GET.get('branch') or request.POST.get('branch') or '').strip().lower()
+        if branch_param and branch_param != 'all':
+            catalog_branch = Branch.objects.filter(slug=branch_param, is_active=True).first()
+
+        if not catalog_branch and hasattr(request.user, 'profile') and request.user.profile.branch:
+            catalog_branch = request.user.profile.branch
+
+        if not catalog_branch and request.session.get('branch_slug'):
+            catalog_branch = Branch.objects.filter(slug=request.session.get('branch_slug'), is_active=True).first()
+
+        if not catalog_branch:
+            catalog_branch = Branch.objects.filter(is_main=True, is_active=True).first()
+
         pdf_bytes, filename = generate_catalog_pdf_bytes(
             category_slugs=categories_param,
             include_prices=include_prices,
@@ -592,6 +619,7 @@ def generate_category_catalog_pdf_view(request, category_slug=None):
             custom_subtitle=custom_subtitle,
             custom_slogan=custom_slogan,
             custom_description=custom_description,
+            branch=catalog_branch,
         )
 
         # Si viene con ?preview=1 se muestra en el navegador (inline), por defecto se descarga (attachment)
@@ -649,7 +677,35 @@ def crm_dashboard_view(request):
     if not month_from and request.GET.get('month'):
         month_from = request.GET.get('month').strip()
         
+    # -------------------------------------------------------------
+    # CONTROL DE SEDE (MULTI-SUCURSAL)
+    # -------------------------------------------------------------
+    user_branch = None
+    if hasattr(request.user, 'profile') and request.user.profile.branch:
+        user_branch = request.user.profile.branch
+
+    crm_branches = list(Branch.objects.filter(is_active=True).order_by('-is_main', 'name'))
+    is_superuser = request.user.is_superuser
+
+    if is_superuser:
+        selected_branch_slug = request.GET.get('branch', 'espana').strip().lower()
+        if selected_branch_slug == 'all':
+            selected_branch = None
+        else:
+            selected_branch = Branch.objects.filter(slug=selected_branch_slug, is_active=True).first()
+            if not selected_branch:
+                selected_branch = Branch.objects.filter(is_main=True, is_active=True).first()
+                selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+    else:
+        # Administrador de sucursal (restringido a su propia sede)
+        selected_branch = user_branch or Branch.objects.filter(is_main=True, is_active=True).first()
+        selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+
     orders = Order.objects.all().order_by('-order_date')
+
+    # Filtrar por sede si no es la vista consolidada 'all'
+    if selected_branch:
+        orders = orders.filter(branch=selected_branch)
     
     date_from = None
     date_to = None
@@ -706,7 +762,7 @@ def crm_dashboard_view(request):
             
     # Autocorrección transparente: si hay pedidos antiguos o creados sin piezas,
     # se genera automáticamente su OrderItem para que se muestren de inmediato en el Kanban.
-    orders_without_items = Order.objects.annotate(item_count=Count('items')).filter(item_count=0).exclude(status='Cancelado')
+    orders_without_items = orders.annotate(item_count=Count('items')).filter(item_count=0).exclude(status='Cancelado')
     for ord_obj in orders_without_items:
         OrderItem.objects.create(
             order=ord_obj,
@@ -727,6 +783,8 @@ def crm_dashboard_view(request):
 
     # Kanban: Pasos solicitados -> Presupuestado - En proceso - Realizado - Enviado - Entregado - Cobrado
     active_order_items = OrderItem.objects.select_related('order', 'product').exclude(order__status='Cancelado')
+    if selected_branch:
+        active_order_items = active_order_items.filter(order__branch=selected_branch)
     if date_from:
         active_order_items = active_order_items.filter(order__order_date__gte=date_from)
     if date_to:
@@ -864,10 +922,16 @@ def crm_dashboard_view(request):
         'platform_choices': Order.PLATFORM_CHOICES,
         'shipping_choices': Order.SHIPPING_CHOICES,
         'correos_services': CORREOS_SERVICES,
-        'customers': Customer.objects.all().order_by('-updated_at')[:50],
+        'customers': (Customer.objects.filter(Q(branch=selected_branch) | Q(branch__isnull=True)) if selected_branch else Customer.objects.all()).order_by('-updated_at')[:50],
         'products_with_id': products_with_id,
         'products_json': json.dumps(products_with_id, default=str),
         'categories': Category.objects.all().order_by('name'),
+        'selected_branch': selected_branch,
+        'selected_branch_slug': selected_branch_slug,
+        'user_branch': user_branch,
+        'crm_branches': crm_branches,
+        'is_all_branches_view': bool(is_superuser and selected_branch_slug == 'all'),
+        'is_superuser': is_superuser,
     }
     
     return render(request, 'crm_dashboard.html', context)
@@ -879,6 +943,9 @@ def update_order_status_api(request, order_id):
             data = json.loads(request.body)
             new_status = data.get('status')
             order = Order.objects.get(id=order_id)
+            if not request.user.is_superuser and hasattr(request.user, 'profile') and request.user.profile.branch:
+                if order.branch and order.branch != request.user.profile.branch:
+                    return JsonResponse({'success': False, 'error': 'No tienes permisos para modificar este pedido de otra sede.'}, status=403)
             if new_status in [s[0] for s in Order.STATUS_CHOICES]:
                 order.status = new_status
                 order.update_status_dates(new_status)
@@ -1089,6 +1156,21 @@ def update_order_full_api(request, order_id):
             data = json.loads(request.body)
             order = get_object_or_404(Order, id=order_id)
             
+            # Control de permisos por sede
+            if not request.user.is_superuser and hasattr(request.user, 'profile') and request.user.profile.branch:
+                if order.branch and order.branch != request.user.profile.branch:
+                    return JsonResponse({'success': False, 'error': 'No tienes permisos para modificar este pedido de otra sede.'}, status=403)
+
+            if request.user.is_superuser:
+                if 'branch_slug' in data:
+                    b = Branch.objects.filter(slug=data['branch_slug']).first()
+                    if b:
+                        order.branch = b
+                elif 'branch_id' in data:
+                    b = Branch.objects.filter(id=data['branch_id']).first()
+                    if b:
+                        order.branch = b
+
             # 1. Cabecera del pedido
             if 'client_name' in data and data['client_name'].strip():
                 order.client_name = data['client_name'].strip()
@@ -1302,6 +1384,9 @@ def delete_order_api(request, order_id):
     if request.method == 'POST':
         try:
             order = get_object_or_404(Order, id=order_id)
+            if not request.user.is_superuser and hasattr(request.user, 'profile') and request.user.profile.branch:
+                if order.branch and order.branch != request.user.profile.branch:
+                    return JsonResponse({'success': False, 'error': 'No tienes permisos para eliminar este pedido de otra sede.'}, status=403)
             order.delete()
             return JsonResponse({'success': True})
         except Exception as e:
@@ -1570,12 +1655,31 @@ def order_create_view(request):
             ship_cost_val = decimal.Decimal('0.00')
 
         save_as_cust = request.POST.get('save_as_customer') in ['true', 'on', '1', True]
+        
+        # Determinar la sucursal del nuevo pedido
+        assigned_branch = None
+        if hasattr(request.user, 'profile') and request.user.profile.branch:
+            assigned_branch = request.user.profile.branch
+        elif request.POST.get('branch_slug'):
+            assigned_branch = Branch.objects.filter(slug=request.POST.get('branch_slug')).first()
+        elif request.POST.get('branch_id'):
+            assigned_branch = Branch.objects.filter(id=request.POST.get('branch_id')).first()
+            
+        if not assigned_branch:
+            session_branch_slug = request.session.get('branch_slug')
+            if session_branch_slug:
+                assigned_branch = Branch.objects.filter(slug=session_branch_slug).first()
+        if not assigned_branch:
+            assigned_branch = Branch.objects.filter(is_main=True).first()
+
         if save_as_cust and client_name:
             if not customer:
                 customer = Customer.objects.filter(name__iexact=client_name).first()
             if not customer:
                 customer = Customer(name=client_name)
             customer.name = client_name
+            if not customer.branch:
+                customer.branch = assigned_branch
             if client_phone:
                 customer.phone = client_phone
             if client_email:
@@ -1597,6 +1701,7 @@ def order_create_view(request):
 
         if client_name and order_date and parsed_pieces:
             order = Order.objects.create(
+                branch=assigned_branch,
                 client_name=client_name,
                 client_contact=client_contact,
                 client_phone=client_phone,
@@ -1761,16 +1866,27 @@ def cart_view(request):
     cart = _get_or_create_cart(request)
     items = cart.items.all().order_by('id')
     
+    # Sede activa para canalizar el pedido
+    branch_slug = request.session.get('branch_slug')
+    current_branch = None
+    if branch_slug:
+        current_branch = Branch.objects.filter(slug=branch_slug, is_active=True).first()
+    if not current_branch:
+        current_branch = Branch.objects.filter(is_main=True, is_active=True).first()
+    
+    greeting = current_branch.greeting_name if current_branch else "ProPrint3D"
+    whatsapp_num = current_branch.whatsapp if current_branch else "34660904515"
+
     # Construir mensaje de WhatsApp
     if items.exists():
-        message_lines = ["Hola ProPrint3d, quiero realizar el siguiente pedido:"]
+        message_lines = [f"Hola {greeting}, quiero realizar el siguiente pedido:"]
         for item in items:
             absolute_url = request.build_absolute_uri(reverse('product_detail', args=[item.product.slug]))
             message_lines.append(f"- {item.quantity}x {item.product.title} ({item.unit_price}€/u) -> {absolute_url}")
         
         message_lines.append(f"\nTotal: {cart.total_price}€")
         wa_message = "\n".join(message_lines)
-        wa_url = f"https://wa.me/34660904515?text={urllib.parse.quote(wa_message)}"
+        wa_url = f"https://wa.me/{whatsapp_num}?text={urllib.parse.quote(wa_message)}"
     else:
         wa_url = "#"
         
@@ -2131,5 +2247,22 @@ def api_postal_code_lookup(request, cp):
         'province': province,
         'city': city
     })
+
+
+def switch_branch_view(request, branch_slug):
+    """
+    Permite al usuario cambiar entre España y Canarias guardando la elección en la sesión.
+    Redirige de vuelta a la página donde estaba el visitante.
+    """
+    slug_clean = branch_slug.strip().lower()
+    if Branch.objects.filter(slug=slug_clean, is_active=True).exists():
+        request.session['branch_slug'] = slug_clean
+        
+    next_url = request.META.get('HTTP_REFERER') or '/'
+    # Evitar redirecciones infinitas o no deseadas
+    if '/cambiar-sede/' in next_url:
+        next_url = '/'
+    return redirect(next_url)
+
 
 

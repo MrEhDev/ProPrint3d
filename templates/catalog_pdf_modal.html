@@ -220,6 +220,13 @@ function executeCatalogPdfGeneration(isPreview) {
     if (customDesc) params.set('custom_description', customDesc);
     if (isPreview) params.set('preview', '1');
 
+    // Pasar la sede activa si se genera desde el CRM o la web
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeBranch = urlParams.get('branch') || "{{ selected_branch_slug|default:'' }}" || "{{ current_branch.slug|default:'' }}";
+    if (activeBranch && activeBranch !== 'all') {
+        params.set('branch', activeBranch);
+    }
+
     const url = "{% url 'generate_catalog_pdf' %}?" + params.toString();
     window.open(url, '_blank');
     closeCatalogPdfModal();

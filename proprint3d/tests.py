@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 import datetime
 
-from proprint3d.models import Customer, Order, OrderItem
+from proprint3d.models import Customer, Order, OrderItem, Branch, UserProfile
 from proprint3d.utils.correos_rates import (
     calculate_all_correos_options,
     calculate_volumetric_weight_grams,
@@ -329,3 +329,107 @@ class CustomerAndOrderShippingTestCase(TestCase):
         # Verificar que el número de seguimiento NO está en Datos del Cliente
         client_section = html.split('<div class="client-section">')[1].split('</div>')[0]
         self.assertNotIn(order.tracking_number, client_section)
+
+
+class BranchMultiSiteTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.branch_espana, _ = Branch.objects.get_or_create(
+            slug='espana',
+            defaults={
+                'name': 'España',
+                'whatsapp': '34660904515',
+                'phone': '+34 660 90 45 15',
+                'greeting_name': 'ProPrint3D',
+                'is_main': True,
+                'is_active': True,
+            }
+        )
+        self.branch_canarias, _ = Branch.objects.get_or_create(
+            slug='canarias',
+            defaults={
+                'name': 'Canarias',
+                'whatsapp': '34697868621',
+                'phone': '+34 697 86 86 21',
+                'greeting_name': 'ProPrint3D Canarias',
+                'city': 'Santa Cruz de Tenerife',
+                'is_main': False,
+                'is_active': True,
+            }
+        )
+        self.branch_canarias.city = 'Santa Cruz de Tenerife'
+        self.branch_canarias.save()
+        self.superadmin = User.objects.create_superuser('superadmin', 'admin@example.com', 'password123')
+        self.canarias_user = User.objects.create_user('canarias_admin', 'canarias@example.com', 'password123', is_staff=True)
+        self.canarias_user.profile.branch = self.branch_canarias
+        self.canarias_user.profile.save()
+
+        # Crear pedidos de prueba
+        self.order_esp = Order.objects.create(
+            branch=self.branch_espana,
+            client_name="Cliente Península",
+            order_date=datetime.date.today(),
+            price=Decimal('25.00')
+        )
+        self.order_can = Order.objects.create(
+            branch=self.branch_canarias,
+            client_name="Cliente Tenerife",
+            order_date=datetime.date.today(),
+            price=Decimal('40.00')
+        )
+
+    def test_switch_branch_view(self):
+        """Verifica que cambiar de sede guarde la elección en la sesión."""
+        response = self.client.get('/cambiar-sede/canarias/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get('branch_slug'), 'canarias')
+
+    def test_branch_context_processor(self):
+        """Verifica que el context processor inyecte el WhatsApp correcto."""
+        # Sin seleccionar: defecto España
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['current_whatsapp'], '34660904515')
+
+        # Con cambio a Canarias
+        self.client.get('/cambiar-sede/canarias/')
+        response = self.client.get('/')
+        self.assertEqual(response.context['current_whatsapp'], '34697868621')
+        self.assertTrue(response.context['is_canarias'])
+
+    def test_crm_branch_isolation(self):
+        """El administrador de Canarias solo ve los pedidos de Canarias en el CRM."""
+        self.client.force_login(self.canarias_user)
+        response = self.client.get('/crm/')
+        self.assertEqual(response.status_code, 200)
+        # Debe ver Cliente Tenerife pero NO Cliente Península
+        self.assertContains(response, "Cliente Tenerife")
+        self.assertNotContains(response, "Cliente Península")
+
+    def test_crm_superadmin_defaults_to_espana(self):
+        """El superadmin entra por defecto a la vista de España (Península)."""
+        self.client.force_login(self.superadmin)
+        response = self.client.get('/crm/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['selected_branch_slug'], 'espana')
+        self.assertContains(response, "Cliente Península")
+        self.assertNotContains(response, "Cliente Tenerife")
+
+        # Al elegir 'all', ve ambos con distintivo
+        response_all = self.client.get('/crm/?branch=all')
+        self.assertTrue(response_all.context['is_all_branches_view'])
+        self.assertContains(response_all, "Cliente Península")
+        self.assertContains(response_all, "Cliente Tenerife")
+
+    def test_catalog_pdf_canarias_data(self):
+        """Verifica que el catálogo generado para Canarias use el teléfono y dirección de Santa Cruz de Tenerife."""
+        from proprint3d.utils.catalog_pdf import build_catalog_context
+        ctx_canarias = build_catalog_context(branch=self.branch_canarias)
+        self.assertEqual(ctx_canarias['whatsapp_display'], '697 868 621')
+        self.assertEqual(ctx_canarias['location'], 'Santa Cruz de Tenerife')
+
+        ctx_espana = build_catalog_context(branch=self.branch_espana)
+        self.assertEqual(ctx_espana['whatsapp_display'], '660 904 515')
+        self.assertIn('Barcelona', ctx_espana['location'])
+
+

@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 import io
@@ -37,6 +40,89 @@ def compress_image_field(image_field, max_width=1200, quality=80):
         # En caso de error, no modificamos la imagen original
         print("Error comprimiendo imagen:", e)
         return False
+
+# =====================================================================
+# MODELO: Branch
+# Propósito: Soporte multi-sede (España Peninsular vs Canarias, etc.).
+# Permite asociar canales de contacto (WhatsApp/Teléfono) y segmentar
+# pedidos y clientes en el CRM por delegación.
+# =====================================================================
+class Branch(models.Model):
+    name = models.CharField(max_length=100, help_text="Nombre de la sede (ej. España, Canarias)")
+    slug = models.SlugField(max_length=50, unique=True, help_text="Identificador único (ej. espana, canarias)")
+    whatsapp = models.CharField(max_length=20, default="34660904515", help_text="WhatsApp con prefijo (sin + ni espacios)")
+    phone = models.CharField(max_length=30, default="+34 660 90 45 15", help_text="Teléfono visible")
+    email = models.EmailField(blank=True, default="proprint3d.es@gmail.com", help_text="Email de contacto")
+    greeting_name = models.CharField(max_length=100, default="ProPrint3D", help_text="Nombre en saludos (ej. ProPrint3D, ProPrint3D Canarias)")
+    address = models.CharField(max_length=250, blank=True, default='', help_text="Dirección física de la sede")
+    city = models.CharField(max_length=100, blank=True, default='', help_text="Ciudad o ubicación (ej. Santa Cruz de Tenerife)")
+    is_main = models.BooleanField(default=False, help_text="Marcar como sede principal por defecto")
+    is_active = models.BooleanField(default=True, help_text="Indica si la sede está activa")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Sede / Sucursal'
+        verbose_name_plural = 'Sedes / Sucursales'
+        ordering = ['-is_main', 'name']
+
+    def __str__(self):
+        return f"{self.name} {'(Principal)' if self.is_main else ''}".strip()
+
+    @property
+    def display_location(self):
+        if self.address and self.city:
+            return f"{self.address}, {self.city}"
+        if self.city:
+            return self.city
+        if self.address:
+            return self.address
+        return "Santa Cruz de Tenerife (Canarias, España)" if self.slug == 'canarias' else "Lliçà d'Amunt (Barcelona, España)"
+
+    @property
+    def display_phone_national(self):
+        # Formato de 9 dígitos para el catálogo (ej: 697 868 621)
+        import re
+        digits = re.sub(r'[^0-9]', '', self.whatsapp or self.phone)
+        if len(digits) >= 9:
+            last9 = digits[-9:]
+            return f"{last9[:3]} {last9[3:6]} {last9[6:]}"
+        return self.phone
+
+
+# =====================================================================
+# MODELO: UserProfile
+# Propósito: Vincular a cada usuario del CRM su sucursal de trabajo.
+# =====================================================================
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users',
+        help_text="Sede asignada. Si es nula o superusuario, puede acceder según permisos."
+    )
+
+    class Meta:
+        verbose_name = 'Perfil de Usuario'
+        verbose_name_plural = 'Perfiles de Usuario'
+
+    def __str__(self):
+        branch_name = self.branch.name if self.branch else "Acceso Global"
+        return f"{self.user.username} - {branch_name}"
+
+
+@receiver(post_save, sender=User)
+def create_or_save_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+    else:
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
+        else:
+            UserProfile.objects.create(user=instance)
+
 
 # =====================================================================
 # MODELO: Category
@@ -258,6 +344,7 @@ class Quote(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Draft')
     notes = models.TextField(blank=True, null=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotes', help_text="Sede que emite el presupuesto")
 
     def update_total(self):
         """
@@ -341,6 +428,7 @@ class Customer(models.Model):
     platform = models.CharField(max_length=50, blank=True, null=True, default='Directo', help_text="Canal habitual (Wallapop, Vinted, Directo, etc.)")
     platform_username = models.CharField(max_length=100, blank=True, null=True, default='', help_text="Usuario en la plataforma (ej. @usuario)")
     notes = models.TextField(blank=True, null=True, default='', help_text="Notas internas sobre el cliente")
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='customers', help_text="Sede habitual del cliente")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -455,6 +543,7 @@ class Order(models.Model):
     
     # Cliente fijo vinculado (opcional para mantener retrocompatibilidad total)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', help_text="Cliente fijo vinculado")
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', help_text="Sede responsable del pedido")
     
     client_name = models.CharField(max_length=150, help_text="Nombre de la Persona")
     client_contact = models.CharField(max_length=150, blank=True, null=True, default='', help_text="Email, teléfono o usuario de contacto")
