@@ -160,11 +160,13 @@
             <div class="inline-flex rounded-xl p-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm gap-1 flex-wrap">
                 <a href="?branch=espana{% if year_from %}&year_from={{ year_from }}{% endif %}{% if month_from %}&month_from={{ month_from }}{% endif %}{% if year_to %}&year_to={{ year_to }}{% endif %}{% if month_to %}&month_to={{ month_to }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 {% if selected_branch_slug == 'espana' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}">
-                    <span>🇪🇸</span> España (Península)
+                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                    <span>España (Península)</span>
                 </a>
                 <a href="?branch=canarias{% if year_from %}&year_from={{ year_from }}{% endif %}{% if month_from %}&month_from={{ month_from }}{% endif %}{% if year_to %}&year_to={{ year_to }}{% endif %}{% if month_to %}&month_to={{ month_to }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 {% if selected_branch_slug == 'canarias' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}">
-                    <span>🇮🇨</span> Canarias
+                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                    <span>Canarias</span>
                 </a>
                 <a href="?branch=all{% if year_from %}&year_from={{ year_from }}{% endif %}{% if month_from %}&month_from={{ month_from }}{% endif %}{% if year_to %}&year_to={{ year_to }}{% endif %}{% if month_to %}&month_to={{ month_to }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 {% if is_all_branches_view %}bg-violet-600 text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}"
@@ -174,7 +176,11 @@
             </div>
             {% else %}
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
-                {% if selected_branch and selected_branch.slug == 'canarias' %}<span>🇮🇨</span>{% else %}<span>🇪🇸</span>{% endif %}
+                {% if selected_branch and selected_branch.slug == 'canarias' %}
+                <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                {% else %}
+                <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                {% endif %}
                 <span>{{ selected_branch.name|default:'Sede asignada' }}</span>
             </span>
             {% endif %}
@@ -463,8 +469,14 @@
                                         #{{ group.order.id }}
                                     </span>
                                     {% if is_all_branches_view and group.order.branch %}
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold {% if group.order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
-                                        {% if group.order.branch.slug == 'canarias' %}🇮🇨 Canarias{% else %}🇪🇸 España{% endif %}
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold {% if group.order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
+                                        {% if group.order.branch.slug == 'canarias' %}
+                                        <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                                        <span>Canarias</span>
+                                        {% else %}
+                                        <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                                        <span>España</span>
+                                        {% endif %}
                                     </span>
                                     {% endif %}
                                     <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0 group-hover/title:text-primary transition underline-offset-2 hover:underline">
@@ -576,8 +588,14 @@
                                             #{{ group.order.id }}
                                         </span>
                                         {% if is_all_branches_view and group.order.branch %}
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold {% if group.order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
-                                            {% if group.order.branch.slug == 'canarias' %}🇮🇨 Canarias{% else %}🇪🇸 España{% endif %}
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold {% if group.order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
+                                            {% if group.order.branch.slug == 'canarias' %}
+                                            <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                                            <span>Canarias</span>
+                                            {% else %}
+                                            <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                                            <span>España</span>
+                                            {% endif %}
                                         </span>
                                         {% endif %}
                                         <span class="text-sm font-bold text-gray-900 dark:text-white truncate min-w-0 group-hover/title:text-primary transition underline-offset-2 hover:underline">
@@ -1087,8 +1105,14 @@
                             #{{ order.id }}
                         </span>
                         {% if is_all_branches_view and order.branch %}
-                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold {% if order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
-                            {% if order.branch.slug == 'canarias' %}🇮🇨 Canarias{% else %}🇪🇸 España{% endif %}
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold {% if order.branch.slug == 'canarias' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300{% endif %} flex-shrink-0">
+                            {% if order.branch.slug == 'canarias' %}
+                            <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                            <span>Canarias</span>
+                            {% else %}
+                            <svg class="w-3.5 h-2.5 rounded-[1px] inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                            <span>España</span>
+                            {% endif %}
                         </span>
                         {% endif %}
                         <button type="button" onclick="openOrderSummaryModal({{ order.id }})"

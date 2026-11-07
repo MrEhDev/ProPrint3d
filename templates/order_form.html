@@ -211,7 +211,7 @@
             <select name="branch_slug" class="of-input font-bold">
               {% for b in all_branches %}
               <option value="{{ b.slug }}" {% if current_branch.slug == b.slug %}selected{% endif %}>
-                {% if b.slug == 'canarias' %}🇮🇨{% else %}🇪🇸{% endif %} {{ b.name }}
+                {{ b.name }}
               </option>
               {% endfor %}
             </select>

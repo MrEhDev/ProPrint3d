@@ -149,9 +149,11 @@
                     <div class="relative" id="branch-dropdown-wrapper">
                         <button id="branch-selector-btn" type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-colors shadow-sm cursor-pointer" title="Cambiar sede de atención">
                             {% if is_canarias %}
-                            <span>🇮🇨</span> <span class="hidden sm:inline">Canarias</span>
+                            <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                            <span class="hidden sm:inline">Canarias</span>
                             {% else %}
-                            <span>🇪🇸</span> <span class="hidden sm:inline">España</span>
+                            <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                            <span class="hidden sm:inline">España</span>
                             {% endif %}
                             <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
@@ -163,7 +165,11 @@
                             {% for b in all_branches %}
                             <a href="{% url 'switch_branch' b.slug %}" class="flex items-center justify-between px-3 py-2 text-xs font-semibold {% if current_branch.slug == b.slug %}text-primary bg-primary/10 dark:bg-primary/20 font-bold{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
                                 <span class="flex items-center gap-2">
-                                    {% if b.slug == 'canarias' %}<span>🇮🇨</span>{% else %}<span>🇪🇸</span>{% endif %}
+                                    {% if b.slug == 'canarias' %}
+                                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                                    {% else %}
+                                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                                    {% endif %}
                                     <span>{{ b.name }}</span>
                                 </span>
                                 {% if current_branch.slug == b.slug %}
@@ -228,7 +234,11 @@
                     <div class="grid grid-cols-2 gap-2 mt-1.5">
                         {% for b in all_branches %}
                         <a href="{% url 'switch_branch' b.slug %}" class="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold border transition-all {% if current_branch.slug == b.slug %}border-primary bg-primary/10 text-primary dark:text-primary{% else %}border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60{% endif %}">
-                            <span>{% if b.slug == 'canarias' %}🇮🇨{% else %}🇪🇸{% endif %}</span>
+                            {% if b.slug == 'canarias' %}
+                            <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                            {% else %}
+                            <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                            {% endif %}
                             <span>{{ b.name }}</span>
                         </a>
                         {% endfor %}
