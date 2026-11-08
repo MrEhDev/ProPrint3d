@@ -705,7 +705,10 @@ def crm_dashboard_view(request):
 
     # Filtrar por sede si no es la vista consolidada 'all'
     if selected_branch:
-        orders = orders.filter(branch=selected_branch)
+        if selected_branch.is_main:
+            orders = orders.filter(Q(branch=selected_branch) | Q(branch__isnull=True))
+        else:
+            orders = orders.filter(branch=selected_branch)
     
     date_from = None
     date_to = None
@@ -784,7 +787,10 @@ def crm_dashboard_view(request):
     # Kanban: Pasos solicitados -> Presupuestado - En proceso - Realizado - Enviado - Entregado - Cobrado
     active_order_items = OrderItem.objects.select_related('order', 'product').exclude(order__status='Cancelado')
     if selected_branch:
-        active_order_items = active_order_items.filter(order__branch=selected_branch)
+        if selected_branch.is_main:
+            active_order_items = active_order_items.filter(Q(order__branch=selected_branch) | Q(order__branch__isnull=True))
+        else:
+            active_order_items = active_order_items.filter(order__branch=selected_branch)
     if date_from:
         active_order_items = active_order_items.filter(order__order_date__gte=date_from)
     if date_to:

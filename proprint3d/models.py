@@ -363,6 +363,13 @@ class Quote(models.Model):
             
         self.save()
 
+    def save(self, *args, **kwargs):
+        if not self.branch_id:
+            main_b = Branch.objects.filter(is_main=True).first()
+            if main_b:
+                self.branch = main_b
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Quote #{self.id} - {self.client_name}"
 
@@ -435,6 +442,13 @@ class Customer(models.Model):
         ordering = ['name']
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
+
+    def save(self, *args, **kwargs):
+        if not self.branch_id:
+            main_b = Branch.objects.filter(is_main=True).first()
+            if main_b:
+                self.branch = main_b
+        super().save(*args, **kwargs)
 
     def __str__(self):
         city_suffix = f" ({self.city})" if self.city else ""
@@ -704,6 +718,12 @@ class Order(models.Model):
             self.unit_price = product_p
             self.price = product_p * qty
             
+        # Asegurar sede por defecto (España) si no se especifica ninguna
+        if not self.branch_id:
+            main_b = Branch.objects.filter(is_main=True).first()
+            if main_b:
+                self.branch = main_b
+
         super().save(*args, **kwargs)
 
     @property
