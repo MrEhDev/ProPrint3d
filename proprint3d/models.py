@@ -502,6 +502,56 @@ class Customer(models.Model):
 
 
 # =====================================================================
+# MODELO: Filament
+# Propósito: Inventario de filamentos y bobinas por sede (Spoolman nativo).
+# Identificación física por número (#4) para rotular la bobina,
+# control de stock de bobinas cerradas/abiertas y alertas de stock mínimo.
+# =====================================================================
+class Filament(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='filaments', help_text="Sede / Almacén al que pertenece el filamento")
+    code = models.PositiveIntegerField(help_text="Número identificador físico para rotular la bobina (ej. 4)")
+    brand = models.CharField(max_length=50, help_text="Marca del filamento (ej. eSun, Elegoo, Bambu Lab, Sunlu)")
+    material = models.CharField(max_length=30, default='PLA', help_text="Tipo de material (PLA, PETG, TPU, ABS, ASA, etc.)")
+    color_name = models.CharField(max_length=50, help_text="Nombre del color (ej. Blanco, Negro, Gris, Rojo)")
+    color_hex = models.CharField(max_length=7, default='#808080', help_text="Código hexadecimal del color para visualización (ej. #808080)")
+    
+    # Stock de bobinas
+    spools_closed = models.PositiveIntegerField(default=0, help_text="Bobinas precintadas / cerradas en stock")
+    spools_opened = models.PositiveIntegerField(default=1, help_text="Bobinas abiertas / en uso en el taller")
+    
+    # Alerta de stock mínimo de bobinas cerradas
+    min_closed_alert = models.PositiveIntegerField(default=1, help_text="Umbral de alerta si quedan X o menos bobinas cerradas")
+    
+    cost_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=20.00, help_text="Coste aproximado por kilogramo (€)")
+    notes = models.CharField(max_length=250, blank=True, null=True, default='', help_text="Notas técnicas (temperatura, secado, ubicación...)")
+    is_active = models.BooleanField(default=True, help_text="¿Activo para usar en nuevos pedidos?")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Filamento'
+        verbose_name_plural = 'Filamentos'
+        unique_together = ('branch', 'code')
+        ordering = ['code']
+
+    def __str__(self):
+        return f"#{self.code} {self.brand} {self.material} - {self.color_name} ({self.branch.name})"
+
+    @property
+    def display_name(self):
+        return f"#{self.code} {self.brand} {self.material} {self.color_name}"
+
+    @property
+    def is_low_stock(self):
+        """Indica si el stock de bobinas cerradas está en o por debajo del umbral de alerta."""
+        return self.spools_closed <= self.min_closed_alert
+
+    @property
+    def total_spools(self):
+        return self.spools_closed + self.spools_opened
+
+
+# =====================================================================
 # MODELO: Order
 # Propósito: Mini-CRM para control de pedidos.
 # Razón de la estructura: Separado de los presupuestos para enfocarse en 
@@ -816,6 +866,11 @@ class Order(models.Model):
     @property
     def formatted_shipping_address(self):
         return self.recipient_full_address
+
+    @property
+    def all_filaments(self):
+        """Devuelve los filamentos únicos utilizados en las piezas de este pedido ordenados por código."""
+        return Filament.objects.filter(order_items__order=self).distinct().order_by('code')
 
     @property
     def total_shipping_weight_grams(self):
@@ -1215,6 +1270,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.CharField(max_length=250, help_text="Nombre o descripción de la pieza")
+    filaments = models.ManyToManyField(Filament, blank=True, related_name='order_items', help_text="Filamentos/colores empleados en esta pieza")
     quantity = models.IntegerField(default=1, help_text="Cantidad de esta pieza")
     completed_quantity = models.PositiveIntegerField(default=0, help_text="Unidades ya fabricadas/impresas")
     

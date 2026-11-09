@@ -59,6 +59,13 @@ urlpatterns = [
     path('crm/api/shipping/calculate/', views.api_calculate_shipping_rates, name='api_calculate_shipping_rates'),
     path('crm/api/postal-code/<str:cp>/', views.api_postal_code_lookup, name='api_postal_code_lookup'),
     
+    # Inventario de Filamentos (Spoolman nativo)
+    path('crm/filamentos/', views.filament_inventory_view, name='filament_inventory'),
+    path('crm/filamentos/api/adjust-stock/', views.api_filament_adjust_stock, name='api_filament_adjust_stock'),
+    path('crm/filamentos/api/save/', views.api_filament_save, name='api_filament_save'),
+    path('crm/filamentos/api/list/', views.api_filament_list, name='api_filament_list'),
+    path('crm/filamentos/api/delete/<int:filament_id>/', views.api_filament_delete, name='api_filament_delete'),
+    
     # APIs rápidas de producto
     path('api/product/check-title/', views.check_product_title_api, name='check_product_title_api'),
     path('product/<slug:slug>/toggle-sale/', views.toggle_sale_api, name='toggle_sale_api'),

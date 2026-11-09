@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 import datetime
 
-from proprint3d.models import Customer, Order, OrderItem, Branch, UserProfile
+from proprint3d.models import Customer, Order, OrderItem, Branch, UserProfile, Filament
 from proprint3d.utils.correos_rates import (
     calculate_all_correos_options,
     calculate_volumetric_weight_grams,
@@ -468,5 +468,162 @@ class BranchMultiSiteTestCase(TestCase):
         ctx_espana = build_catalog_context(branch=self.branch_espana)
         self.assertEqual(ctx_espana['whatsapp_display'], '660 904 515')
         self.assertIn('Barcelona', ctx_espana['location'])
+
+
+class FilamentManagementTestCase(TestCase):
+    def setUp(self):
+        self.branch_espana, _ = Branch.objects.get_or_create(
+            slug="espana",
+            defaults={"name": "Sede Península", "is_main": True}
+        )
+        self.branch_canarias, _ = Branch.objects.get_or_create(
+            slug="canarias",
+            defaults={"name": "Sede Canarias", "is_main": False}
+        )
+        self.user = User.objects.create_superuser(username="admin_filamentos", password="password123")
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_filament_creation_and_branch_scoping(self):
+        """Verifica la creación con código y unicidad por sede."""
+        from django.db import IntegrityError
+
+        fil_es = Filament.objects.create(
+            branch=self.branch_espana,
+            code=4,
+            brand="eSun",
+            material="PLA+",
+            color_name="Gris Espacial",
+            color_hex="#808080",
+            spools_closed=2,
+            spools_opened=1,
+            min_closed_alert=1
+        )
+        self.assertEqual(fil_es.display_name, "#4 eSun PLA+ Gris Espacial")
+        self.assertFalse(fil_es.is_low_stock)
+
+        # Mismo código en Canarias es válido porque está en otra sede
+        fil_can = Filament.objects.create(
+            branch=self.branch_canarias,
+            code=4,
+            brand="Elegoo",
+            material="PETG",
+            color_name="Negro",
+            color_hex="#000000"
+        )
+        self.assertEqual(fil_can.branch.slug, "canarias")
+
+        # Mismo código en la misma sede España debe fallar por unique_together
+        with self.assertRaises(IntegrityError):
+            Filament.objects.create(
+                branch=self.branch_espana,
+                code=4,
+                brand="Sunlu",
+                material="PLA",
+                color_name="Blanco"
+            )
+
+    def test_filament_stock_adjust_api(self):
+        """Prueba la API de ajuste rápido de bobinas y apertura de bobinas."""
+        import json
+
+        fil = Filament.objects.create(
+            branch=self.branch_espana,
+            code=7,
+            brand="Bambu Lab",
+            material="PLA Basic",
+            color_name="Verde Menta",
+            color_hex="#00FF99",
+            spools_closed=3,
+            spools_opened=1,
+            min_closed_alert=2
+        )
+
+        # 1. Abrir bobina: resta 1 a cerradas y suma 1 a abiertas
+        res_open = self.client.post(
+            "/crm/filamentos/api/adjust-stock/",
+            data=json.dumps({"filament_id": fil.id, "action": "open_spool"}),
+            content_type="application/json"
+        )
+        self.assertEqual(res_open.status_code, 200)
+        data = res_open.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["spools_closed"], 2)
+        self.assertEqual(data["spools_opened"], 2)
+
+        # 2. Restar 1 a cerradas: ahora queda 1 cerrada (<= min_closed_alert=2 => is_low_stock True)
+        res_dec = self.client.post(
+            "/crm/filamentos/api/adjust-stock/",
+            data=json.dumps({"filament_id": fil.id, "action": "dec_closed"}),
+            content_type="application/json"
+        )
+        self.assertEqual(res_dec.status_code, 200)
+        data_dec = res_dec.json()
+        self.assertEqual(data_dec["spools_closed"], 1)
+        self.assertTrue(data_dec["is_low_stock"])
+
+    def test_order_item_filament_association_and_all_filaments(self):
+        """Verifica la asignación de filamentos a piezas y la propiedad agregada order.all_filaments."""
+        fil1 = Filament.objects.create(branch=self.branch_espana, code=1, brand="eSun", material="PLA", color_name="Negro")
+        fil2 = Filament.objects.create(branch=self.branch_espana, code=2, brand="eSun", material="PLA", color_name="Blanco")
+
+        order = Order.objects.create(
+            branch=self.branch_espana,
+            client_name="Cliente Filamentos",
+            status="Presupuestado",
+            order_date=datetime.date.today()
+        )
+
+        item1 = OrderItem.objects.create(order=order, description="Pieza Bicolor", quantity=1)
+        item1.filaments.add(fil1, fil2)
+
+        item2 = OrderItem.objects.create(order=order, description="Pieza Monocolor", quantity=2)
+        item2.filaments.add(fil1)
+
+        # Consolida sin duplicar: debe tener fil1 y fil2
+        all_fils = order.all_filaments
+        self.assertEqual(len(all_fils), 2)
+        fil_codes = {f.code for f in all_fils}
+        self.assertEqual(fil_codes, {1, 2})
+
+    def test_order_edit_api_saves_filaments(self):
+        """Verifica que el endpoint de edición de pedidos guarde los filament_ids de cada pieza."""
+        import json
+
+        fil4 = Filament.objects.create(branch=self.branch_espana, code=4, brand="eSun", material="PLA", color_name="Gris")
+        order = Order.objects.create(
+            branch=self.branch_espana,
+            client_name="Cliente API Edit",
+            status="Presupuestado",
+            order_date=datetime.date.today()
+        )
+        item = OrderItem.objects.create(order=order, description="Soporte Auriculares", quantity=1)
+
+        payload = {
+            "client_name": "Cliente API Edit",
+            "order_date": str(datetime.date.today()),
+            "status": "En proceso",
+            "pieces": [
+                {
+                    "id": item.id,
+                    "description": "Soporte Auriculares Modificado",
+                    "quantity": 1,
+                    "filament_ids": [fil4.id]
+                }
+            ]
+        }
+
+        res = self.client.post(
+            f"/crm/api/order/{order.id}/edit/",
+            data=json.dumps(payload),
+            content_type="application/json"
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json().get("success"))
+
+        item.refresh_from_db()
+        self.assertEqual(item.filaments.count(), 1)
+        self.assertEqual(item.filaments.first().code, 4)
+
 
 

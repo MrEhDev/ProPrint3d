@@ -549,6 +549,17 @@
 <script>
   // Lista completa de productos con fotos y datos del catálogo
   const productCatalogList = {{ products_json| safe }};
+  const branchFilaments = {{ filaments_json|default:"[]"|safe }};
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   // Diccionario indexado por título
   const productCatalogMap = {};
@@ -575,7 +586,9 @@
       isCatalog: false,
       suggX25: 0,
       suggX30: 0,
-      suggX40: 0
+      suggX40: 0,
+      filaments: [],
+      filament_ids: []
     }
   ];
 
@@ -730,6 +743,45 @@
           value="${(piece.notes || '').replace(/"/g, '&quot;')}">
       </div>
 
+      <!-- Filamentos / Bobinas Asignadas -->
+      <div class="mb-4 p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-dark/60">
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+            <span>🧵</span> Filamentos / Bobinas utilizadas
+          </label>
+          <a href="/crm/filamentos/" target="_blank" class="text-xs text-primary hover:underline flex items-center gap-1 font-semibold">
+            <span>📦</span> Almacén (+ Nuevo)
+          </a>
+        </div>
+
+        <!-- Lista de chips de filamentos de esta pieza -->
+        <div class="flex flex-wrap gap-1.5 mb-2.5 min-h-[26px]" id="new-piece-filaments-${index}">
+        </div>
+
+        <!-- Selector por número de código o desplegable -->
+        <div class="flex items-center gap-2">
+          <div class="relative w-32 sm:w-40 flex-shrink-0">
+            <input type="text"
+              id="new-piece-fil-code-${index}"
+              placeholder="Ej. #4 o 4..."
+              onkeydown="if(event.key==='Enter'){event.preventDefault(); addFilamentByCodeToNewPiece(${index}, this.value); this.value='';}"
+              class="of-input text-xs py-1.5 px-2.5 font-bold">
+          </div>
+          <button type="button"
+            onclick="const inp=document.getElementById('new-piece-fil-code-${index}'); addFilamentByCodeToNewPiece(${index}, inp.value); inp.value='';"
+            class="px-2.5 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs font-bold rounded-xl text-gray-700 dark:text-gray-200 transition cursor-pointer">
+            + Añadir #
+          </button>
+          <select onchange="if(this.value){ addFilamentByIdToNewPiece(${index}, this.value); this.value=''; }"
+            class="of-input text-xs py-1.5 px-2 flex-1 truncate font-medium">
+            <option value="">O elige filamento...</option>
+            ${branchFilaments.map(f => `
+              <option value="${f.id}">#${f.code} - ${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.color_name)} (${f.spools_closed}📦 / ${f.spools_opened}⭕)</option>
+            `).join('')}
+          </select>
+        </div>
+      </div>
+
       <!-- Fila 2: Fabricación (Peso, Horas, Minutos, Otros costes) -->
       <div class="bg-white/80 dark:bg-dark/60 p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-800 mb-4">
         <div class="flex items-center justify-between mb-2">
@@ -867,6 +919,7 @@
     `;
 
       container.appendChild(card);
+      renderNewOrderPieceFilamentChips(index);
     });
 
     bindPieceEvents();
@@ -1250,6 +1303,84 @@
     updateOrderGrandTotals();
   }
 
+  // ==========================================
+  // GESTIÓN DE FILAMENTOS EN ALTA DE PEDIDO
+  // ==========================================
+  function renderNewOrderPieceFilamentChips(index) {
+    const container = document.getElementById(`new-piece-filaments-${index}`);
+    if (!container) return;
+    const p = piecesState[index];
+    if (!p) return;
+    const filaments = p.filaments || [];
+    if (filaments.length === 0) {
+      container.innerHTML = '<span class="text-xs text-gray-400 dark:text-gray-500 italic">Sin filamentos asignados (opcional)</span>';
+      return;
+    }
+    container.innerHTML = filaments.map((f, fIdx) => `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xs">
+        <span class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0" style="background-color: ${escapeHtml(f.colorHex || f.color_hex || '#cccccc')}"></span>
+        <span class="font-black text-primary">#${f.code}</span>
+        <span class="text-gray-800 dark:text-gray-200">${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.colorName || f.color_name || '')}</span>
+        <button type="button" onclick="removeFilamentFromNewPiece(${index}, ${fIdx})" class="text-gray-400 hover:text-red-500 ml-1 font-bold cursor-pointer" title="Quitar filamento">✕</button>
+      </span>
+    `).join('');
+  }
+
+  function addFilamentByIdToNewPiece(index, filId) {
+    if (!filId) return;
+    const fil = branchFilaments.find(f => String(f.id) === String(filId));
+    if (!fil) return;
+    const p = piecesState[index];
+    if (!p) return;
+    if (!p.filaments) p.filaments = [];
+    if (!p.filament_ids) p.filament_ids = [];
+    if (p.filament_ids.some(id => String(id) === String(fil.id))) {
+      return;
+    }
+    p.filaments.push({
+      id: fil.id,
+      code: fil.code,
+      brand: fil.brand,
+      material: fil.material,
+      colorName: fil.color_name,
+      colorHex: fil.color_hex,
+      displayName: fil.display_name
+    });
+    p.filament_ids.push(fil.id);
+    renderNewOrderPieceFilamentChips(index);
+    syncHiddenInputs();
+  }
+
+  function addFilamentByCodeToNewPiece(index, query) {
+    if (!query) return;
+    const clean = query.trim().replace(/^#/, '');
+    if (!clean) return;
+    let fil = branchFilaments.find(f => String(f.code) === clean);
+    if (!fil) {
+      const qLower = clean.toLowerCase();
+      fil = branchFilaments.find(f =>
+        f.brand.toLowerCase().includes(qLower) ||
+        f.material.toLowerCase().includes(qLower) ||
+        f.color_name.toLowerCase().includes(qLower) ||
+        `${f.brand} ${f.material} ${f.color_name}`.toLowerCase().includes(qLower)
+      );
+    }
+    if (fil) {
+      addFilamentByIdToNewPiece(index, fil.id);
+    } else {
+      alert(`No se encontró ningún filamento con el número o nombre "${query}" en esta sede.`);
+    }
+  }
+
+  function removeFilamentFromNewPiece(pieceIndex, filIndex) {
+    const p = piecesState[pieceIndex];
+    if (!p || !p.filaments) return;
+    p.filaments.splice(filIndex, 1);
+    p.filament_ids = p.filaments.map(f => f.id);
+    renderNewOrderPieceFilamentChips(pieceIndex);
+    syncHiddenInputs();
+  }
+
   // Añadir nueva pieza
   function addPiece() {
     piecesState.push({
@@ -1269,7 +1400,9 @@
       isCatalog: false,
       suggX25: 0,
       suggX30: 0,
-      suggX40: 0
+      suggX40: 0,
+      filaments: [],
+      filament_ids: []
     });
     renderPieces();
   }
@@ -1280,7 +1413,9 @@
     piecesState.splice(index + 1, 0, {
       ...source,
       uid: Date.now(),
-      description: source.description ? `${source.description} (Copia)` : ''
+      description: source.description ? `${source.description} (Copia)` : '',
+      filaments: [...(source.filaments || [])],
+      filament_ids: [...(source.filament_ids || [])]
     });
     renderPieces();
   }
@@ -1433,7 +1568,8 @@
         total_cost: p.totalCost || 0,
         unit_price: p.unitPrice || 0,
         price: p.totalPrice || 0,
-        notes: p.notes ? p.notes.trim() : ''
+        notes: p.notes ? p.notes.trim() : '',
+        filament_ids: (p.filament_ids || (p.filaments ? p.filaments.map(f => f.id) : []))
       }));
       jsonInput.value = JSON.stringify(payload);
     }

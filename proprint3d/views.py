@@ -7,7 +7,8 @@ import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Max, Sum, F, Count
+from django.views.decorators.http import require_POST
 
 from functools import wraps
 from django.contrib.auth import authenticate, login, logout
@@ -29,7 +30,7 @@ def staff_member_required(view_func):
 # Utilidades PDF
 import io
 
-from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer, Branch
+from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer, Branch, Filament
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
@@ -941,6 +942,19 @@ def crm_dashboard_view(request):
         'crm_branches': crm_branches,
         'is_all_branches_view': bool(is_superuser and selected_branch_slug == 'all'),
         'is_superuser': is_superuser,
+        'branch_filaments': list(Filament.objects.filter(branch=selected_branch, is_active=True).order_by('code')) if selected_branch else list(Filament.objects.filter(is_active=True).order_by('code')),
+        'filaments_json': json.dumps([{
+            'id': f.id,
+            'code': f.code,
+            'brand': f.brand,
+            'material': f.material,
+            'color_name': f.color_name,
+            'color_hex': f.color_hex,
+            'display_name': f.display_name,
+            'spools_closed': f.spools_closed,
+            'spools_opened': f.spools_opened,
+            'is_low_stock': f.is_low_stock
+        } for f in (Filament.objects.filter(branch=selected_branch, is_active=True).order_by('code') if selected_branch else Filament.objects.filter(is_active=True).order_by('code'))]),
     }
     
     return render(request, 'crm_dashboard.html', context)
@@ -1319,6 +1333,8 @@ def update_order_full_api(request, order_id):
                 status_piece = p.get('status') or order.status
                 notes_piece = p.get('notes', '').strip() if p.get('notes') else ''
                 
+                filament_ids = p.get('filament_ids', [])
+
                 if pid and int(pid) in existing_items_map:
                     itm = existing_items_map[int(pid)]
                     itm.product = product
@@ -1335,6 +1351,8 @@ def update_order_full_api(request, order_id):
                     itm.status = status_piece
                     itm.notes = notes_piece
                     itm.save()
+                    if filament_ids is not None:
+                        itm.filaments.set(filament_ids)
                     retained_ids.add(itm.id)
                 else:
                     new_itm = OrderItem.objects.create(
@@ -1353,6 +1371,8 @@ def update_order_full_api(request, order_id):
                         status=status_piece,
                         notes=notes_piece
                     )
+                    if filament_ids:
+                        new_itm.filaments.set(filament_ids)
                     retained_ids.add(new_itm.id)
                     
             # Eliminar piezas que se hayan borrado desde el modal
@@ -1761,7 +1781,7 @@ def order_create_view(request):
                 u_price = decimal.Decimal(str(p.get('unit_price') or 0.00).replace(',', '.'))
                 t_price = decimal.Decimal(str(p.get('price') or 0.00).replace(',', '.'))
                 
-                OrderItem.objects.create(
+                new_item = OrderItem.objects.create(
                     order=order,
                     product=product,
                     description=desc,
@@ -1777,6 +1797,9 @@ def order_create_view(request):
                     status=initial_status,
                     notes=p.get('notes', '').strip() if p.get('notes') else ''
                 )
+                filament_ids = p.get('filament_ids', [])
+                if filament_ids:
+                    new_item.filaments.set(filament_ids)
                 
             order.update_totals_from_items()
             return redirect('crm_dashboard')
@@ -1848,6 +1871,24 @@ def order_create_view(request):
         })
     products = [p['title'] for p in products_with_id]
     
+    # Filamentos activos para la sede
+    target_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+    if hasattr(request.user, 'profile') and request.user.profile.branch:
+        target_branch = request.user.profile.branch
+    branch_filaments = list(Filament.objects.filter(branch=target_branch, is_active=True).order_by('code'))
+    filaments_json = json.dumps([{
+        'id': f.id,
+        'code': f.code,
+        'brand': f.brand,
+        'material': f.material,
+        'color_name': f.color_name,
+        'color_hex': f.color_hex,
+        'display_name': f.display_name,
+        'spools_closed': f.spools_closed,
+        'spools_opened': f.spools_opened,
+        'is_low_stock': f.is_low_stock
+    } for f in branch_filaments])
+
     return render(request, 'order_form.html', {
         'form': form, 
         'products': products, 
@@ -1856,6 +1897,8 @@ def order_create_view(request):
         'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
         'correos_services': CORREOS_SERVICES,
         'customers': Customer.objects.all().order_by('-updated_at')[:50],
+        'branch_filaments': branch_filaments,
+        'filaments_json': filaments_json,
     })
 
 # =====================================================================
@@ -2272,6 +2315,250 @@ def switch_branch_view(request, branch_slug):
     if '/cambiar-sede/' in next_url:
         next_url = '/'
     return redirect(next_url)
+
+
+# =====================================================================
+# VISTAS: Inventario de Filamentos (Spoolman nativo)
+# =====================================================================
+
+@staff_member_required
+def filament_inventory_view(request):
+    """
+    Vista principal de gestión de inventario de filamentos y bobinas por sede.
+    Muestra métricas de bobinas cerradas/abiertas, estado de alertas y listado.
+    """
+    user_branch = None
+    if hasattr(request.user, 'profile') and request.user.profile.branch:
+        user_branch = request.user.profile.branch
+
+    is_superuser = request.user.is_superuser
+    crm_branches = list(Branch.objects.filter(is_active=True).order_by('-is_main', 'name'))
+
+    if is_superuser:
+        selected_branch_slug = request.GET.get('branch', 'espana').strip().lower()
+        selected_branch = Branch.objects.filter(slug=selected_branch_slug, is_active=True).first()
+        if not selected_branch:
+            selected_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+            selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+    else:
+        selected_branch = user_branch or Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+        selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+
+    filaments_qs = Filament.objects.filter(branch=selected_branch)
+
+    # Búsqueda
+    q = request.GET.get('q', '').strip()
+    if q:
+        if q.isdigit():
+            filaments_qs = filaments_qs.filter(code=int(q))
+        else:
+            filaments_qs = filaments_qs.filter(
+                Q(brand__icontains=q) |
+                Q(material__icontains=q) |
+                Q(color_name__icontains=q) |
+                Q(notes__icontains=q)
+            )
+
+    # Filtro por material
+    material_filter = request.GET.get('material', '').strip()
+    if material_filter:
+        filaments_qs = filaments_qs.filter(material__iexact=material_filter)
+
+    # Filtro por alerta
+    alert_filter = request.GET.get('alert', '').strip()
+    if alert_filter == 'low':
+        filaments_qs = [f for f in filaments_qs if f.is_low_stock]
+
+    # Lista final ordenada
+    filaments = list(filaments_qs.order_by('code')) if not isinstance(filaments_qs, list) else sorted(filaments_qs, key=lambda f: f.code)
+
+    # Métricas agregadas
+    all_branch_filaments = list(Filament.objects.filter(branch=selected_branch))
+    total_filaments = len(all_branch_filaments)
+    total_closed = sum(f.spools_closed for f in all_branch_filaments)
+    total_opened = sum(f.spools_opened for f in all_branch_filaments)
+    low_stock_count = sum(1 for f in all_branch_filaments if f.is_low_stock)
+
+    # Próximo número recomendado
+    max_code = Filament.objects.filter(branch=selected_branch).aggregate(Max('code'))['code__max'] or 0
+    next_code = max_code + 1
+
+    # Materiales únicos disponibles para el filtro
+    available_materials = list(Filament.objects.filter(branch=selected_branch).values_list('material', flat=True).distinct().order_by('material'))
+
+    return render(request, 'filament_inventory.html', {
+        'selected_branch': selected_branch,
+        'selected_branch_slug': selected_branch_slug,
+        'crm_branches': crm_branches,
+        'is_superuser': is_superuser,
+        'filaments': filaments,
+        'total_filaments': total_filaments,
+        'total_closed': total_closed,
+        'total_opened': total_opened,
+        'low_stock_count': low_stock_count,
+        'next_code': next_code,
+        'available_materials': available_materials,
+        'search_query': q,
+        'material_filter': material_filter,
+        'alert_filter': alert_filter,
+    })
+
+
+@staff_member_required
+@require_POST
+def api_filament_adjust_stock(request):
+    """
+    Ajusta rápidamente el stock de bobinas de un filamento (+, -, abrir bobina).
+    """
+    try:
+        data = json.loads(request.body)
+        filament_id = data.get('filament_id')
+        action = data.get('action') # 'open_spool', 'inc_closed', 'dec_closed', 'inc_opened', 'dec_opened'
+        
+        filament = get_object_or_404(Filament, id=filament_id)
+        
+        if action == 'open_spool':
+            if filament.spools_closed > 0:
+                filament.spools_closed -= 1
+                filament.spools_opened += 1
+            else:
+                return JsonResponse({'success': False, 'error': 'No quedan bobinas cerradas para abrir.'}, status=400)
+        elif action == 'inc_closed':
+            filament.spools_closed += 1
+        elif action == 'dec_closed':
+            filament.spools_closed = max(0, filament.spools_closed - 1)
+        elif action == 'inc_opened':
+            filament.spools_opened += 1
+        elif action == 'dec_opened':
+            filament.spools_opened = max(0, filament.spools_opened - 1)
+        else:
+            return JsonResponse({'success': False, 'error': 'Acción no válida'}, status=400)
+
+        filament.save()
+        return JsonResponse({
+            'success': True,
+            'spools_closed': filament.spools_closed,
+            'spools_opened': filament.spools_opened,
+            'is_low_stock': filament.is_low_stock,
+            'min_closed_alert': filament.min_closed_alert
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@staff_member_required
+@require_POST
+def api_filament_save(request):
+    """
+    Crea o actualiza un filamento vía AJAX.
+    """
+    try:
+        data = json.loads(request.body)
+        filament_id = data.get('id')
+        branch_id = data.get('branch_id')
+        code = int(data.get('code', 1))
+        brand = data.get('brand', '').strip()
+        material = data.get('material', 'PLA').strip()
+        color_name = data.get('color_name', '').strip()
+        color_hex = data.get('color_hex', '#808080').strip()
+        spools_closed = int(data.get('spools_closed', 0))
+        spools_opened = int(data.get('spools_opened', 1))
+        min_closed_alert = int(data.get('min_closed_alert', 1))
+        cost_per_kg = float(data.get('cost_per_kg', 20.00))
+        notes = data.get('notes', '').strip()
+
+        if not brand or not color_name:
+            return JsonResponse({'success': False, 'error': 'La marca y el nombre del color son obligatorios.'}, status=400)
+
+        branch = get_object_or_404(Branch, id=branch_id)
+
+        # Si es nuevo filamento, verificar que el código no esté ocupado en esta sede
+        if not filament_id:
+            if Filament.objects.filter(branch=branch, code=code).exists():
+                return JsonResponse({'success': False, 'error': f'El número #{code} ya está asignado a otro filamento en esta sede.'}, status=400)
+            filament = Filament(branch=branch)
+        else:
+            filament = get_object_or_404(Filament, id=filament_id)
+            if Filament.objects.filter(branch=branch, code=code).exclude(id=filament_id).exists():
+                return JsonResponse({'success': False, 'error': f'El número #{code} ya está asignado a otro filamento en esta sede.'}, status=400)
+
+        filament.branch = branch
+        filament.code = code
+        filament.brand = brand
+        filament.material = material
+        filament.color_name = color_name
+        filament.color_hex = color_hex
+        filament.spools_closed = max(0, spools_closed)
+        filament.spools_opened = max(0, spools_opened)
+        filament.min_closed_alert = max(0, min_closed_alert)
+        filament.cost_per_kg = cost_per_kg
+        filament.notes = notes
+        filament.save()
+
+        return JsonResponse({
+            'success': True,
+            'filament': {
+                'id': filament.id,
+                'code': filament.code,
+                'brand': filament.brand,
+                'material': filament.material,
+                'color_name': filament.color_name,
+                'color_hex': filament.color_hex,
+                'spools_closed': filament.spools_closed,
+                'spools_opened': filament.spools_opened,
+                'min_closed_alert': filament.min_closed_alert,
+                'is_low_stock': filament.is_low_stock,
+                'display_name': filament.display_name
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@staff_member_required
+def api_filament_list(request):
+    """
+    Devuelve lista en JSON de filamentos activos para el autocompletado en pedidos.
+    """
+    branch_slug = request.GET.get('branch', '').strip().lower()
+    branch_id = request.GET.get('branch_id')
+
+    if branch_id:
+        branch = Branch.objects.filter(id=branch_id, is_active=True).first()
+    elif branch_slug:
+        branch = Branch.objects.filter(slug=branch_slug, is_active=True).first()
+    else:
+        branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+
+    if not branch:
+        return JsonResponse({'success': True, 'filaments': []})
+
+    filaments = Filament.objects.filter(branch=branch, is_active=True).order_by('code')
+    data = [{
+        'id': f.id,
+        'code': f.code,
+        'brand': f.brand,
+        'material': f.material,
+        'color_name': f.color_name,
+        'color_hex': f.color_hex,
+        'display_name': f.display_name,
+        'spools_closed': f.spools_closed,
+        'spools_opened': f.spools_opened,
+        'is_low_stock': f.is_low_stock
+    } for f in filaments]
+
+    return JsonResponse({'success': True, 'filaments': data})
+
+
+@staff_member_required
+@require_POST
+def api_filament_delete(request, filament_id):
+    """
+    Elimina un filamento.
+    """
+    filament = get_object_or_404(Filament, id=filament_id)
+    filament.delete()
+    return JsonResponse({'success': True})
 
 
 

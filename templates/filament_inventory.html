@@ -1,0 +1,710 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventario de Filamentos - ProPrint3D{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Encabezado Principal -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <a href="{% url 'crm_dashboard' %}{% if selected_branch_slug %}?branch={{ selected_branch_slug }}{% endif %}"
+                   class="text-xs font-bold text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition flex items-center gap-1">
+                    <span>←</span> Volver al CRM
+                </a>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <span>🧵</span> Inventario de Filamentos
+            </h1>
+            <p class="mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                Identificación física de bobinas por número (<strong class="text-gray-700 dark:text-gray-200">#4</strong>), control de stock cerrado/abierto y alertas de reposición.
+            </p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <button type="button" onclick="openNewFilamentModal()"
+                class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base cursor-pointer">
+                <span>➕</span>
+                <span>Nuevo Filamento</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Conmutador de Sede -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 bg-gray-50 dark:bg-gray-800/60 p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span>📍</span> Almacén de Sede:
+            </span>
+            {% if is_superuser %}
+            <div class="inline-flex rounded-xl p-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm gap-1 flex-wrap">
+                <a href="?branch=espana{% if search_query %}&q={{ search_query }}{% endif %}{% if material_filter %}&material={{ material_filter }}{% endif %}{% if alert_filter %}&alert={{ alert_filter }}{% endif %}"
+                   class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 {% if selected_branch_slug == 'espana' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}">
+                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="750" height="500" fill="#c60b1e"/><rect width="750" height="250" y="125" fill="#ffc400"/></svg>
+                    <span>España (Península)</span>
+                </a>
+                <a href="?branch=canarias{% if search_query %}&q={{ search_query }}{% endif %}{% if material_filter %}&material={{ material_filter }}{% endif %}{% if alert_filter %}&alert={{ alert_filter }}{% endif %}"
+                   class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 {% if selected_branch_slug == 'canarias' %}bg-primary text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800{% endif %}">
+                    <svg class="w-4 h-3 rounded-[2px] shadow-sm inline-block shrink-0 border border-black/10 dark:border-white/10" viewBox="0 0 750 500" aria-hidden="true"><rect width="250" height="500" fill="#ffffff"/><rect width="250" height="500" x="250" fill="#0066cc"/><rect width="250" height="500" x="500" fill="#ffcc00"/></svg>
+                    <span>Canarias</span>
+                </a>
+            </div>
+            {% else %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+                <span>🏢</span> {{ selected_branch.name }}
+            </span>
+            {% endif %}
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+            Siguiente código sugerido: <strong class="text-primary font-mono font-bold text-sm">#{{ next_code }}</strong>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas Resumen -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <!-- Referencias -->
+        <div class="bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300 flex items-center justify-center text-xl flex-shrink-0">
+                🧵
+            </div>
+            <div>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Referencias</span>
+                <span class="text-2xl font-black text-gray-900 dark:text-white">{{ total_filaments }}</span>
+            </div>
+        </div>
+
+        <!-- Bobinas Cerradas -->
+        <div class="bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 flex items-center justify-center text-xl flex-shrink-0">
+                📦
+            </div>
+            <div>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Bobinas Cerradas</span>
+                <span class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ total_closed }}</span>
+                <span class="text-[10px] text-gray-400 block font-medium">Precintadas en stock</span>
+            </div>
+        </div>
+
+        <!-- Bobinas Abiertas -->
+        <div class="bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-xl flex-shrink-0">
+                🟢
+            </div>
+            <div>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Bobinas Abiertas</span>
+                <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ total_opened }}</span>
+                <span class="text-[10px] text-gray-400 block font-medium">En máquina / taller</span>
+            </div>
+        </div>
+
+        <!-- Alertas de Stock Bajo -->
+        <a href="?branch={{ selected_branch_slug }}&alert=low"
+           class="bg-white dark:bg-gray-800/90 border {% if low_stock_count > 0 %}border-amber-300 dark:border-amber-700 bg-amber-50/40 dark:bg-amber-950/20{% else %}border-gray-200 dark:border-gray-700/80{% endif %} rounded-2xl p-4 shadow-sm flex items-center gap-3 transition hover:shadow-md cursor-pointer">
+            <div class="w-11 h-11 rounded-xl {% if low_stock_count > 0 %}bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 animate-pulse{% else %}bg-gray-100 dark:bg-gray-700 text-gray-400{% endif %} flex items-center justify-center text-xl flex-shrink-0">
+                ⚠️
+            </div>
+            <div>
+                <span class="text-xs font-bold {% if low_stock_count > 0 %}text-amber-700 dark:text-amber-300{% else %}text-gray-500 dark:text-gray-400{% endif %} uppercase tracking-wider block">Alertas Reposición</span>
+                <span class="text-2xl font-black {% if low_stock_count > 0 %}text-amber-600 dark:text-amber-400{% else %}text-gray-900 dark:text-white{% endif %}">{{ low_stock_count }}</span>
+                <span class="text-[10px] text-gray-400 block font-medium">≤ Umbral configurado</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Barra de Filtros y Búsqueda -->
+    <div class="bg-white dark:bg-gray-800/90 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <!-- Formulario de Búsqueda -->
+        <form method="GET" class="w-full md:w-auto flex-1 flex items-center gap-2">
+            {% if selected_branch_slug %}<input type="hidden" name="branch" value="{{ selected_branch_slug }}">{% endif %}
+            {% if material_filter %}<input type="hidden" name="material" value="{{ material_filter }}">{% endif %}
+            {% if alert_filter %}<input type="hidden" name="alert" value="{{ alert_filter }}">{% endif %}
+            
+            <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    🔍
+                </span>
+                <input type="text" name="q" value="{{ search_query }}"
+                    placeholder="Buscar por número (#4), marca (eSun), material (PLA) o color (Gris)..."
+                    class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition">
+                Buscar
+            </button>
+            {% if search_query or material_filter or alert_filter %}
+            <a href="?branch={{ selected_branch_slug }}" class="px-3 py-2 text-xs text-red-500 hover:text-red-700 font-bold transition">
+                Limpiar
+            </a>
+            {% endif %}
+        </form>
+
+        <!-- Filtros Rápidos por Material y Alerta -->
+        <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto justify-start md:justify-end">
+            <span class="text-xs font-bold text-gray-400 mr-1">Material:</span>
+            <a href="?branch={{ selected_branch_slug }}{% if search_query %}&q={{ search_query }}{% endif %}"
+               class="px-2.5 py-1 rounded-lg text-xs font-bold transition {% if not material_filter %}bg-primary text-white shadow-xs{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200{% endif %}">
+                Todos
+            </a>
+            {% for mat in available_materials %}
+            <a href="?branch={{ selected_branch_slug }}&material={{ mat }}{% if search_query %}&q={{ search_query }}{% endif %}"
+               class="px-2.5 py-1 rounded-lg text-xs font-bold transition {% if material_filter == mat %}bg-primary text-white shadow-xs{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200{% endif %}">
+                {{ mat }}
+            </a>
+            {% endfor %}
+
+            <!-- Botón Filtro Alerta -->
+            <a href="?branch={{ selected_branch_slug }}{% if alert_filter != 'low' %}&alert=low{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if material_filter %}&material={{ material_filter }}{% endif %}"
+               class="ml-2 px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 {% if alert_filter == 'low' %}bg-amber-600 text-white shadow-xs{% else %}bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100{% endif %}">
+                <span>⚠️</span> Solo Alertas
+            </a>
+        </div>
+    </div>
+
+    <!-- Cuadrícula / Tarjetas de Filamentos -->
+    {% if filaments %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for filament in filaments %}
+        <div id="filament-card-{{ filament.id }}"
+             class="bg-white dark:bg-gray-800/90 border {% if filament.is_low_stock %}border-amber-300/80 dark:border-amber-700/80 shadow-amber-500/5{% else %}border-gray-200 dark:border-gray-700{% endif %} rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between relative group">
+            
+            <!-- Parte Superior: Número (#4), Color Swatch, Marca y Material -->
+            <div>
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <!-- Badge Numérico Físico (#4) -->
+                        <div class="w-12 h-12 rounded-xl bg-gray-900 text-white dark:bg-black dark:border dark:border-gray-700 flex items-center justify-center font-mono font-black text-xl shadow-inner flex-shrink-0"
+                             title="Número para rotular la bobina con rotulador">
+                            #{{ filament.code }}
+                        </div>
+
+                        <!-- Círculo de Color real -->
+                        <div class="w-10 h-10 rounded-full border-2 border-white dark:border-gray-700 shadow-sm flex-shrink-0"
+                             style="background-color: {{ filament.color_hex }};"
+                             title="Color HEX: {{ filament.color_hex }}"></div>
+
+                        <div class="min-w-0">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">
+                                {{ filament.brand }}
+                            </span>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white truncate">
+                                {{ filament.material }} — {{ filament.color_name }}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Menú Rápido Editar / Borrar -->
+                    <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition flex-shrink-0">
+                        <button type="button" onclick="openEditFilamentModal({{ filament.id }})"
+                            class="p-1.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            title="Editar filamento">
+                            ✏️
+                        </button>
+                        <button type="button" onclick="deleteFilament({{ filament.id }}, '{{ filament.display_name|escapejs }}')"
+                            class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                            title="Eliminar filamento">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notas y Coste -->
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-3 space-y-1">
+                    {% if filament.notes %}
+                    <p class="italic text-gray-600 dark:text-gray-300">
+                        💬 {{ filament.notes }}
+                    </p>
+                    {% endif %}
+                    <div class="flex items-center justify-between text-[11px] pt-1 border-t border-gray-100 dark:border-gray-700/60">
+                        <span>Coste: <strong>{{ filament.cost_per_kg }} €/kg</strong></span>
+                        <span class="font-mono text-gray-400">{{ filament.color_hex }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parte Inferior: Control de Bobinas Cerradas / Abiertas + Botón Abrir Bobina -->
+            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 space-y-2.5">
+                
+                <!-- Fila de Contadores -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Bobinas Cerradas -->
+                    <div class="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
+                        <span class="block text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide">📦 Cerradas</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="closed-count-{{ filament.id }}" class="text-lg font-black text-blue-900 dark:text-blue-100">
+                                {{ filament.spools_closed }}
+                            </span>
+                            <div class="inline-flex items-center gap-1">
+                                <button type="button" onclick="adjustStock({{ filament.id }}, 'dec_closed')"
+                                    class="w-6 h-6 rounded bg-white dark:bg-gray-800 hover:bg-blue-200 text-blue-900 dark:text-blue-200 font-black flex items-center justify-center border border-blue-300 dark:border-blue-700 transition"
+                                    title="Restar 1 bobina cerrada">-</button>
+                                <button type="button" onclick="adjustStock({{ filament.id }}, 'inc_closed')"
+                                    class="w-6 h-6 rounded bg-white dark:bg-gray-800 hover:bg-blue-200 text-blue-900 dark:text-blue-200 font-black flex items-center justify-center border border-blue-300 dark:border-blue-700 transition"
+                                    title="Añadir 1 bobina cerrada">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bobinas Abiertas -->
+                    <div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
+                        <span class="block text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">🟢 Abiertas</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="opened-count-{{ filament.id }}" class="text-lg font-black text-emerald-900 dark:text-emerald-100">
+                                {{ filament.spools_opened }}
+                            </span>
+                            <div class="inline-flex items-center gap-1">
+                                <button type="button" onclick="adjustStock({{ filament.id }}, 'dec_opened')"
+                                    class="w-6 h-6 rounded bg-white dark:bg-gray-800 hover:bg-emerald-200 text-emerald-900 dark:text-emerald-200 font-black flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition"
+                                    title="Terminar / gasta 1 bobina abierta">-</button>
+                                <button type="button" onclick="adjustStock({{ filament.id }}, 'inc_opened')"
+                                    class="w-6 h-6 rounded bg-white dark:bg-gray-800 hover:bg-emerald-200 text-emerald-900 dark:text-emerald-200 font-black flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition"
+                                    title="Añadir 1 bobina abierta">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Acción "Abrir Bobina" y Alerta -->
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <button type="button" onclick="adjustStock({{ filament.id }}, 'open_spool')"
+                        class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold bg-gray-100 dark:bg-gray-700 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white text-gray-700 dark:text-gray-200 transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                        title="Desprecintar y abrir 1 bobina cerrada para usar en taller (-1 cerrada, +1 abierta)">
+                        <span>✨</span> Abrir bobina
+                    </button>
+
+                    <!-- Semáforo de Alerta -->
+                    <span id="alert-badge-{{ filament.id }}">
+                        {% if filament.spools_closed == 0 %}
+                        <span class="px-2 py-1 rounded-md text-[10px] font-black bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800 flex items-center gap-1">
+                            🔴 Agotada
+                        </span>
+                        {% elif filament.is_low_stock %}
+                        <span class="px-2 py-1 rounded-md text-[10px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1"
+                              title="Alerta: quedan ≤ {{ filament.min_closed_alert }} cerradas">
+                            ⚠️ Stock bajo
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-gray-100 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400">
+                            🟢 OK
+                        </span>
+                        {% endif %}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado Vacío -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700 shadow-sm max-w-lg mx-auto">
+        <span class="text-5xl block mb-3">🧵</span>
+        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">No se encontraron filamentos</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            No hay filamentos registrados que coincidan con la búsqueda o la sede seleccionada.
+        </p>
+        <button type="button" onclick="openNewFilamentModal()"
+            class="px-4 py-2 bg-primary hover:bg-secondary text-white text-sm font-bold rounded-xl transition shadow">
+            ➕ Crear primer filamento
+        </button>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ===================================================================== -->
+<!-- MODAL: CREAR / EDITAR FILAMENTO -->
+<!-- ===================================================================== -->
+<div id="filament-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs hidden">
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto"
+         onclick="event.stopPropagation()">
+        
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100 dark:border-gray-800">
+            <h3 id="filament-modal-title" class="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>🧵</span> Nuevo Filamento
+            </h3>
+            <button type="button" onclick="closeFilamentModal()"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                &times;
+            </button>
+        </div>
+
+        <form id="filament-form" onsubmit="submitFilamentForm(event)" class="space-y-4">
+            <input type="hidden" id="form-filament-id" value="">
+            <input type="hidden" id="form-filament-branch-id" value="{{ selected_branch.id }}">
+
+            <!-- Número Físico Identificador y Sede -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-black text-gray-700 dark:text-gray-300 mb-1">
+                        Número / Código (#) *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none font-bold text-gray-400">#</span>
+                        <input type="number" id="form-filament-code" min="1" required
+                            class="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="Ej. 4">
+                    </div>
+                    <span class="text-[10px] text-gray-400 mt-0.5 block">Para rotular la bobina con rotulador</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Sede / Sucursal
+                    </label>
+                    <input type="text" value="{{ selected_branch.name }}" disabled
+                        class="w-full py-2 px-3 text-sm rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800/50 text-gray-500 font-semibold cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Marca y Material -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Marca *
+                    </label>
+                    <input type="text" id="form-filament-brand" list="brands-datalist" required placeholder="Ej. eSun, Elegoo, Bambu"
+                        class="w-full py-2 px-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <datalist id="brands-datalist">
+                        <option value="Bambu Lab">
+                        <option value="eSun">
+                        <option value="Elegoo">
+                        <option value="Sunlu">
+                        <option value="Polymaker">
+                        <option value="Creality">
+                        <option value="Anycubic">
+                        <option value="Prusament">
+                        <option value="Smart Materials 3D">
+                    </datalist>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Material *
+                    </label>
+                    <input type="text" id="form-filament-material" list="materials-datalist" required placeholder="Ej. PLA, PETG, TPU"
+                        class="w-full py-2 px-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <datalist id="materials-datalist">
+                        <option value="PLA">
+                        <option value="PLA+">
+                        <option value="PLA Matte">
+                        <option value="PLA Silk">
+                        <option value="PETG">
+                        <option value="PETG Transparente">
+                        <option value="TPU 95A">
+                        <option value="ABS">
+                        <option value="ASA">
+                        <option value="PC">
+                        <option value="PVA">
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Nombre de Color y Selector HEX -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Nombre del Color *
+                    </label>
+                    <input type="text" id="form-filament-color-name" required placeholder="Ej. Blanco Frío, Negro Carbón, Gris"
+                        class="w-full py-2 px-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Muestra de Color Visual
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" id="form-filament-color-picker" value="#808080"
+                            class="w-10 h-10 rounded-xl cursor-pointer border border-gray-300 dark:border-gray-700 p-0.5 bg-white dark:bg-gray-800"
+                            oninput="syncColorHex(this.value)">
+                        <input type="text" id="form-filament-color-hex" value="#808080" maxlength="7"
+                            class="flex-1 py-2 px-3 text-sm font-mono rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white uppercase"
+                            oninput="syncColorPicker(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control de Bobinas y Alerta -->
+            <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-3">
+                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide block">
+                    📦 Control de Stock de Bobinas
+                </span>
+                
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                        <label class="block text-gray-500 dark:text-gray-400 mb-1 font-semibold">Cerradas</label>
+                        <input type="number" id="form-filament-closed" min="0" value="0"
+                            class="w-full py-1.5 px-2 text-sm font-black rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center">
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 dark:text-gray-400 mb-1 font-semibold">Abiertas</label>
+                        <input type="number" id="form-filament-opened" min="0" value="1"
+                            class="w-full py-1.5 px-2 text-sm font-black rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center">
+                    </div>
+                    <div>
+                        <label class="block text-amber-600 dark:text-amber-400 mb-1 font-bold">⚠️ Alerta si ≤</label>
+                        <input type="number" id="form-filament-alert" min="0" value="1"
+                            class="w-full py-1.5 px-2 text-sm font-black rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 text-center"
+                            title="Avisar cuando queden X o menos bobinas cerradas">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coste y Notas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Coste (€ / kg)
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="form-filament-cost" step="0.5" min="0" value="20.00"
+                            class="w-full py-2 px-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400 text-xs">€</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Notas técnicas / Ubicación
+                    </label>
+                    <input type="text" id="form-filament-notes" placeholder="Ej. Estantería 2, Secar a 50ºC"
+                        class="w-full py-2 px-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                </div>
+            </div>
+
+            <!-- Botones Modal -->
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <button type="button" onclick="closeFilamentModal()"
+                    class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    Cancelar
+                </button>
+                <button type="submit" id="btn-submit-filament"
+                    class="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary hover:bg-secondary text-white transition shadow-sm">
+                    Guardar Filamento
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!-- Notificación Toast Flotante -->
+<div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+    <div id="toast-content" class="px-4 py-3 rounded-xl bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-bold text-sm shadow-xl flex items-center gap-2">
+        <span>✅</span>
+        <span id="toast-message">Stock actualizado</span>
+    </div>
+</div>
+
+<script>
+    const CSRF_TOKEN = "{{ csrf_token }}";
+    const NEXT_CODE_SUGGESTED = {{ next_code }};
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast-notification');
+        const content = document.getElementById('toast-content');
+        const msgEl = document.getElementById('toast-message');
+        if (!toast || !msgEl) return;
+
+        msgEl.textContent = message;
+        if (isError) {
+            content.className = 'px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm shadow-xl flex items-center gap-2';
+        } else {
+            content.className = 'px-4 py-3 rounded-xl bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-bold text-sm shadow-xl flex items-center gap-2';
+        }
+
+        toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        }, 2500);
+    }
+
+    function syncColorHex(val) {
+        const input = document.getElementById('form-filament-color-hex');
+        if (input) input.value = val.toUpperCase();
+    }
+
+    function syncColorPicker(val) {
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            const picker = document.getElementById('form-filament-color-picker');
+            if (picker) picker.value = val;
+        }
+    }
+
+    function openNewFilamentModal() {
+        document.getElementById('filament-modal-title').innerHTML = '<span>🧵</span> Nuevo Filamento';
+        document.getElementById('form-filament-id').value = '';
+        document.getElementById('form-filament-code').value = NEXT_CODE_SUGGESTED;
+        document.getElementById('form-filament-brand').value = '';
+        document.getElementById('form-filament-material').value = 'PLA';
+        document.getElementById('form-filament-color-name').value = '';
+        document.getElementById('form-filament-color-picker').value = '#808080';
+        document.getElementById('form-filament-color-hex').value = '#808080';
+        document.getElementById('form-filament-closed').value = 0;
+        document.getElementById('form-filament-opened').value = 1;
+        document.getElementById('form-filament-alert').value = 1;
+        document.getElementById('form-filament-cost').value = '20.00';
+        document.getElementById('form-filament-notes').value = '';
+
+        document.getElementById('filament-modal').classList.remove('hidden');
+    }
+
+    function openEditFilamentModal(filamentId) {
+        fetch(`/crm/filamentos/api/list/?branch_id={{ selected_branch.id }}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return;
+                const f = data.filaments.find(item => item.id === filamentId);
+                if (!f) return;
+
+                document.getElementById('filament-modal-title').innerHTML = `<span>✏️</span> Editar Filamento #${f.code}`;
+                document.getElementById('form-filament-id').value = f.id;
+                document.getElementById('form-filament-code').value = f.code;
+                document.getElementById('form-filament-brand').value = f.brand;
+                document.getElementById('form-filament-material').value = f.material;
+                document.getElementById('form-filament-color-name').value = f.color_name;
+                document.getElementById('form-filament-color-picker').value = f.color_hex;
+                document.getElementById('form-filament-color-hex').value = f.color_hex;
+                document.getElementById('form-filament-closed').value = f.spools_closed;
+                document.getElementById('form-filament-opened').value = f.spools_opened;
+                document.getElementById('form-filament-alert').value = f.min_closed_alert || 1;
+                document.getElementById('form-filament-cost').value = f.cost_per_kg || '20.00';
+                document.getElementById('form-filament-notes').value = f.notes || '';
+
+                document.getElementById('filament-modal').classList.remove('hidden');
+            });
+    }
+
+    function closeFilamentModal() {
+        document.getElementById('filament-modal').classList.add('hidden');
+    }
+
+    // Cerrar modal al pulsar ESC o hacer clic fuera
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeFilamentModal();
+    });
+    document.getElementById('filament-modal').addEventListener('click', closeFilamentModal);
+
+    function submitFilamentForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-submit-filament');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+
+        const payload = {
+            id: document.getElementById('form-filament-id').value || null,
+            branch_id: parseInt(document.getElementById('form-filament-branch-id').value),
+            code: parseInt(document.getElementById('form-filament-code').value),
+            brand: document.getElementById('form-filament-brand').value.trim(),
+            material: document.getElementById('form-filament-material').value.trim(),
+            color_name: document.getElementById('form-filament-color-name').value.trim(),
+            color_hex: document.getElementById('form-filament-color-hex').value.trim(),
+            spools_closed: parseInt(document.getElementById('form-filament-closed').value) || 0,
+            spools_opened: parseInt(document.getElementById('form-filament-opened').value) || 0,
+            min_closed_alert: parseInt(document.getElementById('form-filament-alert').value) || 1,
+            cost_per_kg: parseFloat(document.getElementById('form-filament-cost').value) || 20.00,
+            notes: document.getElementById('form-filament-notes').value.trim()
+        };
+
+        fetch('/crm/filamentos/api/save/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.textContent = 'Guardar Filamento';
+            if (data.success) {
+                closeFilamentModal();
+                showToast(`Filamento #${data.filament.code} guardado correctamente`);
+                setTimeout(() => window.location.reload(), 600);
+            } else {
+                alert(data.error || 'Error al guardar el filamento');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.textContent = 'Guardar Filamento';
+            alert('Error de red al guardar filamento: ' + err);
+        });
+    }
+
+    function adjustStock(filamentId, action) {
+        fetch('/crm/filamentos/api/adjust-stock/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            body: JSON.stringify({ filament_id: filamentId, action: action })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const closedEl = document.getElementById(`closed-count-${filamentId}`);
+                const openedEl = document.getElementById(`opened-count-${filamentId}`);
+                const alertEl = document.getElementById(`alert-badge-${filamentId}`);
+
+                if (closedEl) closedEl.textContent = data.spools_closed;
+                if (openedEl) openedEl.textContent = data.spools_opened;
+
+                if (alertEl) {
+                    if (data.spools_closed === 0) {
+                        alertEl.innerHTML = `
+                            <span class="px-2 py-1 rounded-md text-[10px] font-black bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800 flex items-center gap-1">
+                                🔴 Agotada
+                            </span>`;
+                    } else if (data.is_low_stock) {
+                        alertEl.innerHTML = `
+                            <span class="px-2 py-1 rounded-md text-[10px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                                ⚠️ Stock bajo
+                            </span>`;
+                    } else {
+                        alertEl.innerHTML = `
+                            <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-gray-100 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400">
+                                🟢 OK
+                            </span>`;
+                    }
+                }
+
+                if (action === 'open_spool') {
+                    showToast('Bobina abierta (-1 cerrada, +1 abierta)');
+                } else {
+                    showToast('Stock actualizado');
+                }
+            } else {
+                showToast(data.error || 'Error al actualizar', true);
+            }
+        })
+        .catch(err => {
+            showToast('Error de conexión', true);
+        });
+    }
+
+    function deleteFilament(filamentId, name) {
+        if (!confirm(`¿Seguro que deseas eliminar el filamento "${name}"?`)) return;
+
+        fetch(`/crm/filamentos/api/delete/${filamentId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const card = document.getElementById(`filament-card-${filamentId}`);
+                if (card) card.remove();
+                showToast('Filamento eliminado');
+            } else {
+                alert('No se pudo eliminar el filamento');
+            }
+        });
+    }
+</script>
+{% endblock %}

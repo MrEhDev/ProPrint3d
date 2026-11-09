@@ -132,6 +132,14 @@
                 trazabilidad de envíos, gestión de cobros y flujo Kanban.</p>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
+            <!-- Botón Gestión de Filamentos -->
+            <a href="{% url 'filament_inventory' %}{% if selected_branch_slug %}?branch={{ selected_branch_slug }}{% endif %}"
+                class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base cursor-pointer"
+                title="Gestión de inventario de filamentos, bobinas y alertas de reposición">
+                <span>🧵</span>
+                <span>Filamentos</span>
+            </a>
+
             <!-- Botón Generar Catálogo PDF -->
             <button type="button" onclick="openCatalogPdfModal()"
                 class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base cursor-pointer"
@@ -1835,6 +1843,16 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN: FILAMENTOS / BOBINAS DEL PEDIDO -->
+            <div id="sm-modal-filaments-container" class="hidden mb-4 p-3.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/20 border border-violet-200/70 dark:border-violet-800/40">
+                <div class="text-xs font-bold text-violet-800 dark:text-violet-300 flex items-center gap-1.5 mb-2 uppercase tracking-wide">
+                    <span>🧵</span> Filamentos / Bobinas utilizadas
+                </div>
+                <div id="sm-modal-filaments-list" class="flex items-center gap-2 flex-wrap">
+                    <!-- Badges de filamentos dinámicos -->
+                </div>
+            </div>
+
             <!-- SECCIÓN: DESGLOSE DE PIEZAS -->
             <div>
                 <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -2550,6 +2568,19 @@
         shippingCostEstimated: {{ order.shipping_cost_estimated|default:0|unlocalize }},
         shippingCostPaidBy: "{{ order.shipping_cost_paid_by|default:'client'|escapejs }}",
         includeShippingInTotal: {{ order.include_shipping_in_total|yesno:"true,false" }},
+        allFilaments: [
+            {% for f in order.all_filaments %}
+            {
+                id: {{ f.id }},
+                code: {{ f.code }},
+                brand: "{{ f.brand|escapejs }}",
+                material: "{{ f.material|escapejs }}",
+                colorName: "{{ f.color_name|escapejs }}",
+                colorHex: "{{ f.color_hex|escapejs }}",
+                displayName: "{{ f.display_name|escapejs }}"
+            }{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        ],
         items: [
             {% for item in order.items.all %}
     {
@@ -2567,13 +2598,28 @@
         unitPrice: {{ item.unit_price|default:0|unlocalize }},
         totalPrice: {{ item.price|default:0|unlocalize }},
         status: "{{ item.status|default:order.status|escapejs }}",
-        notes: "{{ item.notes|default:''|escapejs }}"
+        notes: "{{ item.notes|default:''|escapejs }}",
+        filaments: [
+            {% for f in item.filaments.all %}
+            {
+                id: {{ f.id }},
+                code: {{ f.code }},
+                brand: "{{ f.brand|escapejs }}",
+                material: "{{ f.material|escapejs }}",
+                colorName: "{{ f.color_name|escapejs }}",
+                colorHex: "{{ f.color_hex|escapejs }}",
+                displayName: "{{ f.display_name|escapejs }}"
+            }{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        ]
     } {% if not forloop.last %}, {% endif %}
     {% endfor %}
             ]
         }{% if not forloop.last %}, {% endif %}
     {% endfor %}
     };
+
+    const branchFilaments = {{ filaments_json|default:"[]"|safe }};
 
     // Diccionario con los datos de cobro de cada pedido
     const ordersPaymentData = {
@@ -3945,6 +3991,25 @@
             payInfoEl.innerHTML = payHtml;
         }
 
+        // Rellenar Filamentos utilizados en el pedido
+        const elFilamentsCont = document.getElementById('sm-modal-filaments-container');
+        const elFilamentsList = document.getElementById('sm-modal-filaments-list');
+        if (elFilamentsCont && elFilamentsList) {
+            const allFils = order.allFilaments || [];
+            if (allFils.length > 0) {
+                elFilamentsList.innerHTML = allFils.map(f => `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-xs">
+                        <span class="w-3.5 h-3.5 rounded-full border border-black/20 flex-shrink-0" style="background-color: ${f.colorHex};"></span>
+                        <strong class="font-mono text-primary font-black">#${f.code}</strong>
+                        <span>${escapeHtml(f.brand)} ${escapeHtml(f.material)} — ${escapeHtml(f.colorName)}</span>
+                    </span>
+                `).join('');
+                elFilamentsCont.classList.remove('hidden');
+            } else {
+                elFilamentsCont.classList.add('hidden');
+            }
+        }
+
         // Tabla de Desglose de Piezas
         const tbody = document.getElementById('sm-modal-pieces-tbody');
         const countBadge = document.getElementById('sm-modal-pieces-count');
@@ -3970,7 +4035,17 @@
                             ${imgHtml}
                             <div class="min-w-0">
                                 <div class="font-bold text-gray-900 dark:text-white truncate">${escapeHtml(item.description)}</div>
-                                ${item.notes ? `<div class="text-xs text-amber-600 dark:text-amber-400 truncate max-w-xs">📝 ${escapeHtml(item.notes)}</div>` : ''}
+                                ${(item.filaments && item.filaments.length > 0) ? `
+                                    <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                                        ${item.filaments.map(f => `
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs">
+                                                <span class="w-2.5 h-2.5 rounded-full border border-black/20 flex-shrink-0" style="background-color: ${f.colorHex};"></span>
+                                                <strong class="font-mono text-primary font-bold">#${f.code}</strong> ${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.colorName)}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                                ${item.notes ? `<div class="text-xs text-amber-600 dark:text-amber-400 truncate max-w-xs mt-0.5">📝 ${escapeHtml(item.notes)}</div>` : ''}
                             </div>
                         </div>
                     </td>
@@ -4143,6 +4218,10 @@
         // Copia profunda de piezas
         if (order.items && order.items.length > 0) {
             editModalPieces = JSON.parse(JSON.stringify(order.items));
+            editModalPieces.forEach(p => {
+                if (!p.filaments) p.filaments = [];
+                p.filament_ids = p.filaments.map(f => f.id);
+            });
         } else {
             editModalPieces = [{
                 id: null,
@@ -4159,7 +4238,9 @@
                 unitPrice: order.price || 0,
                 totalPrice: order.price || 0,
                 status: order.status || 'Presupuestado',
-                notes: order.notes || ''
+                notes: order.notes || '',
+                filaments: [],
+                filament_ids: []
             }];
         }
 
@@ -4328,6 +4409,45 @@
                         class="w-full text-sm p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium focus:ring-1 focus:ring-primary">
                 </div>
 
+                <!-- Filamentos / Bobinas Asignadas -->
+                <div class="mb-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                            <span>🧵</span> Filamentos / Bobinas utilizadas
+                        </label>
+                        <a href="/crm/filamentos/" target="_blank" class="text-[11px] text-primary hover:underline flex items-center gap-1 font-semibold">
+                            <span>📦</span> Almacén (+ Nuevo)
+                        </a>
+                    </div>
+
+                    <!-- Lista de chips de filamentos de esta pieza -->
+                    <div class="flex flex-wrap gap-1.5 mb-2 min-h-[24px]" id="edit-piece-filaments-${index}">
+                    </div>
+
+                    <!-- Selector por número de código o desplegable -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative w-28 sm:w-36 flex-shrink-0">
+                            <input type="text"
+                                id="edit-piece-fil-code-${index}"
+                                placeholder="Ej. #4 o 4..."
+                                onkeydown="if(event.key==='Enter'){event.preventDefault(); addFilamentByCodeToEditPiece(${index}, this.value); this.value='';}"
+                                class="w-full text-xs py-1.5 px-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-1 focus:ring-primary">
+                        </div>
+                        <button type="button"
+                            onclick="const inp=document.getElementById('edit-piece-fil-code-${index}'); addFilamentByCodeToEditPiece(${index}, inp.value); inp.value='';"
+                            class="px-2 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-bold rounded text-gray-700 dark:text-gray-200 transition cursor-pointer">
+                            + Añadir #
+                        </button>
+                        <select onchange="if(this.value){ addFilamentByIdToEditPiece(${index}, this.value); this.value=''; }"
+                            class="text-xs py-1.5 px-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex-1 truncate focus:ring-1 focus:ring-primary">
+                            <option value="">O elige filamento...</option>
+                            ${branchFilaments.map(f => `
+                                <option value="${f.id}">#${f.code} - ${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.color_name)} (${f.spools_closed}📦 / ${f.spools_opened}⭕)</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Métricas de Fabricación -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 bg-gray-50/70 dark:bg-gray-900/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800">
                     <div>
@@ -4438,9 +4558,88 @@
                 </div>
             `;
             container.appendChild(card);
+            renderEditPieceFilamentChips(index);
         });
 
         recalcEditModalTotals();
+    }
+
+    // ==========================================
+    // GESTIÓN DE FILAMENTOS EN MODAL DE EDICIÓN
+    // ==========================================
+    function renderEditPieceFilamentChips(index) {
+        const container = document.getElementById(`edit-piece-filaments-${index}`);
+        if (!container) return;
+        const p = editModalPieces[index];
+        if (!p) return;
+        const filaments = p.filaments || [];
+        if (filaments.length === 0) {
+            container.innerHTML = '<span class="text-xs text-gray-400 dark:text-gray-500 italic">Sin filamentos asignados (opcional)</span>';
+            return;
+        }
+        container.innerHTML = filaments.map((f, fIdx) => `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xs">
+                <span class="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 flex-shrink-0" style="background-color: ${escapeHtml(f.colorHex || f.color_hex || '#cccccc')}"></span>
+                <span class="font-black text-primary">#${f.code}</span>
+                <span class="text-gray-800 dark:text-gray-200">${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.colorName || f.color_name || '')}</span>
+                <button type="button" onclick="removeFilamentFromEditPiece(${index}, ${fIdx})" class="text-gray-400 hover:text-red-500 ml-1 font-bold cursor-pointer" title="Quitar filamento">✕</button>
+            </span>
+        `).join('');
+    }
+
+    function addFilamentByIdToEditPiece(index, filId) {
+        if (!filId) return;
+        const fil = branchFilaments.find(f => String(f.id) === String(filId));
+        if (!fil) return;
+        const p = editModalPieces[index];
+        if (!p) return;
+        if (!p.filaments) p.filaments = [];
+        if (!p.filament_ids) p.filament_ids = [];
+        if (p.filament_ids.some(id => String(id) === String(fil.id))) {
+            return; // ya asignado
+        }
+        p.filaments.push({
+            id: fil.id,
+            code: fil.code,
+            brand: fil.brand,
+            material: fil.material,
+            colorName: fil.color_name,
+            colorHex: fil.color_hex,
+            displayName: fil.display_name
+        });
+        p.filament_ids.push(fil.id);
+        renderEditPieceFilamentChips(index);
+    }
+
+    function addFilamentByCodeToEditPiece(index, query) {
+        if (!query) return;
+        const clean = query.trim().replace(/^#/, '');
+        if (!clean) return;
+        // Primero buscar por coincidencia exacta de código
+        let fil = branchFilaments.find(f => String(f.code) === clean);
+        // Si no se encuentra por código exacto, buscar por coincidencia en texto
+        if (!fil) {
+            const qLower = clean.toLowerCase();
+            fil = branchFilaments.find(f =>
+                f.brand.toLowerCase().includes(qLower) ||
+                f.material.toLowerCase().includes(qLower) ||
+                f.color_name.toLowerCase().includes(qLower) ||
+                `${f.brand} ${f.material} ${f.color_name}`.toLowerCase().includes(qLower)
+            );
+        }
+        if (fil) {
+            addFilamentByIdToEditPiece(index, fil.id);
+        } else {
+            alert(`No se encontró ningún filamento con el número o nombre "${query}" en esta sede.`);
+        }
+    }
+
+    function removeFilamentFromEditPiece(pieceIndex, filIndex) {
+        const p = editModalPieces[pieceIndex];
+        if (!p || !p.filaments) return;
+        p.filaments.splice(filIndex, 1);
+        p.filament_ids = p.filaments.map(f => f.id);
+        renderEditPieceFilamentChips(pieceIndex);
     }
 
     function addNewEditPieceRow(data = null) {
@@ -4460,8 +4659,12 @@
             unitPrice: 0,
             totalPrice: 0,
             status: generalStatus,
-            notes: ''
+            notes: '',
+            filaments: [],
+            filament_ids: []
         };
+        if (!newPiece.filaments) newPiece.filaments = [];
+        if (!newPiece.filament_ids) newPiece.filament_ids = [];
         editModalPieces.push(newPiece);
         renderEditPieces();
     }
@@ -4860,7 +5063,8 @@
                 unit_price: parseFloat(p.unitPrice) || 0,
                 price: parseFloat(p.totalPrice) || 0,
                 status: p.status || status,
-                notes: p.notes ? p.notes.trim() : ''
+                notes: p.notes ? p.notes.trim() : '',
+                filament_ids: (p.filament_ids || (p.filaments ? p.filaments.map(f => f.id) : []))
             }))
         };
 

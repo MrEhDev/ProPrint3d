@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     Branch, UserProfile, Category, Product, ProductImage,
-    Quote, QuoteItem, Order, OrderItem, Review, Customer
+    Quote, QuoteItem, Order, OrderItem, Review, Customer, Filament
 )
 
 @admin.register(Branch)
@@ -46,6 +46,13 @@ class CustomerAdmin(admin.ModelAdmin):
     list_filter = ('branch', 'platform', 'province', 'created_at')
     search_fields = ('name', 'phone', 'email', 'address', 'city', 'postal_code', 'notes')
     ordering = ('name',)
+
+@admin.register(Filament)
+class FilamentAdmin(admin.ModelAdmin):
+    list_display = ('code', 'brand', 'material', 'color_name', 'color_hex', 'branch', 'spools_closed', 'spools_opened', 'min_closed_alert', 'is_low_stock', 'is_active')
+    list_filter = ('branch', 'material', 'brand', 'is_active')
+    search_fields = ('code', 'brand', 'material', 'color_name', 'notes')
+    ordering = ('branch', 'code')
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
