@@ -255,7 +255,7 @@
                 </td>
                 <td class="text-right" style="border: none; padding: 5px; vertical-align: top;">€{{ quote.shipping_cost }}</td>
             </tr>
-            {% elif quote.tracking_number %}
+            {% elif quote.tracking_number and quote.include_shipping_in_total %}
             <tr>
                 <td style="border: none; padding: 5px;">
                     {{ quote.shipping_title|default:"Envío certificado" }}:

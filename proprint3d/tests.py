@@ -330,6 +330,43 @@ class CustomerAndOrderShippingTestCase(TestCase):
         client_section = html.split('<div class="client-section">')[1].split('</div>')[0]
         self.assertNotIn(order.tracking_number, client_section)
 
+    def test_order_quote_pdf_without_shipping_in_total(self):
+        """Verifica que si include_shipping_in_total=False, el envío NO aparezca en el presupuesto ni se sume al total."""
+        from unittest.mock import patch
+        from django.template.loader import render_to_string
+
+        order = Order.objects.create(
+            client_name="Maria Gomez",
+            client_contact="660998877",
+            order_date=datetime.date.today(),
+            shipping="Correos",
+            correos_service="carta_certificada",
+            tracking_number="CD0C8E0000199330028999X",
+            shipping_cost=Decimal('5.50'),
+            include_shipping_in_total=False,
+            unit_price=Decimal('20.00'),
+            price=Decimal('20.00')
+        )
+        with patch('proprint3d.views.render_to_string', wraps=render_to_string) as mock_render:
+            response = self.client.get(f'/crm/order/{order.id}/quote-pdf/')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response['Content-Type'], 'application/pdf')
+            self.assertIn('Presupuesto_Maria_Gomez_', response['Content-Disposition'])
+
+            # Verificar el contexto pasado a la plantilla
+            context = mock_render.call_args[0][1]
+            quote = context['quote']
+            self.assertIsNone(quote['shipping_cost'])
+            self.assertIsNone(quote['shipping_title'])
+            self.assertEqual(quote['total_price'], '20.00')
+            self.assertFalse(quote['include_shipping_in_total'])
+
+            # Verificar el HTML generado
+            rendered_html = render_to_string('quote_pdf.html', context)
+            self.assertNotIn('5.50', rendered_html)
+            self.assertNotIn('Envío certificado', rendered_html)
+            self.assertNotIn('Incluido', rendered_html)
+
 
 class BranchMultiSiteTestCase(TestCase):
     def setUp(self):

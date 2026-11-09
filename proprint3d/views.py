@@ -483,9 +483,9 @@ def generate_order_quote_pdf_view(request, order_id):
         })
 
     shipping_cost_val = float(order.shipping_cost or 0.00)
-    has_shipping = shipping_cost_val > 0
+    has_shipping = bool(order.include_shipping_in_total and shipping_cost_val > 0)
     shipping_title = "Envío certificado"
-    if has_shipping:
+    if has_shipping or order.include_shipping_in_total:
         service_lower = str(order.correos_service or '').lower()
         shipping_lower = str(order.shipping or '').lower()
         if 'certificad' in service_lower or 'certificad' in shipping_lower or order.shipping == 'Correos':
@@ -494,6 +494,8 @@ def generate_order_quote_pdf_view(request, order_id):
             shipping_title = f"Envío ({order.shipping})"
         else:
             shipping_title = "Envío"
+    else:
+        shipping_title = None
 
     include_tax = order.has_vat
     if sum_items_price <= 0 and order.price:
@@ -530,9 +532,10 @@ def generate_order_quote_pdf_view(request, order_id):
         'items': items,
         'subtotal': f"{subtotal_val:.2f}",
         'shipping_cost': f"{shipping_cost_val:.2f}" if has_shipping else None,
-        'shipping_title': shipping_title if has_shipping else None,
-        'tracking_number': tracking_num if tracking_num else None,
-        'tracking_url': tracking_url,
+        'shipping_title': shipping_title,
+        'tracking_number': tracking_num if (has_shipping or order.include_shipping_in_total) else None,
+        'tracking_url': tracking_url if (has_shipping or order.include_shipping_in_total) else None,
+        'include_shipping_in_total': bool(order.include_shipping_in_total),
         'include_tax': include_tax,
         'tax_name': tax_name,
         'tax_percentage': tax_percentage,
