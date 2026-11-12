@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     Branch, UserProfile, Category, Product, ProductImage,
-    Quote, QuoteItem, Order, OrderItem, Review, Customer, Filament
+    Quote, QuoteItem, Order, OrderItem, Review, Customer, Filament,
+    TrophyGalleryItem
 )
 
 @admin.register(Branch)
@@ -107,3 +108,10 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('client_name', 'rating', 'source', 'client_details', 'time_ago', 'is_active', 'created_at')
     list_filter = ('rating', 'source', 'is_active')
     search_fields = ('client_name', 'text', 'client_details')
+
+@admin.register(TrophyGalleryItem)
+class TrophyGalleryItemAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category_type', 'description', 'order', 'created_at')
+    list_filter = ('category_type', 'created_at')
+    search_fields = ('title', 'description')
+

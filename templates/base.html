@@ -35,21 +35,82 @@
     <meta name="twitter:description" content="{% block twitter_description %}Piezas terminadas e impresas en 3D listas para su uso con acabados profesionales.{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endblock %}">
 
-    <!-- Datos Estructurados JSON-LD (Schema.org) para Google Search -->
+    <!-- Datos Estructurados JSON-LD (Schema.org) para Google Search y Motores GEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
+      "@id": "https://proprint3d.shop/#localbusiness",
       "name": "ProPrint3D",
       "image": "https://proprint3d.shop{% static 'images/hero_3d_render.png' %}",
       "telephone": "+34660904515",
       "url": "https://proprint3d.shop/",
       "priceRange": "€",
+      "description": "Taller de fabricación aditiva e impresión 3D profesional en Lliçà d'Amunt (Barcelona). Especialistas en trofeos y medallas personalizadas para eventos deportivos y empresas en Granollers y Vallès Oriental, figuras, prototipos y piezas a medida sin pedido mínimo.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "C/Empordá 136",
+        "addressLocality": "Lliçà d'Amunt",
+        "addressRegion": "Barcelona",
         "postalCode": "08186",
         "addressCountry": "ES"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 41.6112,
+        "longitude": 2.2356
+      },
+      "areaServed": [
+        {"@type": "AdministrativeArea", "name": "Lliçà d'Amunt"},
+        {"@type": "AdministrativeArea", "name": "Lliçà de Vall"},
+        {"@type": "AdministrativeArea", "name": "Granollers"},
+        {"@type": "AdministrativeArea", "name": "Parets del Vallès"},
+        {"@type": "AdministrativeArea", "name": "Mollet del Vallès"},
+        {"@type": "AdministrativeArea", "name": "La Garriga"},
+        {"@type": "AdministrativeArea", "name": "Les Franqueses del Vallès"},
+        {"@type": "AdministrativeArea", "name": "La Roca del Vallès"},
+        {"@type": "AdministrativeArea", "name": "Caldes de Montbui"},
+        {"@type": "AdministrativeArea", "name": "Vallès Oriental"},
+        {"@type": "AdministrativeArea", "name": "Barcelona"},
+        {"@type": "Country", "name": "España"}
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios de Fabricación e Impresión 3D",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Trofeos y Medallas Personalizadas en 3D",
+              "description": "Diseño y fabricación de trofeos y medallas personalizadas para clubes, torneos deportivos y eventos corporativos sin pedido mínimo en Vallès Oriental y Granollers."
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Figuras y Coleccionables 3D Personalizados",
+              "description": "Impresión en alta resolución y post-procesado de figuras, esculturas y coleccionables a medida."
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Prototipado Rápido y Piezas Técnicas",
+              "description": "Fabricación aditiva de prototipos funcionales y piezas a medida en PLA, PETG y materiales técnicos."
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Modelado y Diseño 3D bajo Demanda",
+              "description": "Servicio de diseño CAD 3D y preparación de archivos digitales para producción."
+            }
+          }
+        ]
       },
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
@@ -60,9 +121,10 @@
       "sameAs": [
         "https://www.instagram.com/proprint3d_spain/",
         "https://www.tiktok.com/@proprint3d_spain",
-        "https://es.wallapop.com/user/proprint3-444369027"
-      ],
-      "description": "Taller de fabricación e impresión 3D profesional en España. Piezas terminadas de alta precisión y modelado a medida."
+        "https://es.wallapop.com/user/proprint3-444369027",
+        "https://g.page/r/CXSzfuDIA4BvEBM",
+        "https://g.page/r/CXSzfuDIA4BvEBM/review"
+      ]
     }
     </script>
 
@@ -116,31 +178,34 @@
                 </div>
                 
                 <!-- Menú Desktop -->
-                <div class="hidden md:flex items-center space-x-1 lg:space-x-2">
-                    <a href="{% url 'catalog' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-1.5 xl:space-x-2">
+                    <a href="{% url 'catalog' %}" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors whitespace-nowrap shrink-0">
                         Catálogo
                     </a>
-                    <a href="{% url 'about_us' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                    <a href="{% url 'trophies_medals' %}" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all flex items-center gap-1 lg:gap-1.5 shadow-xs whitespace-nowrap shrink-0">
+                        <span>🏆</span> <span>Trofeos<span class="hidden xl:inline"> & Medallas</span></span>
+                    </a>
+                    <a href="{% url 'about_us' %}" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors whitespace-nowrap shrink-0">
                         ¿Quiénes somos?
                     </a>
-                    <a href="{% url 'custom_order' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
+                    <a href="{% url 'custom_order' %}" class="px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors whitespace-nowrap shrink-0">
                         A medida
                     </a>
                     {% if request.user.is_staff %}
-                    <span class="h-4 w-px bg-gray-300 dark:bg-gray-700 mx-1"></span>
-                    <a href="{% url 'admin_dashboard' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all flex items-center gap-1">
-                        <span>➕</span> Añadir
+                    <span class="h-4 w-px bg-gray-300 dark:bg-gray-700 mx-1 shrink-0"></span>
+                    <a href="{% url 'admin_dashboard' %}" class="px-2 py-1.5 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-all flex items-center gap-1 whitespace-nowrap shrink-0" title="Añadir Producto">
+                        <span>➕</span> <span class="hidden xl:inline">Añadir</span>
                     </a>
-                    <a href="{% url 'crm_dashboard' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 transition-all flex items-center gap-1 shadow-xs">
-                        <span>📋</span> CRM
+                    <a href="{% url 'crm_dashboard' %}" class="px-2 py-1.5 rounded-lg text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 transition-all flex items-center gap-1 shadow-xs whitespace-nowrap shrink-0" title="CRM Pedidos">
+                        <span>📋</span> <span class="hidden xl:inline">CRM</span>
                     </a>
-                    <a href="{% url 'filament_inventory' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-all flex items-center gap-1">
-                        <span>🧵</span> Filamentos
+                    <a href="{% url 'filament_inventory' %}" class="px-2 py-1.5 rounded-lg text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-all flex items-center gap-1 whitespace-nowrap shrink-0" title="Inventario Filamentos">
+                        <span>🧵</span> <span class="hidden xl:inline">Filamentos</span>
                     </a>
-                    <a href="{% url 'quote_builder' %}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 transition-all flex items-center gap-1">
-                        <span>🧾</span> Presupuestos
+                    <a href="{% url 'quote_builder' %}" class="px-2 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 transition-all flex items-center gap-1 whitespace-nowrap shrink-0" title="Presupuestos">
+                        <span>🧾</span> <span class="hidden xl:inline">Presupuestos</span>
                     </a>
-                    <a href="{% url 'admin_logout' %}" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" title="Cerrar sesión administrador">
+                    <a href="{% url 'admin_logout' %}" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0" title="Cerrar sesión administrador">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </a>
                     {% endif %}
@@ -224,6 +289,9 @@
                 <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
                     <span>🛍️</span> Catálogo
                 </a>
+                <a href="{% url 'trophies_medals' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 transition-colors">
+                    <span>🏆</span> Trofeos & Medallas
+                </a>
                 <a href="{% url 'about_us' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
                     <span>ℹ️</span> ¿Quiénes somos?
                 </a>
@@ -306,6 +374,11 @@
                             <a href="{% url 'catalog' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">Catálogo de Piezas</a>
                         </li>
                         <li>
+                            <a href="{% url 'trophies_medals' %}" class="text-amber-600 dark:text-amber-400 hover:text-amber-500 font-semibold transition-colors flex items-center gap-1.5">
+                                <span>🏆</span> Trofeos & Medallas 3D
+                            </a>
+                        </li>
+                        <li>
                             <a href="{% url 'about_us' %}" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">¿Quiénes somos?</a>
                         </li>
                         <li>
@@ -345,6 +418,19 @@
                                 <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.08L2 22l5.08-1.34C8.54 21.52 10.22 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm-1 14.5l-3.5-3.5 1.41-1.41L11 13.67l5.59-5.59L18 9.5l-7 7z"/>
                             </svg>
                             <span>Wallapop ★ 5.0</span>
+                        </a>
+
+                        <!-- Google Perfil / Reseñas -->
+                        <a href="https://g.page/r/CXSzfuDIA4BvEBM/review" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm transition-all transform hover:-translate-y-0.5" 
+                           title="Dejar o ver reseñas en Google Maps ProPrint3D">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                            <span>Google ★ Reseñas</span>
                         </a>
 
                         <!-- WhatsApp -->

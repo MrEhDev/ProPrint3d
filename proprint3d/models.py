@@ -320,6 +320,51 @@ class ProductImage(models.Model):
         return f"Imagen para {self.product.title}"
 
 # =====================================================================
+# MODELO: TrophyGalleryItem
+# Propósito: Muestrario fotográfico de trofeos, medallas y placas personalizadas.
+# Permite subir fotos con información básica sin necesidad de crear un producto completo.
+# =====================================================================
+class TrophyGalleryItem(models.Model):
+    CATEGORY_CHOICES = (
+        ('trofeo', 'Trofeo'),
+        ('medalla', 'Medalla'),
+        ('placa', 'Placa conmemorativa'),
+        ('especial', 'Diseño Especial / Torneo'),
+    )
+
+    title = models.CharField(max_length=150, help_text="Ej: Trofeo Pádel Oro con Peana")
+    category_type = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='trofeo')
+    image = models.ImageField(upload_to='trophies_gallery/')
+    description = models.CharField(max_length=255, blank=True, null=True, help_text="Breve descripción o detalle del trabajo")
+    order = models.PositiveIntegerField(default=0, help_text="Orden de visualización")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = 'Trofeo de Galería'
+        verbose_name_plural = 'Trofeos de Galería'
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            do_compress = False
+            if not self.pk:
+                do_compress = True
+            else:
+                try:
+                    old = TrophyGalleryItem.objects.get(pk=self.pk)
+                    if old.image != self.image:
+                        do_compress = True
+                except TrophyGalleryItem.DoesNotExist:
+                    do_compress = True
+            if do_compress:
+                compress_image_field(self.image)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"[{self.get_category_type_display()}] {self.title}"
+
+
+# =====================================================================
 # MODELO: Quote
 # Propósito: Cabecera para almacenar presupuestos generados a clientes.
 # Razón de la estructura: Permite guardar el estado de una negociación,

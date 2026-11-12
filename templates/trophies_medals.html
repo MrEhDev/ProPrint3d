@@ -1,0 +1,816 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Trofeos y Medallas Personalizadas en Granollers y Vallès | ProPrint3D{% endblock %}
+{% block meta_description %}Trofeos y medallas personalizadas en impresión 3D en Granollers, Vallès Oriental y Lliçà d'Amunt. Diseños únicos con tu logo o escudo, sin pedido mínimo (desde 1 unidad) y entrega rápida.{% endblock %}
+
+{% block og_title %}Trofeos y Medallas Personalizadas en 3D | ProPrint3D Vallès{% endblock %}
+{% block og_description %}Fabricación a medida de trofeos deportivos, medallas conmemorativas y placas con tu logo. Sin pedido mínimo y entrega en mano en el Vallès Oriental.{% endblock %}
+
+{% block extra_head %}
+<!-- Schema.org estructurado para Servicio Local y FAQPage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://proprint3d.shop/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Trofeos y Medallas Personalizadas",
+          "item": "https://proprint3d.shop/trofeos-medallas-personalizadas/"
+        }
+      ]
+    },
+    {
+      "@type": "Service",
+      "@id": "https://proprint3d.shop/trofeos-medallas-personalizadas/#service",
+      "name": "Fabricación de Trofeos y Medallas Personalizadas en 3D",
+      "provider": {
+        "@id": "https://proprint3d.shop/#localbusiness"
+      },
+      "serviceType": "Fabricación e Impresión 3D de Trofeos y Medallas",
+      "areaServed": [
+        "Lliçà d'Amunt", "Granollers", "Lliçà de Vall", "Parets del Vallès", 
+        "Mollet del Vallès", "La Garriga", "Les Franqueses del Vallès", 
+        "La Roca del Vallès", "Caldes de Montbui", "Vallès Oriental", "Barcelona"
+      ],
+      "description": "Diseño y fabricación aditiva de trofeos deportivos, copas conmemorativas, placas y medallas personalizadas con logo o escudo. Sin pedido mínimo.",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "EUR",
+        "lowPrice": "1.90",
+        "offerCount": "100",
+        "priceRange": "Desde 1,90€ según volumen y diseño"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://proprint3d.shop/trofeos-medallas-personalizadas/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Cuál es el pedido mínimo para trofeos o medallas personalizadas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No tenemos pedido mínimo. Fabricamos desde una sola unidad para un torneo de pádel entre amigos, cumpleaños o trofeo MVP, hasta pedidos de cientos de medallas o copas para clubes deportivos y eventos multitudinarios con descuento por volumen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuánto tardáis en fabricar y entregar en Granollers o el Vallès Oriental?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Los plazos habituales son de 24 a 72 horas para pedidos pequeños o urgentes, y pocos días para tiradas medianas/grandes. Ofrecemos opción de entrega en mano y recogida en nuestro taller de Lliçà d'Amunt, además de entregas rápidas en Granollers y municipios cercanos del Vallès."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Podéis incluir el escudo de nuestro club deportivo o el logo de la empresa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí, totalmente. Convertimos el escudo o logo de tu club, torneo o empresa en relieve 3D, multicapa a varios colores o grabado sobre peanas personalizadas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo solicito un presupuesto y cuánto cuesta?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Solo tienes que escribirnos por WhatsApp al 660 90 45 15 indicándonos qué idea tienes, unidades estimadas y fecha del evento. Te daremos un presupuesto cerrado y sin compromiso lo antes posible."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿En qué materiales se fabrican los trofeos y medallas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Utilizamos bioplásticos PLA de alta densidad y resistencia, de origen vegetal y biodegradables, con acabados profesionales tipo oro satinado, plata, bronce, cobre, seda brillante y colores corporativos personalizados."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Podemos ver una muestra o diseño previo antes de la producción definitiva?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Antes de poner las máquinas a producir la tirada completa, te enviamos una previsualización digital en 3D para que revises textos, proporciones y detalles."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="relative overflow-hidden py-10 sm:py-16">
+    <!-- Luces ambientales de fondo -->
+    <div class="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl"></div>
+    <div class="pointer-events-none absolute top-1/3 -right-24 w-96 h-96 bg-primary/15 rounded-full blur-3xl"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 sm:space-y-24">
+        
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 1: HERO PRINCIPAL                                     -->
+        <!-- ============================================================= -->
+        <div class="text-center space-y-6 max-w-4xl mx-auto pt-2">
+            <!-- Badge Local & Especialidad -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 shadow-sm backdrop-blur-sm">
+                <span>🏆</span>
+                <span>Taller de Trofeos y Medallas 3D • Vallès Oriental & Granollers</span>
+            </div>
+
+            <!-- Título H1 SEO -->
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+                Trofeos y Medallas Personalizadas <br class="hidden sm:inline">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500">
+                    que marcan la diferencia
+                </span>
+            </h1>
+
+            <!-- Subtítulo comercial y geolocalizado -->
+            <p class="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Diseño 3D exclusivo con el <strong>escudo de tu club, torneo o empresa</strong>. 
+                Olvídate de las copas genéricas de catálogo: creamos piezas únicas 
+                <span class="text-primary font-bold">sin pedido mínimo (desde 1 unidad)</span>, con 
+                <strong>entrega en mano en Lliçà d'Amunt, Granollers</strong> y toda la comarca.
+            </p>
+
+            <!-- Botones de Acción Inmediata (CTA) -->
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <a href="https://wa.me/{{ current_whatsapp|default:'34660904515' }}?text=Hola%20ProPrint3D!%20Me%20gustar%C3%ADa%20pedir%20presupuesto%20para%20trofeos%20o%20medallas%20personalizadas%20para%20un%20evento." 
+                   target="_blank" rel="noopener noreferrer"
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-black text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+                    <svg class="w-6 h-6 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"/></svg>
+                    <span>Pedir Presupuesto por WhatsApp</span>
+                </a>
+                
+                <a href="#galeria" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-base font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm transition-all">
+                    <span>✨</span>
+                    <span>Ver Modelos y Trabajos</span>
+                </a>
+            </div>
+
+            <!-- Píldoras de confianza / USP -->
+            <div class="pt-6 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                    <span class="text-emerald-500">✔</span> Desde 1 sola unidad
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                    <span class="text-emerald-500">✔</span> Presupuesto sin compromiso
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                    <span class="text-emerald-500">✔</span> Fabricado en Lliçà d'Amunt
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                    <span class="text-emerald-500">✔</span> Muestra digital previa
+                </span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 2: ¿POR QUÉ ELEGIR PROPRINT3D? (DIFERENCIALES)        -->
+        <!-- ============================================================= -->
+        <div class="space-y-8">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    ¿Por qué nuestros trofeos 3D superan al trofeo tradicional?
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    La fabricación aditiva moderna elimina las limitaciones de las copas metálicas genéricas y los pedidos masivos forzados.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Ventaja 1 -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md transition-all space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl font-bold">
+                        🎯
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        Sin pedido mínimo
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        ¿Necesitas un solo trofeo para el ganador de un torneo de pádel entre amigos o un homenaje especial? <strong>Fabricamos desde 1 unidad</strong> sin sobrecostes absurdos de moldes.
+                    </p>
+                </div>
+
+                <!-- Ventaja 2 -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md transition-all space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+                        🛡️
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        Tu Escudo o Logo Real
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        No pegamos una simple pegatina: <strong>modelamos tu escudo en relieve volumétrico</strong>, con los colores de tu club y peanas personalizadas con fecha y categoría.
+                    </p>
+                </div>
+
+                <!-- Ventaja 3 -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md transition-all space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center text-2xl font-bold">
+                        📱
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        Muestra 3D Digital Previa
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Antes de fabricar, te enviamos una muestra digital del diseño para que revises proporciones, colores y textos. <strong>Solo imprimimos con tu visto bueno</strong>.
+                    </p>
+                </div>
+
+                <!-- Ventaja 4 -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md transition-all space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-2xl font-bold">
+                        📍
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        Trato y Entrega Local
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Taller propio en <strong>Lliçà d'Amunt</strong>. Puedes recoger tus piezas en mano o te las entregamos rápidamente en Granollers, Parets, Mollet y toda la comarca.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 3: PRECIOS ORIENTATIVOS DE REFERENCIA                 -->
+        <!-- ============================================================= -->
+        <div class="bg-gradient-to-br from-amber-500/5 via-primary/5 to-transparent p-6 sm:p-10 rounded-3xl border border-amber-500/20 shadow-sm space-y-8">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    Transparencia y Flexibilidad
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Precios Orientativos de Referencia
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Como cada evento y logotipo tiene tamaños, colores y detalles únicos, trabajamos con presupuestos a medida adaptados a tu presupuesto.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Tarjeta 1: Medallas -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">🥇</span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Popular</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Medallas Conmemorativas</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Para torneos, carreras populares, colegios y eventos deportivos.</p>
+                        <div class="pt-2">
+                            <span class="text-xs text-gray-400 uppercase font-semibold">Desde</span>
+                            <div class="text-3xl font-black text-amber-500">~1,90 € <span class="text-xs font-normal text-gray-400">/ ud*</span></div>
+                            <span class="text-[11px] text-gray-400">*según cantidad y diseño</span>
+                        </div>
+                        <ul class="text-xs space-y-2 text-gray-600 dark:text-gray-300 pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <li class="flex items-center gap-2"><span>✔</span> Diámetro personalizable (6 - 8 cm)</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Relieve a 2 colores o acabado metal</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Ranura lista para cinta o cordón</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Descuentos progresivos por volumen</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Trofeos de Torneo -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border-2 border-amber-500/40 shadow-lg shadow-amber-500/10 flex flex-col justify-between space-y-4 relative">
+                    <div class="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                        Más Solicitado
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">🏆</span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">Torneos & Clubes</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Trofeos con Peana</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Trofeos de 1º, 2º, 3º puesto, campeonatos de pádel, fútbol y baloncesto.</p>
+                        <div class="pt-2">
+                            <span class="text-xs text-gray-400 uppercase font-semibold">Desde</span>
+                            <div class="text-3xl font-black text-amber-500">~8,50 € <span class="text-xs font-normal text-gray-400">/ ud*</span></div>
+                            <span class="text-[11px] text-gray-400">*según medidas y complejidad</span>
+                        </div>
+                        <ul class="text-xs space-y-2 text-gray-600 dark:text-gray-300 pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <li class="flex items-center gap-2"><span>✔</span> Alturas desde 12 cm hasta 25+ cm</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Peana sólida con plaquita de texto</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Siluetas deportivas o logotipo 3D</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Acabados oro, plata, bronce y seda</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Copas Exclusivas y Placas -->
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">⭐</span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400">Premium</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Placas y Diseños a Medida</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Para homenajes, aniversarios de empresa, jubilaciones o torneos gaming.</p>
+                        <div class="pt-2">
+                            <span class="text-xs text-gray-400 uppercase font-semibold">Presupuesto</span>
+                            <div class="text-3xl font-black text-amber-500">A medida</div>
+                            <span class="text-[11px] text-gray-400">diseño 100% exclusivo</span>
+                        </div>
+                        <ul class="text-xs space-y-2 text-gray-600 dark:text-gray-300 pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <li class="flex items-center gap-2"><span>✔</span> Formas geométricas o escultóricas complejas</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Efectos multimaterial y texturas especiales</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Gran formato de sobremesa o pared</li>
+                            <li class="flex items-center gap-2"><span>✔</span> Modelado CAD especializado incluido</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aviso de tranquilidad -->
+            <div class="text-center pt-2 max-w-xl mx-auto space-y-3">
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                    💬 <em>Cada proyecto es único: cuéntanos tu idea por WhatsApp y te damos <strong>presupuesto cerrado y sin compromiso lo antes posible</strong>.</em>
+                </p>
+                <div>
+                    <a href="https://wa.me/{{ current_whatsapp|default:'34660904515' }}?text=Hola%20ProPrint3D!%20Quer%C3%ADa%20consultar%20precio%20orientativo%20para%20un%20encargo%20de%20trofeos/medallas." 
+                       target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all">
+                        <span>📲</span> Consultar presupuesto personalizado ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 4: MUESTRARIO FOTOGRÁFICO DE TRABAJOS REALES          -->
+        <!-- ============================================================= -->
+        <div id="galeria" class="space-y-8 scroll-mt-20">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    Muestrario y Portfolio
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Muestrario de Trabajos y Diseños Reales
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Fotos de piezas y encargos fabricados en nuestro taller para torneos deportivos, escuelas, empresas y eventos especiales.
+                </p>
+            </div>
+
+            {% if messages %}
+            <div class="max-w-xl mx-auto space-y-2">
+                {% for message in messages %}
+                <div class="p-3.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-between {% if message.tags == 'error' %}bg-red-500/10 text-red-600 border border-red-500/20{% else %}bg-emerald-500/10 text-emerald-600 border border-emerald-500/20{% endif %}">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if request.user.is_staff %}
+            <!-- Barra Administrador para Subir Fotos Rápidas (Sin Crear Producto) -->
+            <div class="bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
+                <div class="flex items-center gap-2.5 text-amber-800 dark:text-amber-200">
+                    <span class="text-xl">📸</span>
+                    <span><strong>Modo Administrador:</strong> Sube fotos directamente a la galería con su título y tipo sin necesidad de crear un producto completo de tienda.</span>
+                </div>
+                <button type="button" onclick="document.getElementById('gallery-upload-panel').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition shadow-sm whitespace-nowrap shrink-0 cursor-pointer">
+                    <span>➕</span> Subir Foto al Muestrario
+                </button>
+            </div>
+
+            <!-- Formulario Desplegable para Subir Foto Directa -->
+            <div id="gallery-upload-panel" class="hidden bg-white dark:bg-dark p-6 rounded-3xl border-2 border-amber-500/40 shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
+                        <span>✨</span> Nueva Foto para el Muestrario de Trofeos
+                    </h3>
+                    <button type="button" onclick="document.getElementById('gallery-upload-panel').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-bold">✕ Cerrar</button>
+                </div>
+                <form method="POST" action="{% url 'add_trophy_gallery_item_api' %}" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Título de la pieza *</label>
+                            <input type="text" name="title" required placeholder="Ej: Trofeo Torneo Pádel Oro" class="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Tipo de Pieza *</label>
+                            <select name="category_type" class="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="trofeo">🏆 Trofeo</option>
+                                <option value="medalla">🥇 Medalla</option>
+                                <option value="placa">⭐ Placa conmemorativa</option>
+                                <option value="especial">✨ Torneo / Diseño Especial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Seleccionar Foto (JPG, PNG, WEBP) *</label>
+                        <input type="file" name="image" required accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-white hover:file:bg-amber-600 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Breve descripción o detalle (Opcional)</label>
+                        <input type="text" name="description" placeholder="Ej: Peana negra con silueta y relieve dorado para Club Pádel Granollers" class="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                        <button type="button" onclick="document.getElementById('gallery-upload-panel').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Cancelar</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition shadow-md">Guardar en el Muestrario</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Galería de Fotos Subidas -->
+            {% if gallery_items %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for item in gallery_items %}
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                    <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-800 aspect-square flex items-center justify-center">
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        
+                        <span class="absolute top-2 left-2 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-black/70 text-white backdrop-blur-xs flex items-center gap-1 shadow-sm">
+                            {% if item.category_type == 'trofeo' %}🏆 Trofeo
+                            {% elif item.category_type == 'medalla' %}🥇 Medalla
+                            {% elif item.category_type == 'placa' %}⭐ Placa
+                            {% else %}✨ Especial{% endif %}
+                        </span>
+
+                        {% if request.user.is_staff %}
+                        <form method="POST" action="{% url 'delete_trophy_gallery_item_api' item.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar esta foto de la galería?');" class="absolute top-2 right-2">
+                            {% csrf_token %}
+                            <button type="submit" class="p-1.5 rounded-lg bg-red-600/90 hover:bg-red-600 text-white text-xs shadow transition cursor-pointer" title="Eliminar foto de la galería">
+                                🗑️
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-3">
+                        <div class="space-y-1">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-base leading-snug">
+                                {{ item.title }}
+                            </h3>
+                            {% if item.description %}
+                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                {{ item.description }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <a href="https://wa.me/{{ current_whatsapp|default:'34660904515' }}?text=Hola%20ProPrint3D!%20He%20visto%20en%20vuestro%20muestrario%20la%20foto%20de%20%22{{ item.title|urlencode }}%22%20y%20me%20gustar%C3%ADa%20pedir%20presupuesto%20para%20un%20encargo%20similar." 
+                               target="_blank" rel="noopener noreferrer"
+                               class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition shadow-xs" title="Consultar o pedir por WhatsApp">
+                                <span>💬</span> <span>Pedir algo parecido</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Estado vacío cuando aún no se han subido fotos -->
+            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-3xl p-8 text-center max-w-xl mx-auto border border-dashed border-gray-300 dark:border-gray-700 space-y-3">
+                <span class="text-4xl">📸</span>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Muestrario de Fotos Activo</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {% if request.user.is_staff %}
+                    Aún no hay fotos en el muestrario. Pulsa el botón <strong>"Subir Foto al Muestrario"</strong> de arriba para añadir tus fotos reales en pocos segundos.
+                    {% else %}
+                    Estamos actualizando nuestro muestrario con las fotos de los últimos trofeos fabricados. Si tienes una idea, ¡escríbenos directamente por WhatsApp!
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Formatos y deportes que personalizamos a medida -->
+            <div class="pt-8 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Formatos y deportes que personalizamos a medida:</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Item 1: Pádel & Tenis -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-amber-600/20 via-yellow-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">🎾</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">Torneos de Pádel</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Torneos de Pádel y Tenis</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Trofeos con silueta de pala en relieve, pelotas con texturas reales y peanas grabadas con categoría Oro, Plata o Bronce.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 2: Carreras & Finisher -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-emerald-600/20 via-teal-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">🏅</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">Medallas Finisher</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Medallas para Carreras y Trails</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Medallas de finisher ultraligeras y resistentes, con el relieve del perfil altimétrico de la ruta o el logotipo de la prueba popular.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 3: Fútbol & Baloncesto -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-blue-600/20 via-indigo-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">⚽</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">Fútbol & Baloncesto</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Clubes de Fútbol y Baloncesto</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Copas personalizadas con el escudo oficial del club para torneos de verano, escuelas base y trofeos individuales al Máximo Goleador o MVP.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 4: Eventos Corporativos -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-violet-600/20 via-purple-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">🏢</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">Empresas & Homenajes</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Reconocimientos de Empresa</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Placas de agradecimiento para jubilaciones, premios de productividad o aniversarios de empresas con el logo institucional en 3D.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 5: E-Sports & Gaming -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-pink-600/20 via-rose-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">🎮</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">E-Sports & Gaming</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Torneos Gaming y E-Sports</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Diseños geométricos y vanguardistas inspirados en videojuegos (League of Legends, FIFA, Valorant, Pokémon) imposibles de conseguir en tiendas de trofeos convencionales.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 6: Escolar & Amigos -->
+                <div class="group bg-white dark:bg-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <div class="h-44 bg-gradient-to-tr from-cyan-600/20 via-teal-500/10 to-primary/10 flex items-center justify-center p-6 relative overflow-hidden">
+                        <span class="text-6xl transform group-hover:scale-110 transition-transform duration-300">🎓</span>
+                        <span class="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">Colegios & Aniversarios</span>
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-base">Graduaciones y Eventos Escolares</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            Medallas personalizadas para olimpiadas escolares, diplomas rígidos en relieve y detalles para profesores y alumnos en material bioplástico ecológico.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caja explicativa fotos -->
+            <div class="bg-gray-100 dark:bg-gray-800/60 p-4 rounded-xl text-center text-xs text-gray-600 dark:text-gray-400 max-w-xl mx-auto flex items-center justify-center gap-2">
+                <span>📸</span>
+                <span>¿Tienes una foto o boceto de lo que te gustaría? <strong>Mándanosla por WhatsApp</strong> y te decimos cómo llevarla a cabo.</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 5: COBERTURA LOCAL & RECOGIDA EN MANO                 -->
+        <!-- ============================================================= -->
+        <div class="bg-white dark:bg-dark p-6 sm:p-10 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="lg:col-span-7 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                    <span>📍</span> Taller de Proximidad en el Vallès
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Entrega en mano en Lliçà d'Amunt, Granollers y comarca
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Evita retrasos de paquetería y roturas de envíos lejanos: nuestro taller físico se encuentra en <strong>Lliçà d'Amunt (C/ Empordà 136)</strong>, lo que nos permite coordinar <strong>recogidas en mano gratuitas</strong> o entregas exprés concertadas para todo el <strong>Vallès Oriental</strong>.
+                </p>
+                
+                <div class="space-y-2 pt-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Poblaciones atendidas con entrega o recogida directa:</span>
+                    <div class="flex flex-wrap gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold text-primary">Lliçà d'Amunt</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold text-amber-500">Granollers</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">Lliçà de Vall</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">Parets del Vallès</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">Mollet del Vallès</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">La Garriga</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">Les Franqueses del Vallès</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">La Roca del Vallès</span>
+                        <span class="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">Caldes de Montbui</span>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400 pt-1">
+                    📦 <em>¿Estás fuera del Vallès? También realizamos envíos protegidos a toda Cataluña, España peninsular y Canarias.</em>
+                </p>
+            </div>
+
+            <div class="lg:col-span-5 bg-gradient-to-br from-primary/10 via-amber-500/5 to-transparent p-6 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-4 text-center">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 mx-auto flex items-center justify-center text-3xl">
+                    🤝
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Tienes fecha límite para tu torneo?</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                        Consúltanos con tu fecha y te confirmamos disponibilidad inmediata de producción en el taller.
+                    </p>
+                </div>
+                <a href="https://wa.me/{{ current_whatsapp|default:'34660904515' }}?text=Hola%20ProPrint3D!%20Tengo%20un%20evento%20el%20d%C3%ADa%20...%20y%20quer%C3%ADa%20consultar%20disponibilidad%20para%20trofeos." 
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all">
+                    <span>⚡</span> Consultar disponibilidad inmediata
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 6: PROCESO EN 4 PASOS SENCILLOS                        -->
+        <!-- ============================================================= -->
+        <div class="space-y-8">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    Rápido y Sin Complicaciones
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Cómo trabajamos tu encargo
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Desde que nos contactas hasta que tienes los trofeos en tus manos, paso a paso:
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-3 relative">
+                    <span class="text-3xl font-black text-amber-500/40">01</span>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Envíanos tu idea o logo</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Por WhatsApp nos pasas el escudo de tu club o boceto, número de trofeos y la fecha límite de tu evento.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-3 relative">
+                    <span class="text-3xl font-black text-primary/40">02</span>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Muestra digital 3D</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Preparamos el modelado 3D y te enviamos una muestra digital con presupuesto cerrado lo antes posible.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-3 relative">
+                    <span class="text-3xl font-black text-emerald-500/40">03</span>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Fabricación en taller</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Una vez aprobado, imprimimos en nuestro taller con filamentos premium, revisando cada pieza individualmente.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-dark p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-3 relative">
+                    <span class="text-3xl font-black text-violet-500/40">04</span>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Entrega o recogida</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Recogida gratuita en mano en Lliçà d'Amunt, entrega rápida en el Vallès o envío protegido a tu dirección.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 7: PREGUNTAS FRECUENTES (FAQ INTERACTIVO)             -->
+        <!-- ============================================================= -->
+        <div class="space-y-8 max-w-4xl mx-auto">
+            <div class="text-center space-y-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                    Resolvemos tus dudas
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Preguntas Frecuentes sobre Trofeos y Medallas
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Todo lo que necesitas saber antes de encargar tus piezas personalizadas.
+                </p>
+            </div>
+
+            <div class="space-y-3" id="faq-accordion">
+                <!-- FAQ 1 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Cuál es el pedido mínimo para trofeos o medallas?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        <strong>No hay pedido mínimo.</strong> Fabricamos desde 1 sola unidad (ideal para un trofeo especial de MVP, un regalo de cumpleaños, graduación o un torneo de pádel local) hasta tiradas de cientos de piezas para eventos multitudinarios con descuento por volumen.
+                    </div>
+                </details>
+
+                <!-- FAQ 2 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Cuánto tardáis en tener listos los trofeos en Granollers o el Vallès?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        Para pedidos pequeños o urgentes el plazo suele ser de <strong>24 a 72 horas</strong> una vez aprobado el diseño. Para tiradas grandes (50-200+ unidades) coordinamos el calendario según la fecha de tu evento. Al estar en Lliçà d'Amunt, la entrega en Granollers y municipios comarcales es prácticamente inmediata.
+                    </div>
+                </details>
+
+                <!-- FAQ 3 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Podéis poner el escudo de nuestro club o logo de empresa?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        Sí, es nuestra especialidad. Nos pasas tu imagen o vector (PNG, JPG, SVG, PDF) y nosotros lo convertimos a <strong>volumen 3D real</strong>, con relieves nítidos, opciones a varios colores y placas grabadas en la peana.
+                    </div>
+                </details>
+
+                <!-- FAQ 4 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Cómo solicito un presupuesto y cuánto cuesta?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        Las medallas parten habitualmente desde <strong>~1,90 € / ud</strong> y los trofeos con peana desde <strong>~8,50 € / ud</strong>, ajustándose según medidas y acabados. Para pedir precio exacto, basta con enviarnos un mensaje por WhatsApp al <strong>+34 660 904 515</strong> con la idea, unidades y fecha del torneo; te respondemos con un presupuesto cerrado sin compromiso lo antes posible.
+                    </div>
+                </details>
+
+                <!-- FAQ 5 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Qué material utilizáis y qué resistencia tienen?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        Fabricamos principalmente en <strong>PLA+ de alta tenacidad</strong>, un bioplástico rígido de origen vegetal y reciclable, respetuoso con el medio ambiente. Tienen gran resistencia a caídas normales y excelente presencia estética, con acabados en oro, plata, bronce, cobre, seda brillante y colores mate.
+                    </div>
+                </details>
+
+                <!-- FAQ 6 -->
+                <details class="group bg-white dark:bg-dark border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200">
+                    <summary class="flex justify-between items-center px-6 py-4 cursor-pointer text-sm sm:text-base font-bold text-gray-900 dark:text-white select-none group-open:text-primary">
+                        <span>¿Ofrecéis recogida física en mano?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 pt-3">
+                        Sí. Puedes recoger tu pedido directamente en nuestro taller de <strong>Lliçà d'Amunt (08186)</strong> con coste de envío 0€. También acordamos puntos de entrega en Granollers, Parets, Mollet y alrededores según disponibilidad.
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECCIÓN 8: CTA FINAL DIRECTO A WHATSAPP                       -->
+        <!-- ============================================================= -->
+        <div class="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-8 sm:p-12 text-white shadow-2xl shadow-amber-500/20 text-center space-y-6">
+            <div class="max-w-2xl mx-auto space-y-3">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-black/20 text-white backdrop-blur-xs">
+                    Tu Torneo Merece Algo Único
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                    Haz que los ganadores se lleven un recuerdo inolvidable
+                </h2>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed">
+                    Escríbenos por WhatsApp, cuéntanos qué necesitas y te responderemos lo antes posible con una propuesta personalizada y presupuesto sin compromiso.
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://wa.me/{{ current_whatsapp|default:'34660904515' }}?text=Hola%20ProPrint3D!%20Me%20gustar%C3%ADa%20pedir%20presupuesto%20para%20trofeos%20o%20medallas%20personalizadas." 
+                   target="_blank" rel="noopener noreferrer"
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-black text-gray-950 bg-white hover:bg-gray-100 shadow-xl transition-all transform hover:scale-105 cursor-pointer">
+                    <svg class="w-6 h-6 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.6-1.446c.152-.173.331-.216.441-.216.11 0 .22 0 .311.005.092.005.23-.05.356.253.128.305.434 1.056.477 1.143.043.087.073.188.026.289-.047.101-.073.159-.147.246l-.234.23c-.068.057-.143.152-.064.29.081.136.354.582.756.944.516.464.953.609 1.088.676.135.067.215.05.292-.036.077-.087.332-.387.42-.519.087-.132.174-.111.294-.067.121.043.763.36 893.424c.13.064.216.096.248.149.032.053.032.313-.112.718z"/></svg>
+                    <span>Contactar por WhatsApp (+34 660 904 515)</span>
+                </a>
+            </div>
+            
+            <div class="text-xs text-white/80 pt-2">
+                📍 Taller en Lliçà d'Amunt (08186) • Entregas en Granollers y comarca del Vallès Oriental
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

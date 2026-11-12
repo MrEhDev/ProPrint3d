@@ -9,6 +9,9 @@ urlpatterns = [
     # Catálogo público
     path('', views.catalog_view, name='catalog'),
     path('quienes-somos/', views.about_view, name='about_us'),
+    path('trofeos-medallas-personalizadas/', views.trophies_medals_view, name='trophies_medals'),
+    path('trofeos-medallas/api/add/', views.add_trophy_gallery_item_api, name='add_trophy_gallery_item_api'),
+    path('trofeos-medallas/api/<int:item_id>/delete/', views.delete_trophy_gallery_item_api, name='delete_trophy_gallery_item_api'),
     path('cambiar-sede/<slug:branch_slug>/', views.switch_branch_view, name='switch_branch'),
     
     # Formulario personalizado

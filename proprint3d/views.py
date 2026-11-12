@@ -11,6 +11,7 @@ from django.db.models import Q, Max, Sum, F, Count
 from django.views.decorators.http import require_POST
 
 from functools import wraps
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -30,7 +31,7 @@ def staff_member_required(view_func):
 # Utilidades PDF
 import io
 
-from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer, Branch, Filament
+from .models import Category, Product, Quote, QuoteItem, Order, OrderItem, ProductImage, Review, Cart, CartItem, Customer, Branch, Filament, TrophyGalleryItem
 from .forms import CalculatorForm, ProductFromCalcForm, ScraperForm, QuoteForm
 from .utils.calculator import calculate_print_costs
 from .utils.scraper import scrape_makerworld
@@ -148,6 +149,57 @@ def about_view(request):
     """Muestra la página de '¿Quiénes somos?' con información del taller, tecnología y opiniones."""
     reviews = get_verified_reviews(limit=9)
     return render(request, 'about.html', {'reviews': reviews})
+
+def trophies_medals_view(request):
+    """
+    Landing Page especializada en Trofeos y Medallas Personalizadas en Impresión 3D.
+    Optimizada para SEO Local (Granollers, Vallès Oriental, Lliçà d'Amunt) y GEO (IA).
+    Incluye galería/muestrario fotográfico independiente sin necesidad de crear productos de tienda.
+    """
+    reviews = get_verified_reviews(limit=6)
+    gallery_items = TrophyGalleryItem.objects.all()
+
+    return render(request, 'trophies_medals.html', {
+        'reviews': reviews,
+        'gallery_items': gallery_items,
+    })
+
+@staff_member_required
+def add_trophy_gallery_item_api(request):
+    """
+    Endpoint para subir una foto directamente al muestrario de trofeos/medallas.
+    No requiere crear un producto completo de tienda.
+    """
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        category_type = request.POST.get('category_type', 'trofeo')
+        description = request.POST.get('description', '').strip()
+        image = request.FILES.get('image')
+
+        if not title or not image:
+            messages.error(request, 'El título y la imagen son obligatorios.')
+            return redirect('trophies_medals')
+
+        TrophyGalleryItem.objects.create(
+            title=title,
+            category_type=category_type,
+            description=description,
+            image=image
+        )
+        messages.success(request, f'¡"{title}" añadido a la galería con éxito!')
+    return redirect('trophies_medals')
+
+@staff_member_required
+def delete_trophy_gallery_item_api(request, item_id):
+    """Elimina una foto del muestrario de trofeos/medallas."""
+    if request.method == 'POST':
+        item = get_object_or_404(TrophyGalleryItem, pk=item_id)
+        title = item.title
+        if item.image:
+            item.image.delete(save=False)
+        item.delete()
+        messages.success(request, f'Foto "{title}" eliminada de la galería.')
+    return redirect('trophies_medals')
 def product_detail_view(request, slug):
     """Muestra detalles extendidos de una pieza del catálogo."""
     # Admins pueden ver productos ocultos (is_active=False)

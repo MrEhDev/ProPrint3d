@@ -1,9 +1,11 @@
 User-agent: *
 Allow: /
+Allow: /trofeos-medallas-personalizadas/
 Allow: /custom-order/
 Allow: /product/
 Allow: /static/
 Allow: /media/
+Allow: /llms.txt
 
 Disallow: /gestion-taller/
 Disallow: /crm/
@@ -15,4 +17,5 @@ Disallow: /quote/
 Disallow: /order-print/
 
 Sitemap: https://proprint3d.shop/sitemap.xml
+
 
