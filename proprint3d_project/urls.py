@@ -15,13 +15,21 @@ sitemaps = {
     'categories': CategorySitemap,
 }
 
+def clean_sitemap_view(request, **kwargs):
+    response = sitemap(request, **kwargs)
+    if hasattr(response, 'headers') and 'X-Robots-Tag' in response.headers:
+        del response.headers['X-Robots-Tag']
+    elif response.has_header('X-Robots-Tag'):
+        del response['X-Robots-Tag']
+    return response
+
 # Configuración principal de URLs
 # Incluye las rutas de la app 'proprint3d', sitemap, robots.txt y favicon
 urlpatterns = [
     # SEO & Indexación Google y Agentes de IA
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots_file'),
     path('llms.txt', TemplateView.as_view(template_name="llms.txt", content_type="text/plain; charset=utf-8"), name='llms_file'),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('sitemap.xml', clean_sitemap_view, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'images/favicon.ico', permanent=True)),
 
     # Panel de administración protegido con URL oculta no estándar

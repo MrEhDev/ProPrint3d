@@ -751,4 +751,14 @@ class FilamentManagementTestCase(TestCase):
         self.assertEqual(item.filaments.first().code, 4)
 
 
+class SitemapTestCase(TestCase):
+    def test_sitemap_xml_accessible_and_no_noindex(self):
+        resp = self.client.get('/sitemap.xml')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('application/xml', resp['Content-Type'])
+        self.assertNotIn('X-Robots-Tag', resp.headers)
+        self.assertIn('<urlset', resp.content.decode('utf-8'))
+
+
+
 
