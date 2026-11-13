@@ -589,10 +589,10 @@ class BranchMultiSiteTestCase(TestCase):
             'quote_branch': self.branch_canarias,
             'logo_b64': get_quote_logo_base64(),
         })
-        self.assertIn("ProPrint3D Canarias", html)
+        self.assertIn("ProPrint3D", html)
+        self.assertNotIn("SEDE CANARIAS", html)
         self.assertIn("Santa Cruz de Tenerife", html)
         self.assertIn("697 868 621", html)
-        self.assertIn("SEDE CANARIAS", html)
 
 
 class FilamentManagementTestCase(TestCase):

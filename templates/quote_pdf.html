@@ -147,7 +147,7 @@
                     </td>
                     {% endif %}
                     <td style="vertical-align: middle; border: none; padding: 0;">
-                        <h1 style="margin: 0; line-height: 1.1; font-size: 24pt; color: #0ea5e9;">{{ quote_branch.greeting_name|default:"ProPrint3D" }}</h1>
+                        <h1 style="margin: 0; line-height: 1.1; font-size: 24pt; color: #0ea5e9;">ProPrint3D</h1>
                         <p style="margin: 2px 0 0 0; color: #64748b; font-size: 9.5pt;"><strong>Servicios de Impresión 3D Profesional</strong></p>
                     </td>
                 </tr>
@@ -186,9 +186,6 @@
             <p><strong>Nº de Ref:</strong> #{{ quote.id|stringformat:"04d" }}</p>
             <p><strong>Fecha:</strong> {{ quote.created_at|date:"d/m/Y" }}</p>
             <p><strong>Validez:</strong> 15 días</p>
-            {% if quote_branch and quote_branch.slug == 'canarias' %}
-            <p style="margin: 4px 0 0 0;"><span style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 2px 7px; border-radius: 4px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px;">SEDE CANARIAS</span></p>
-            {% endif %}
         </div>
         <div class="clear"></div>
     </div>
