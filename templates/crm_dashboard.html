@@ -2171,10 +2171,41 @@
         <div class="overflow-y-auto flex-1 pr-1 sm:pr-2 py-4 space-y-6">
             <!-- 1. Datos Generales del Pedido -->
             <div class="bg-gray-50 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/70 dark:border-gray-800">
-                <h4
-                    class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <span>📋</span> 1. Información General del Pedido
-                </h4>
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                    <h4 class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📋</span> 1. Información General del Pedido y Cliente
+                    </h4>
+                    <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                        <input type="checkbox" id="edit-order-save-as-customer" class="w-4 h-4 rounded text-primary focus:ring-primary transition cursor-pointer">
+                        <span>💾 Guardar o actualizar en agenda</span>
+                    </label>
+                </div>
+
+                <!-- Buscador de Cliente Habitual en Agenda -->
+                <div class="mb-4 relative">
+                    <input type="hidden" id="edit-order-customer-id" value="">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        🔍 Buscar cliente en la agenda (vincular o autocompletar)
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="edit-customer-search-input" placeholder="Escribe nombre, teléfono, email o localidad del cliente habitual..."
+                            class="w-full text-xs sm:text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            oninput="onCustomerSearchInput(this.value, 'edit')" onfocus="onCustomerSearchInput(this.value, 'edit')"
+                            onkeydown="if(event.key==='Escape'){ document.getElementById('edit-customer-dropdown').classList.add('hidden'); }" autocomplete="off">
+                        <button type="button" onclick="clearCustomerSelection('edit')"
+                            class="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-bold transition cursor-pointer"
+                            title="Limpiar selección">✕</button>
+                    </div>
+                    <!-- Badge de Cliente de Agenda Vinculado -->
+                    <div id="edit-selected-customer-badge" class="hidden mt-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 font-semibold flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <span class="text-emerald-600 dark:text-emerald-400 font-black">✓</span> Cliente de agenda vinculado: <strong id="edit-selected-customer-badge-name"></strong>
+                        </span>
+                        <button type="button" onclick="clearCustomerSelection('edit')" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 text-xs font-bold underline cursor-pointer">Desvincular</button>
+                    </div>
+                    <div id="edit-customer-dropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto hidden divide-y divide-gray-100 dark:divide-gray-700/60"></div>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre del
@@ -2282,32 +2313,12 @@
                         </div>
                     </div>
 
-                    <!-- SECCIÓN LOGÍSTICA CORREOS & CLIENTES FIJOS (Oficial Correos 2026) -->
+                    <!-- SECCIÓN LOGÍSTICA CORREOS (Oficial Correos 2026) -->
                     <div class="sm:col-span-3 p-4 rounded-xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/60 space-y-3">
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <h5 class="text-xs font-black uppercase tracking-wider text-cyan-900 dark:text-cyan-300 flex items-center gap-1.5">
-                                <span>📦</span> Logística Correos 2026 & Clientes Habituales
+                                <span>📦</span> Logística y Envío Correos 2026
                             </h5>
-                            <div class="flex items-center gap-2">
-                                <input type="hidden" id="edit-order-customer-id" value="">
-                                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none">
-                                    <input type="checkbox" id="edit-order-save-as-customer" class="w-4 h-4 rounded text-primary focus:ring-primary transition cursor-pointer">
-                                    <span>💾 Guardar en agenda de clientes</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Buscador / Selector de Cliente Habitual -->
-                        <div class="relative">
-                            <div class="flex gap-2">
-                                <input type="text" id="edit-customer-search-input" placeholder="🔍 Buscar cliente habitual (nombre, teléfono, email, ciudad)..."
-                                    class="w-full text-xs sm:text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                    oninput="onCustomerSearchInput(this.value, 'edit')" autocomplete="off">
-                                <button type="button" onclick="clearCustomerSelection('edit')"
-                                    class="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-bold transition"
-                                    title="Limpiar selección">✕</button>
-                            </div>
-                            <div id="edit-customer-dropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
                         </div>
 
                         <!-- Dirección Postal Desglosada -->
@@ -2568,6 +2579,7 @@
         depositMethod: "{{ order.deposit_method|default:''|escapejs }}",
         finalPaymentMethod: "{{ order.final_payment_method|default:''|escapejs }}",
         customerId: {% if order.customer %}{{ order.customer.id }}{% else %}null{% endif %},
+        customerName: "{% if order.customer %}{{ order.customer.name|escapejs }}{% endif %}",
         shippingAddress: "{{ order.shipping_address|default:''|escapejs }}",
         shippingPostalCode: "{{ order.shipping_postal_code|default:''|escapejs }}",
         shippingCity: "{{ order.shipping_city|default:''|escapejs }}",
@@ -4202,11 +4214,22 @@
         document.getElementById('edit-order-shipping').value = order.shipping || '';
         document.getElementById('edit-order-notes').value = order.notes || '';
 
-        // Campos de Cliente habitual y Logística Correos 2026
+        // Campos de Cliente habitual en agenda
         const custIdInput = document.getElementById('edit-order-customer-id');
         if (custIdInput) custIdInput.value = order.customerId || '';
         const custSearchInput = document.getElementById('edit-customer-search-input');
         if (custSearchInput) custSearchInput.value = '';
+        const custBadge = document.getElementById('edit-selected-customer-badge');
+        const custBadgeName = document.getElementById('edit-selected-customer-badge-name');
+        if (order.customerId && order.customerName) {
+            if (custBadgeName) custBadgeName.textContent = order.customerName;
+            if (custBadge) custBadge.classList.remove('hidden');
+        } else if (order.customerId) {
+            if (custBadgeName) custBadgeName.textContent = order.clientName || ('Cliente #' + order.customerId);
+            if (custBadge) custBadge.classList.remove('hidden');
+        } else {
+            if (custBadge) custBadge.classList.add('hidden');
+        }
 
         const shipAddrInput = document.getElementById('edit-order-shipping-address');
         if (shipAddrInput) shipAddrInput.value = order.shippingAddress || '';
@@ -5642,6 +5665,13 @@
         const provField = document.getElementById(`${mode}-order-shipping-province`);
         if (provField && cust.province) provField.value = cust.province;
 
+        const badge = document.getElementById(`${mode}-selected-customer-badge`);
+        const badgeName = document.getElementById(`${mode}-selected-customer-badge-name`);
+        if (badge && badgeName) {
+            badgeName.textContent = cust.name;
+            badge.classList.remove('hidden');
+        }
+
         const dropdown = document.getElementById(`${mode}-customer-dropdown`);
         if (dropdown) dropdown.classList.add('hidden');
     }
@@ -5651,6 +5681,8 @@
         if (custIdField) custIdField.value = '';
         const searchField = document.getElementById(`${mode}-customer-search-input`);
         if (searchField) searchField.value = '';
+        const badge = document.getElementById(`${mode}-selected-customer-badge`);
+        if (badge) badge.classList.add('hidden');
         const dropdown = document.getElementById(`${mode}-customer-dropdown`);
         if (dropdown) dropdown.classList.add('hidden');
     }
