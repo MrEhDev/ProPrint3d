@@ -744,18 +744,26 @@ def crm_dashboard_view(request):
     is_superuser = request.user.is_superuser
 
     if is_superuser:
-        selected_branch_slug = request.GET.get('branch', 'espana').strip().lower()
+        selected_branch_slug = request.GET.get('branch')
+        if not selected_branch_slug:
+            selected_branch_slug = request.session.get('crm_branch_slug') or request.session.get('branch_slug', 'espana')
+        selected_branch_slug = selected_branch_slug.strip().lower()
         if selected_branch_slug == 'all':
             selected_branch = None
+            request.session['crm_branch_slug'] = 'all'
         else:
             selected_branch = Branch.objects.filter(slug=selected_branch_slug, is_active=True).first()
             if not selected_branch:
                 selected_branch = Branch.objects.filter(is_main=True, is_active=True).first()
                 selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+            request.session['crm_branch_slug'] = selected_branch_slug
+            request.session['branch_slug'] = selected_branch_slug
     else:
         # Administrador de sucursal (restringido a su propia sede)
         selected_branch = user_branch or Branch.objects.filter(is_main=True, is_active=True).first()
         selected_branch_slug = selected_branch.slug if selected_branch else 'espana'
+        request.session['crm_branch_slug'] = selected_branch_slug
+        request.session['branch_slug'] = selected_branch_slug
 
     orders = Order.objects.all().order_by('-order_date')
 
@@ -1678,6 +1686,23 @@ def order_create_view(request):
     import json
     import decimal
 
+    # 1. Determinar sede inicial/activa
+    initial_branch_slug = request.GET.get('branch') or request.session.get('crm_branch_slug') or request.session.get('branch_slug')
+    target_branch = None
+    if initial_branch_slug and initial_branch_slug != 'all':
+        target_branch = Branch.objects.filter(slug=initial_branch_slug, is_active=True).first()
+
+    if not target_branch:
+        if hasattr(request.user, 'profile') and request.user.profile.branch and not request.user.is_superuser:
+            target_branch = request.user.profile.branch
+        else:
+            target_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+
+    if target_branch:
+        request.session['branch_slug'] = target_branch.slug
+        if request.user.is_superuser:
+            request.session['crm_branch_slug'] = target_branch.slug
+
     if request.method == 'POST':
         pieces_json = request.POST.get('pieces_json', '').strip()
         client_name = request.POST.get('client_name', '').strip()
@@ -1739,17 +1764,21 @@ def order_create_view(request):
         
         # Determinar la sucursal del nuevo pedido
         assigned_branch = None
-        if hasattr(request.user, 'profile') and request.user.profile.branch:
-            assigned_branch = request.user.profile.branch
-        elif request.POST.get('branch_slug'):
-            assigned_branch = Branch.objects.filter(slug=request.POST.get('branch_slug')).first()
-        elif request.POST.get('branch_id'):
-            assigned_branch = Branch.objects.filter(id=request.POST.get('branch_id')).first()
-            
+        post_slug = request.POST.get('branch_slug', '').strip().lower()
+        post_id = request.POST.get('branch_id', '').strip()
+
+        if post_slug:
+            assigned_branch = Branch.objects.filter(slug=post_slug, is_active=True).first()
+        elif post_id:
+            assigned_branch = Branch.objects.filter(id=post_id, is_active=True).first()
+
+        if not assigned_branch and not request.user.is_superuser:
+            if hasattr(request.user, 'profile') and request.user.profile.branch:
+                assigned_branch = request.user.profile.branch
+
         if not assigned_branch:
-            session_branch_slug = request.session.get('branch_slug')
-            if session_branch_slug:
-                assigned_branch = Branch.objects.filter(slug=session_branch_slug).first()
+            assigned_branch = target_branch
+
         if not assigned_branch:
             assigned_branch = Branch.objects.filter(is_main=True).first()
 
@@ -1854,6 +1883,10 @@ def order_create_view(request):
                     new_item.filaments.set(filament_ids)
                 
             order.update_totals_from_items()
+            if assigned_branch:
+                request.session['crm_branch_slug'] = assigned_branch.slug
+                request.session['branch_slug'] = assigned_branch.slug
+                return redirect(f"{reverse('crm_dashboard')}?branch={assigned_branch.slug}")
             return redirect('crm_dashboard')
 
         # Fallback a formulario tradicional SmartOrderForm
@@ -1901,6 +1934,10 @@ def order_create_view(request):
                 status=order.status or 'Presupuestado',
                 notes=order.notes or ''
             )
+            if assigned_branch:
+                request.session['crm_branch_slug'] = assigned_branch.slug
+                request.session['branch_slug'] = assigned_branch.slug
+                return redirect(f"{reverse('crm_dashboard')}?branch={assigned_branch.slug}")
             return redirect('crm_dashboard')
     else:
         form = SmartOrderForm()
@@ -1923,10 +1960,7 @@ def order_create_view(request):
         })
     products = [p['title'] for p in products_with_id]
     
-    # Filamentos activos para la sede
-    target_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
-    if hasattr(request.user, 'profile') and request.user.profile.branch:
-        target_branch = request.user.profile.branch
+    # Filamentos activos para la sede activa (target_branch)
     branch_filaments = list(Filament.objects.filter(branch=target_branch, is_active=True).order_by('code'))
     filaments_json = json.dumps([{
         'id': f.id,
@@ -1949,6 +1983,7 @@ def order_create_view(request):
         'payment_methods': [c[0] for c in Order.PAYMENT_METHOD_CHOICES],
         'correos_services': CORREOS_SERVICES,
         'customers': Customer.objects.all().order_by('-updated_at')[:50],
+        'target_branch': target_branch,
         'branch_filaments': branch_filaments,
         'filaments_json': filaments_json,
     })
@@ -2121,37 +2156,54 @@ def order_thermal_label_view(request, order_id):
 @staff_member_required
 def api_customers_search(request):
     """
-    API JSON para autocompletado y búsqueda de clientes habituales.
-    Permite buscar por nombre, teléfono, email, ciudad o código postal.
+    API JSON para autocompletado y búsqueda en tiempo real de clientes habituales.
+    Permite buscar por nombre, teléfono (flexible ignorando formato/espacios), email,
+    ciudad, código postal o dirección.
     """
+    import re
     q = request.GET.get('q', '').strip()
     customers_qs = Customer.objects.all()
     if q:
-        customers_qs = customers_qs.filter(
+        digits = re.sub(r'\D', '', q)
+        q_filter = (
             Q(name__icontains=q) |
             Q(phone__icontains=q) |
             Q(email__icontains=q) |
             Q(city__icontains=q) |
-            Q(postal_code__icontains=q)
+            Q(postal_code__icontains=q) |
+            Q(address__icontains=q)
         )
+        if len(digits) >= 3:
+            # Buscar clientes cuyo teléfono contenga los dígitos buscados sin importar espacios ni caracteres
+            all_recent = list(Customer.objects.all().order_by('-updated_at')[:300])
+            phone_matched_ids = [
+                c.id for c in all_recent
+                if c.phone and digits in re.sub(r'\D', '', c.phone)
+            ]
+            if phone_matched_ids:
+                customers_qs = customers_qs.filter(Q(id__in=phone_matched_ids) | q_filter)
+            else:
+                customers_qs = customers_qs.filter(q_filter)
+        else:
+            customers_qs = customers_qs.filter(q_filter)
     
-    customers_qs = customers_qs.order_by('-updated_at')[:20]
+    customers_qs = customers_qs.order_by('-updated_at')[:25]
     
     results = []
     for c in customers_qs:
         results.append({
             'id': c.id,
             'name': c.name,
-            'phone': c.phone,
-            'email': c.email,
-            'address': c.address,
-            'postal_code': c.postal_code,
-            'city': c.city,
-            'province': c.province,
-            'notes': c.notes,
+            'phone': c.phone or '',
+            'email': c.email or '',
+            'address': c.address or '',
+            'postal_code': c.postal_code or '',
+            'city': c.city or '',
+            'province': c.province or '',
+            'notes': c.notes or '',
             'full_address': c.full_address,
-            'order_count': c.order_count,
-            'total_spent': float(c.total_spent),
+            'order_count': c.total_orders,
+            'total_spent': float(c.total_spent or 0.0),
         })
         
     return JsonResponse({'success': True, 'customers': results})

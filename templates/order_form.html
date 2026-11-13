@@ -170,13 +170,20 @@
         <div class="mb-4 relative">
           <input type="hidden" name="customer_id" id="new-order-customer-id" value="">
           <div class="flex gap-2">
-            <input type="text" id="new-customer-search-input" placeholder="🔍 Buscar cliente habitual en agenda (nombre, teléfono, email, localidad)..."
-              class="of-input" oninput="onNewOrderCustomerSearch(this.value)" autocomplete="off">
+            <input type="text" id="new-customer-search-input" placeholder="🔍 Buscar cliente habitual en agenda (escribe nombre, teléfono, email, localidad)..."
+              class="of-input" oninput="onNewOrderCustomerSearch(this.value)" onfocus="onNewOrderCustomerSearch(this.value)"
+              onkeydown="if(event.key==='Escape'){ document.getElementById('new-customer-dropdown').classList.add('hidden'); }" autocomplete="off">
             <button type="button" onclick="clearNewOrderCustomer()"
-              class="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-bold transition"
+              class="px-3 py-2 text-xs bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-bold transition cursor-pointer"
               title="Limpiar selección">✕</button>
           </div>
-          <div id="new-customer-dropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
+          <div id="selected-customer-badge" class="hidden mt-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 font-semibold flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <span>✓</span> Cliente de agenda vinculado: <strong id="selected-customer-badge-name"></strong>
+            </span>
+            <button type="button" onclick="clearNewOrderCustomer()" class="text-emerald-500 hover:text-emerald-700 text-xs font-bold underline cursor-pointer">Desvincular</button>
+          </div>
+          <div id="new-customer-dropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto hidden divide-y divide-gray-100 dark:divide-gray-700/60"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 {% if request.user.is_superuser %}lg:grid-cols-6{% else %}lg:grid-cols-5{% endif %} gap-3">
@@ -208,16 +215,16 @@
           {% if request.user.is_superuser %}
           <div class="of-field lg:col-span-1">
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">📍 Sede Pedido</label>
-            <select name="branch_slug" class="of-input font-bold">
+            <select name="branch_slug" id="id_branch_slug" class="of-input font-bold" onchange="onOrderBranchChange(this.value)">
               {% for b in all_branches %}
-              <option value="{{ b.slug }}" {% if current_branch.slug == b.slug %}selected{% endif %}>
+              <option value="{{ b.slug }}" {% if target_branch and target_branch.slug == b.slug or not target_branch and current_branch.slug == b.slug %}selected{% endif %}>
                 {{ b.name }}
               </option>
               {% endfor %}
             </select>
           </div>
           {% else %}
-          <input type="hidden" name="branch_slug" value="{{ current_branch.slug }}">
+          <input type="hidden" name="branch_slug" value="{{ target_branch.slug|default:current_branch.slug }}">
           {% endif %}
           <div class="hidden">
             {{ form.client_contact }}
@@ -678,6 +685,7 @@
 
       const pieceProfit = Math.round((piece.totalPrice - piece.totalCost) * 100) / 100;
       const pieceMargin = piece.totalPrice > 0 ? ((pieceProfit / piece.totalPrice) * 100).toFixed(0) : '0';
+      const hasFilaments = piece.filaments && piece.filaments.length > 0;
 
       card.innerHTML = `
       <!-- Cabecera de la Pieza con Miniatura si tiene foto -->
@@ -739,48 +747,58 @@
           <span>📝</span> Notas o Requisitos de la Pieza (opcional)
         </label>
         <input type="text" class="of-input text-xs font-medium input-notes" data-index="${index}"
-          placeholder="Ej: Filamento PLA Madera, acabado mate, relleno 40%..."
+          placeholder="Ej: Acabado mate, relleno 40%, etc..."
           value="${(piece.notes || '').replace(/"/g, '&quot;')}">
       </div>
 
-      <!-- Filamentos / Bobinas Asignadas -->
-      <div class="mb-4 p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-dark/60">
-        <div class="flex items-center justify-between mb-2">
-          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
-            <span>🧵</span> Filamentos / Bobinas utilizadas
-          </label>
-          <a href="/crm/filamentos/" target="_blank" class="text-xs text-primary hover:underline flex items-center gap-1 font-semibold">
-            <span>📦</span> Almacén (+ Nuevo)
-          </a>
-        </div>
-
-        <!-- Lista de chips de filamentos de esta pieza -->
-        <div class="flex flex-wrap gap-1.5 mb-2.5 min-h-[26px]" id="new-piece-filaments-${index}">
-        </div>
-
-        <!-- Selector por número de código o desplegable -->
-        <div class="flex items-center gap-2">
-          <div class="relative w-32 sm:w-40 flex-shrink-0">
-            <input type="text"
-              id="new-piece-fil-code-${index}"
-              placeholder="Ej. #4 o 4..."
-              onkeydown="if(event.key==='Enter'){event.preventDefault(); addFilamentByCodeToNewPiece(${index}, this.value); this.value='';}"
-              class="of-input text-xs py-1.5 px-2.5 font-bold">
+      <!-- Filamentos / Bobinas Asignadas (Pestaña desplegable, oculta/cerrada por defecto) -->
+      <details class="group mb-4 rounded-xl border border-gray-200/90 dark:border-gray-800 bg-white/60 dark:bg-dark/40 overflow-hidden transition-all shadow-2xs" ${hasFilaments ? 'open' : ''}>
+        <summary class="flex items-center justify-between p-3 cursor-pointer select-none hover:bg-gray-100/60 dark:hover:bg-gray-800/40 list-none text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span>🧵</span>
+            <span>Filamentos / Bobinas utilizadas</span>
+            <span class="text-[11px] font-normal normal-case text-gray-400 dark:text-gray-500">(opcional - clic para desplegar)</span>
+            ${hasFilaments ? `<span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold normal-case">${piece.filaments.length} asignado(s)</span>` : ''}
           </div>
-          <button type="button"
-            onclick="const inp=document.getElementById('new-piece-fil-code-${index}'); addFilamentByCodeToNewPiece(${index}, inp.value); inp.value='';"
-            class="px-2.5 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs font-bold rounded-xl text-gray-700 dark:text-gray-200 transition cursor-pointer">
-            + Añadir #
-          </button>
-          <select onchange="if(this.value){ addFilamentByIdToNewPiece(${index}, this.value); this.value=''; }"
-            class="of-input text-xs py-1.5 px-2 flex-1 truncate font-medium">
-            <option value="">O elige filamento...</option>
-            ${branchFilaments.map(f => `
-              <option value="${f.id}">#${f.code} - ${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.color_name)} (${f.spools_closed}📦 / ${f.spools_opened}⭕)</option>
-            `).join('')}
-          </select>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+          </div>
+        </summary>
+        <div class="p-3 pt-2 border-t border-gray-100 dark:border-gray-800/60 bg-white/80 dark:bg-dark/60">
+          <div class="flex items-center justify-end mb-2">
+            <a href="/crm/filamentos/" target="_blank" class="text-xs text-primary hover:underline flex items-center gap-1 font-semibold">
+              <span>📦</span> Ver Almacén (+ Nuevo)
+            </a>
+          </div>
+
+          <!-- Lista de chips de filamentos de esta pieza -->
+          <div class="flex flex-wrap gap-1.5 mb-2.5 min-h-[26px]" id="new-piece-filaments-${index}">
+          </div>
+
+          <!-- Selector por número de código o desplegable -->
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div class="relative w-32 sm:w-40 flex-shrink-0">
+              <input type="text"
+                id="new-piece-fil-code-${index}"
+                placeholder="Ej. #4 o 4..."
+                onkeydown="if(event.key==='Enter'){event.preventDefault(); addFilamentByCodeToNewPiece(${index}, this.value); this.value='';}"
+                class="of-input text-xs py-1.5 px-2.5 font-bold">
+            </div>
+            <button type="button"
+              onclick="const inp=document.getElementById('new-piece-fil-code-${index}'); addFilamentByCodeToNewPiece(${index}, inp.value); inp.value='';"
+              class="px-2.5 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs font-bold rounded-xl text-gray-700 dark:text-gray-200 transition cursor-pointer">
+              + Añadir #
+            </button>
+            <select onchange="if(this.value){ addFilamentByIdToNewPiece(${index}, this.value); this.value=''; }"
+              class="of-input text-xs py-1.5 px-2 flex-1 truncate font-medium">
+              <option value="">O elige filamento...</option>
+              ${branchFilaments.map(f => `
+                <option value="${f.id}">#${f.code} - ${escapeHtml(f.brand)} ${escapeHtml(f.material)} ${escapeHtml(f.color_name)} (${f.spools_closed}📦 / ${f.spools_opened}⭕)</option>
+              `).join('')}
+            </select>
+          </div>
         </div>
-      </div>
+      </details>
 
       <!-- Fila 2: Fabricación (Peso, Horas, Minutos, Otros costes) -->
       <div class="bg-white/80 dark:bg-dark/60 p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-800 mb-4">
@@ -1638,45 +1656,61 @@
 
   // Funciones de Cliente habitual y Cotización Correos 2026
   let newCustSearchTimeout = null;
+  let cachedCustomersList = [];
+
   function onNewOrderCustomerSearch(query) {
     clearTimeout(newCustSearchTimeout);
     const dropdown = document.getElementById('new-customer-dropdown');
     if (!dropdown) return;
 
-    if (!query || query.trim().length < 1) {
-      dropdown.classList.add('hidden');
-      dropdown.innerHTML = '';
-      return;
-    }
+    const trimmed = (query || '').trim();
 
     newCustSearchTimeout = setTimeout(() => {
-      fetch(`/crm/api/customers/search/?q=${encodeURIComponent(query.trim())}`)
+      fetch(`/crm/api/customers/search/?q=${encodeURIComponent(trimmed)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.customers && data.customers.length > 0) {
-            dropdown.innerHTML = data.customers.map(c => `
-              <div class="p-2.5 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 cursor-pointer border-b border-gray-100 dark:border-gray-700/60 transition last:border-b-0"
-                onclick='selectNewOrderCustomer(${JSON.stringify(c)})'>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">${c.name}</span>
-                  <span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold">${c.order_count || 0} pedidos</span>
+            cachedCustomersList = data.customers;
+            dropdown.innerHTML = data.customers.map((c, idx) => `
+              <div class="p-3 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 cursor-pointer border-b border-gray-100 dark:border-gray-700/60 transition last:border-b-0 flex items-center justify-between gap-3"
+                onmousedown="selectNewOrderCustomerByIndex(${idx})">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">${escapeHtml(c.name)}</span>
+                    ${c.order_count > 0 ? `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/60 dark:text-cyan-300 shrink-0">${c.order_count} ${c.order_count === 1 ? 'pedido' : 'pedidos'}</span>` : ''}
+                  </div>
+                  <div class="text-[11px] text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+                    ${c.phone ? `<span>📞 ${escapeHtml(c.phone)}</span>` : ''}
+                    ${c.email ? `<span>✉️ ${escapeHtml(c.email)}</span>` : ''}
+                    ${c.city ? `<span>📍 ${escapeHtml(c.city)}${c.postal_code ? ` (${escapeHtml(c.postal_code)})` : ''}</span>` : ''}
+                    ${c.address ? `<span class="truncate max-w-[220px]">🏠 ${escapeHtml(c.address)}</span>` : ''}
+                  </div>
                 </div>
-                <div class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
-                  ${c.phone ? `<span>📞 ${c.phone}</span>` : ''}
-                  ${c.city ? `<span>📍 ${c.city}</span>` : ''}
-                </div>
+                <span class="text-xs text-primary font-bold shrink-0">Usar ↵</span>
               </div>
             `).join('');
             dropdown.classList.remove('hidden');
           } else {
-            dropdown.innerHTML = '<div class="p-3 text-xs text-gray-400 text-center">No se encontraron clientes habituales.</div>';
-            dropdown.classList.remove('hidden');
+            if (trimmed.length > 0) {
+              dropdown.innerHTML = '<div class="p-3 text-xs text-gray-400 dark:text-gray-500 text-center italic">No se encontraron clientes habituales con esa búsqueda.</div>';
+              dropdown.classList.remove('hidden');
+            } else {
+              dropdown.classList.add('hidden');
+              dropdown.innerHTML = '';
+            }
           }
         })
-        .catch(() => {
+        .catch(err => {
+          console.error("Error buscando clientes:", err);
           dropdown.classList.add('hidden');
         });
-    }, 250);
+    }, 100);
+  }
+
+  function selectNewOrderCustomerByIndex(idx) {
+    const cust = cachedCustomersList[idx];
+    if (!cust) return;
+    selectNewOrderCustomer(cust);
   }
 
   function selectNewOrderCustomer(cust) {
@@ -1705,7 +1739,12 @@
     if (addrField && cust.address) addrField.value = cust.address;
 
     const cpField = document.getElementById('id_shipping_postal_code');
-    if (cpField && cust.postal_code) cpField.value = cust.postal_code;
+    if (cpField && cust.postal_code) {
+      cpField.value = cust.postal_code;
+      if (typeof onShippingPostalCodeChange === 'function') {
+        onShippingPostalCodeChange(cust.postal_code);
+      }
+    }
 
     const cityField = document.getElementById('id_shipping_city');
     if (cityField && cust.city) cityField.value = cust.city;
@@ -1713,8 +1752,19 @@
     const provField = document.getElementById('id_shipping_province');
     if (provField && cust.province) provField.value = cust.province;
 
+    const badge = document.getElementById('selected-customer-badge');
+    if (badge) {
+      badge.classList.remove('hidden');
+      const badgeName = document.getElementById('selected-customer-badge-name');
+      if (badgeName) badgeName.textContent = cust.name;
+    }
+
     const dropdown = document.getElementById('new-customer-dropdown');
     if (dropdown) dropdown.classList.add('hidden');
+
+    if (typeof autoCalculateNewOrderShippingRates === 'function') {
+      autoCalculateNewOrderShippingRates();
+    }
   }
 
   function clearNewOrderCustomer() {
@@ -1722,8 +1772,20 @@
     if (custIdField) custIdField.value = '';
     const searchInput = document.getElementById('new-customer-search-input');
     if (searchInput) searchInput.value = '';
+    const badge = document.getElementById('selected-customer-badge');
+    if (badge) badge.classList.add('hidden');
     const dropdown = document.getElementById('new-customer-dropdown');
     if (dropdown) dropdown.classList.add('hidden');
+  }
+
+  function onOrderBranchChange(newBranchSlug) {
+    if (!newBranchSlug) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('branch', newBranchSlug);
+    const hasData = document.getElementById('id_client_name') && document.getElementById('id_client_name').value.trim();
+    if (!hasData) {
+      window.location.href = url.toString();
+    }
   }
 
   let newOrderShippingOptionsMap = {};

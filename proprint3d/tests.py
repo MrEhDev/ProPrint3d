@@ -469,6 +469,82 @@ class BranchMultiSiteTestCase(TestCase):
         self.assertEqual(ctx_espana['whatsapp_display'], '660 904 515')
         self.assertIn('Barcelona', ctx_espana['location'])
 
+    def test_crm_superadmin_creates_order_in_canarias(self):
+        """Verifica que el superadmin en el CRM de Canarias cree el pedido en Canarias y se refleje allí."""
+        self.client.force_login(self.superadmin)
+        
+        # 1. Visitar CRM Canarias
+        crm_can = self.client.get('/crm/?branch=canarias')
+        self.assertEqual(crm_can.status_code, 200)
+        self.assertEqual(crm_can.context['selected_branch_slug'], 'canarias')
+
+        # 2. Abrir formulario de nuevo pedido
+        new_order_page = self.client.get('/crm/order/new/?branch=canarias')
+        self.assertEqual(new_order_page.status_code, 200)
+        self.assertEqual(new_order_page.context['target_branch'].slug, 'canarias')
+
+        # 3. Crear pedido con sede Canarias
+        import json
+        post_data = {
+            'client_name': 'Cliente Canarias Especial',
+            'client_phone': '699112233',
+            'client_email': 'canarias@especial.es',
+            'order_date': str(datetime.date.today()),
+            'status': 'Presupuestado',
+            'branch_slug': 'canarias',
+            'pieces_json': json.dumps([{
+                'description': 'Llavero Canarias',
+                'quantity': 3,
+                'weight_grams': 25,
+                'print_time_hours': 1,
+                'print_time_minutes': 0,
+                'unit_price': 10.0,
+                'price': 30.0,
+            }]),
+            'save_as_customer': 'true',
+        }
+        resp = self.client.post('/crm/order/new/', post_data)
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('branch=canarias', resp.url)
+
+        # 4. Verificar que el pedido existe y pertenece a Canarias
+        order = Order.objects.filter(client_name='Cliente Canarias Especial').first()
+        self.assertIsNotNone(order)
+        self.assertEqual(order.branch, self.branch_canarias)
+
+        # 5. Comprobar que aparece en CRM Canarias y NO en España
+        crm_canarias = self.client.get('/crm/?branch=canarias')
+        self.assertContains(crm_canarias, "Cliente Canarias Especial")
+
+        crm_espana = self.client.get('/crm/?branch=espana')
+        self.assertNotContains(crm_espana, "Cliente Canarias Especial")
+
+    def test_api_customers_search_live_filtering(self):
+        """Verifica que el buscador de clientes en agenda filtre en vivo por nombre y teléfono sin errores."""
+        self.client.force_login(self.superadmin)
+        customer = Customer.objects.create(
+            name="Laura Sanchez",
+            phone="+34 654 32 10 98",
+            email="laura@test.es",
+            city="Las Palmas",
+            postal_code="35001",
+            branch=self.branch_canarias
+        )
+
+        # Búsqueda por nombre
+        res_name = self.client.get('/crm/api/customers/search/?q=Laura')
+        self.assertEqual(res_name.status_code, 200)
+        data_name = res_name.json()
+        self.assertTrue(data_name['success'])
+        self.assertTrue(any(c['name'] == 'Laura Sanchez' for c in data_name['customers']))
+
+        # Búsqueda por dígitos de teléfono
+        res_phone = self.client.get('/crm/api/customers/search/?q=654321')
+        self.assertEqual(res_phone.status_code, 200)
+        data_phone = res_phone.json()
+        self.assertTrue(data_phone['success'])
+        self.assertTrue(any(c['name'] == 'Laura Sanchez' for c in data_phone['customers']))
+
 
 class FilamentManagementTestCase(TestCase):
     def setUp(self):
