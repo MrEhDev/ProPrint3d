@@ -545,6 +545,55 @@ class BranchMultiSiteTestCase(TestCase):
         self.assertTrue(data_phone['success'])
         self.assertTrue(any(c['name'] == 'Laura Sanchez' for c in data_phone['customers']))
 
+    def test_order_quote_pdf_canarias_branch_data(self):
+        """Verifica que el presupuesto en PDF para un pedido de Canarias muestre la sede, teléfono y ubicación de Canarias."""
+        self.client.force_login(self.superadmin)
+        order = Order.objects.create(
+            branch=self.branch_canarias,
+            client_name="Cliente Tenerife Presupuesto",
+            client_phone="697868621",
+            client_contact="697868621",
+            order_date=datetime.date.today(),
+            price=Decimal('75.00'),
+            status='Presupuestado'
+        )
+        OrderItem.objects.create(
+            order=order,
+            description="Pieza 3D Canarias",
+            quantity=1,
+            unit_price=Decimal('75.00'),
+            price=Decimal('75.00')
+        )
+
+        resp = self.client.get(f'/crm/order/{order.id}/quote-pdf/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'application/pdf')
+        self.assertTrue(len(resp.content) > 1000)
+
+        # Verificar renderizado de plantilla
+        from django.template.loader import render_to_string
+        from proprint3d.views import get_quote_logo_base64
+        quote_data = {
+            'id': order.id,
+            'client_name': order.client_name,
+            'client_contact': order.client_contact,
+            'created_at': order.order_date,
+            'items': [{'custom_title': 'Pieza 3D Canarias', 'quantity': 1, 'unit_price': '75.00', 'calculated_cost': '75.00'}],
+            'subtotal': '75.00',
+            'total_price': '75.00',
+            'branch': self.branch_canarias,
+        }
+        html = render_to_string('quote_pdf.html', {
+            'quote': quote_data,
+            'order': order,
+            'quote_branch': self.branch_canarias,
+            'logo_b64': get_quote_logo_base64(),
+        })
+        self.assertIn("ProPrint3D Canarias", html)
+        self.assertIn("Santa Cruz de Tenerife", html)
+        self.assertIn("697 868 621", html)
+        self.assertIn("SEDE CANARIAS", html)
+
 
 class FilamentManagementTestCase(TestCase):
     def setUp(self):

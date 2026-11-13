@@ -477,11 +477,18 @@ def generate_quote_pdf_view(request, quote_id):
     y lo devuelve como archivo descargable con el nombre: Presupuesto_Nombre_AÑOMESDIA.pdf
     """
     quote = get_object_or_404(Quote, id=quote_id)
+    quote_branch = quote.branch
+    if not quote_branch:
+        req_branch = request.GET.get('branch') or request.session.get('crm_branch_slug') or request.session.get('branch_slug')
+        if req_branch and req_branch != 'all':
+            quote_branch = Branch.objects.filter(slug=req_branch, is_active=True).first()
+    if not quote_branch:
+        quote_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
     
     # Generar el HTML
     context = {
         'quote': quote,
-        'quote_branch': quote.branch,
+        'quote_branch': quote_branch,
         'logo_b64': get_quote_logo_base64(),
         'request': request,
     }
@@ -576,6 +583,22 @@ def generate_order_quote_pdf_view(request, order_id):
     tracking_num = (order.tracking_number or '').strip()
     tracking_url = order.correos_tracking_url if tracking_num else None
 
+    # Determinar sede emisora del presupuesto para el pedido
+    quote_branch = order.branch
+    if not quote_branch and order.customer and order.customer.branch:
+        quote_branch = order.customer.branch
+    if not quote_branch:
+        requested_branch_slug = request.GET.get('branch') or request.session.get('crm_branch_slug') or request.session.get('branch_slug')
+        if requested_branch_slug and requested_branch_slug != 'all':
+            quote_branch = Branch.objects.filter(slug=requested_branch_slug, is_active=True).first()
+    if not quote_branch:
+        cp = (order.shipping_postal_code or '').strip()
+        prov = (order.shipping_province or '').strip().lower()
+        if cp.startswith('35') or cp.startswith('38') or 'palmas' in prov or 'tenerife' in prov or 'canarias' in prov:
+            quote_branch = Branch.objects.filter(slug='canarias', is_active=True).first()
+    if not quote_branch:
+        quote_branch = Branch.objects.filter(is_main=True, is_active=True).first() or Branch.objects.first()
+
     quote_data = {
         'id': order.id,
         'client_name': order.client_name,
@@ -593,12 +616,19 @@ def generate_order_quote_pdf_view(request, order_id):
         'tax_name': tax_name,
         'tax_percentage': tax_percentage,
         'tax_amount': f"{tax_amount_val:.2f}",
-        'total_price': f"{total_val:.2f}"
+        'total_price': f"{total_val:.2f}",
+        'branch': quote_branch,
     }
+
+    # Si el pedido en base de datos no tenía branch fijado, sincronizarlo
+    if not order.branch and quote_branch:
+        order.branch = quote_branch
+        order.save(update_fields=['branch'])
 
     context = {
         'quote': quote_data,
         'order': order,
+        'quote_branch': quote_branch,
         'logo_b64': get_quote_logo_base64(),
         'request': request,
     }

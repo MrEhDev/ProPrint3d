@@ -147,30 +147,34 @@
                     </td>
                     {% endif %}
                     <td style="vertical-align: middle; border: none; padding: 0;">
-                        <h1 style="margin: 0; line-height: 1.1; font-size: 24pt; color: #0ea5e9;">ProPrint3D</h1>
+                        <h1 style="margin: 0; line-height: 1.1; font-size: 24pt; color: #0ea5e9;">{{ quote_branch.greeting_name|default:"ProPrint3D" }}</h1>
                         <p style="margin: 2px 0 0 0; color: #64748b; font-size: 9.5pt;"><strong>Servicios de Impresión 3D Profesional</strong></p>
                     </td>
                 </tr>
             </table>
             <p style="margin: 0 0 3px 0; font-size: 9.5pt; color: #475569;">
                 {% if quote_branch %}
-                    {{ quote_branch.display_location }}
+                    {{ quote_branch.display_location }}{% if quote_branch.slug == 'canarias' and 'canarias' not in quote_branch.display_location|lower %} (Canarias, España){% endif %}
                 {% elif quote.branch %}
-                    {{ quote.branch.display_location }}
+                    {{ quote.branch.display_location }}{% if quote.branch.slug == 'canarias' and 'canarias' not in quote.branch.display_location|lower %} (Canarias, España){% endif %}
+                {% elif order.branch %}
+                    {{ order.branch.display_location }}{% if order.branch.slug == 'canarias' and 'canarias' not in order.branch.display_location|lower %} (Canarias, España){% endif %}
                 {% else %}
-                    Lliçà d'Amunt, Vallès Oriental, Barcelona, España
+                    Lliçà d'Amunt (Barcelona, España)
                 {% endif %}
             </p>
             <p style="margin: 0; font-size: 9.5pt;">
                 <a href="https://proprint3d.shop" target="_blank" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">www.proprint3d.shop</a>
                 <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
-                <span style="color: #475569;">info@proprint3d.shop</span>
+                <span style="color: #475569;">{{ quote_branch.email|default:"info@proprint3d.shop" }}</span>
                 <span style="color: #94a3b8;">&nbsp;|&nbsp;</span>
                 <span style="color: #475569;">
                     {% if quote_branch %}
                         +34 {{ quote_branch.display_phone_national }}
                     {% elif quote.branch %}
                         +34 {{ quote.branch.display_phone_national }}
+                    {% elif order.branch %}
+                        +34 {{ order.branch.display_phone_national }}
                     {% else %}
                         660.90.45.15
                     {% endif %}
@@ -182,6 +186,9 @@
             <p><strong>Nº de Ref:</strong> #{{ quote.id|stringformat:"04d" }}</p>
             <p><strong>Fecha:</strong> {{ quote.created_at|date:"d/m/Y" }}</p>
             <p><strong>Validez:</strong> 15 días</p>
+            {% if quote_branch and quote_branch.slug == 'canarias' %}
+            <p style="margin: 4px 0 0 0;"><span style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 2px 7px; border-radius: 4px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px;">SEDE CANARIAS</span></p>
+            {% endif %}
         </div>
         <div class="clear"></div>
     </div>

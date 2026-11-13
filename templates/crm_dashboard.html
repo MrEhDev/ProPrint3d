@@ -882,7 +882,7 @@
                                     title="Editar pedido y piezas">
                                     <span>✏️</span> Editar
                                 </button>
-                                <a href="{% url 'generate_order_quote_pdf' group.order.id %}" target="_blank" onclick="event.stopPropagation()"
+                                <a href="{% url 'generate_order_quote_pdf' group.order.id %}{% if selected_branch_slug and selected_branch_slug != 'all' %}?branch={{ selected_branch_slug }}{% endif %}" target="_blank" onclick="event.stopPropagation()"
                                     class="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 border border-gray-200 dark:border-gray-700 flex-shrink-0"
                                     title="Descargar Presupuesto en PDF">
                                     <span>📄</span> PDF
@@ -1235,7 +1235,7 @@
                     class="h-10 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1 active:scale-95 border border-gray-200 dark:border-gray-700">
                     <span>✏️</span> Editar
                 </button>
-                <a href="{% url 'generate_order_quote_pdf' order.id %}" target="_blank"
+                <a href="{% url 'generate_order_quote_pdf' order.id %}{% if selected_branch_slug and selected_branch_slug != 'all' %}?branch={{ selected_branch_slug }}{% endif %}" target="_blank"
                     class="h-10 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 transition flex items-center gap-1 active:scale-95 border border-gray-200 dark:border-gray-700">
                     <span>📄</span> PDF
                 </a>
@@ -1532,7 +1532,7 @@
                                             title="Ver o compartir etiqueta térmica de 58mm">
                                             <span>🖨️</span> Etiqueta 58mm
                                         </a>
-                                        <a href="{% url 'generate_order_quote_pdf' order.id %}"
+                                        <a href="{% url 'generate_order_quote_pdf' order.id %}{% if selected_branch_slug and selected_branch_slug != 'all' %}?branch={{ selected_branch_slug }}{% endif %}"
                                             onclick="event.stopPropagation();"
                                             class="px-3 py-1.5 rounded-lg text-sm font-bold bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/50 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white border border-emerald-200 dark:border-emerald-800 transition flex items-center gap-1.5 shadow-sm"
                                             title="Descargar presupuesto oficial en PDF">
@@ -2238,6 +2238,20 @@
                         </select>
                     </div>
 
+                    {% if is_superuser %}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">📍 Sede del Pedido</label>
+                        <select id="edit-order-branch"
+                            class="w-full text-sm p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            {% for b in crm_branches %}
+                            <option value="{{ b.slug }}">{{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <input type="hidden" id="edit-order-branch" value="{{ selected_branch_slug|default:'espana' }}">
+                    {% endif %}
+
                     <!-- Calculadora Wallapop en Modal de Edición -->
                     <div id="edit-wallapop-calc-box" class="sm:col-span-3 hidden p-3.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 space-y-2">
                         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -2527,6 +2541,8 @@
         {% for order in orders %}
     "{{ order.id }}": {
         id: {{ order.id }},
+        branchSlug: "{{ order.branch.slug|default:'espana'|escapejs }}",
+        branchName: "{{ order.branch.name|default:'España'|escapejs }}",
         clientName: "{{ order.client_name|escapejs }}",
         clientPhone: "{{ order.client_phone|default:''|escapejs }}",
         clientEmail: "{{ order.client_email|default:''|escapejs }}",
@@ -2626,6 +2642,8 @@
         {% for order in orders %}
     "{{ order.id }}": {
         id: {{ order.id }},
+        branchSlug: "{{ order.branch.slug|default:'espana'|escapejs }}",
+        branchName: "{{ order.branch.name|default:'España'|escapejs }}",
         clientName: "{{ order.client_name|escapejs }}",
             totalPrice: {{ order.price|default:0|unlocalize }},
         depositAmount: {{ order.deposit_amount|default:0|unlocalize }},
@@ -4171,8 +4189,11 @@
             badgeEl.textContent = `${cost.toFixed(2)} €`;
         }
 
+        const bSelect = document.getElementById('edit-order-branch');
+        if (bSelect) bSelect.value = order.branchSlug || 'espana';
+
         const btnPdfEdit = document.getElementById('edit-modal-btn-pdf');
-        if (btnPdfEdit) btnPdfEdit.href = `/crm/order/${orderId}/quote-pdf/`;
+        if (btnPdfEdit) btnPdfEdit.href = `/crm/order/${orderId}/quote-pdf/${order.branchSlug ? '?branch=' + order.branchSlug : ''}`;
 
         document.getElementById('edit-order-date').value = order.rawOrderDate || order.orderDate || '';
         document.getElementById('edit-order-deadline').value = order.rawDeadline || order.deadline || '';
@@ -5027,6 +5048,7 @@
 
         const payload = {
             client_name: clientName,
+            branch_slug: document.getElementById('edit-order-branch') ? document.getElementById('edit-order-branch').value : (order.branchSlug || 'espana'),
             client_phone: clientPhone,
             client_email: clientEmail,
             client_contact: clientContact || [clientPhone, clientEmail].filter(Boolean).join(' · '),
