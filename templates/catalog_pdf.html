@@ -184,6 +184,15 @@
             line-height: 1.5;
         }
 
+        .cover-footer a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        .cover-footer a:hover {
+            text-decoration: underline;
+        }
+
         /* =========================================================
            PÁGINAS DE PRODUCTOS (GRID 2x2)
            ========================================================= */
@@ -231,7 +240,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 12mm;
+            gap: 8mm;
             flex: 1;
         }
 
@@ -239,7 +248,7 @@
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
-            padding: 10mm;
+            padding: 6mm 7mm 5mm 7mm;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -249,7 +258,7 @@
         }
 
         .product-img-wrap {
-            height: 52mm;
+            height: 44mm;
             width: 100%;
             background: #f8fafc;
             border-radius: 11px;
@@ -257,25 +266,27 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            margin-bottom: 4mm;
+            margin-bottom: 2.5mm;
             border: 1px solid #f1f5f9;
         }
 
         .product-img {
-            max-height: 50mm;
+            max-height: 42mm;
             max-width: 95%;
             object-fit: contain;
             border-radius: 9px;
         }
 
         .product-title {
-            font-size: 11.5pt;
+            font-size: 10.5pt;
             font-weight: 800;
             color: #0f172a;
-            margin: 0 0 2mm 0;
-            line-height: 1.25;
-            height: 11mm;
+            margin: 0 0 1.5mm 0;
+            line-height: 1.22;
+            max-height: 18mm;
             overflow: hidden;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .product-dims {
@@ -287,6 +298,7 @@
             border-radius: 5px;
             margin-bottom: 2mm;
             font-weight: 600;
+            line-height: 1.2;
         }
 
         .product-desc {
@@ -359,11 +371,13 @@
         }
 
         .product-horizontal-title {
-            font-size: 11.5pt;
+            font-size: 11pt;
             font-weight: 800;
             color: #0f172a;
-            line-height: 1.2;
-            margin: 0;
+            line-height: 1.22;
+            margin: 0 0 1.5mm 0;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .product-horizontal-dims {
@@ -375,6 +389,7 @@
             border-radius: 4px;
             font-weight: 600;
             align-self: flex-start;
+            line-height: 1.2;
         }
 
         .product-horizontal-desc {
@@ -471,6 +486,16 @@
             justify-content: space-between;
             font-size: 7.5pt;
             color: #94a3b8;
+        }
+
+        .page-footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page-footer a:hover {
+            color: #0284c7;
+            text-decoration: underline;
         }
 
         /* =========================================================
@@ -574,6 +599,21 @@
         .contact-item {
             font-size: 8.5pt;
             color: #cbd5e1;
+            text-decoration: none;
+        }
+
+        a.contact-item {
+            display: block;
+            text-decoration: none;
+            color: #cbd5e1;
+            border-radius: 8px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+        }
+
+        a.contact-item:hover {
+            color: #ffffff;
+            background: rgba(14, 165, 233, 0.15);
         }
 
         .contact-item strong {
@@ -583,6 +623,10 @@
             text-transform: uppercase;
             letter-spacing: 0.8px;
             margin-bottom: 2px;
+        }
+
+        a.contact-item:hover strong {
+            color: #7dd3fc;
         }
 
         .back-footer {
@@ -636,8 +680,8 @@
                 {{ location }}
             </div>
             <div class="cover-footer-right">
-                WhatsApp: <strong>+34 {{ whatsapp_display }}</strong><br>
-                Web: <strong>www.proprint3d.shop</strong>
+                WhatsApp: <a href="{{ general_wa_url }}" target="_blank"><strong>+34 {{ whatsapp_display }}</strong></a><br>
+                Web: <a href="{{ website_url }}" target="_blank"><strong>www.proprint3d.shop</strong></a>
             </div>
         </div>
     </div>
@@ -674,7 +718,7 @@
                     <div class="product-horizontal-top">
                         <div class="product-horizontal-title">{{ prod.title }}</div>
                         {% if prod.dimensions %}
-                        <div class="product-horizontal-dims">📐 {{ prod.dimensions }}</div>
+                        <div class="product-horizontal-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
                         {% endif %}
                         {% if prod.description %}
                         <div class="product-horizontal-desc">{{ prod.short_description }}</div>
@@ -729,7 +773,7 @@
 
                     <!-- Dimensiones (si están disponibles) -->
                     {% if prod.dimensions %}
-                    <div class="product-dims">📐 {{ prod.dimensions }}</div>
+                    <div class="product-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
                     {% endif %}
                 </div>
 
@@ -767,7 +811,10 @@
         <!-- Pie de página interior -->
         <div class="page-footer">
             <div>ProPrint3D · Taller de Fabricación e Impresión 3D</div>
-            <div>www.proprint3d.shop · Pedidos: WhatsApp {{ whatsapp_display }}</div>
+            <div>
+                <a href="{{ website_url }}" target="_blank">www.proprint3d.shop</a> · 
+                Pedidos: WhatsApp <a href="{{ general_wa_url }}" target="_blank"><strong>+34 {{ whatsapp_display }}</strong></a>
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -805,33 +852,33 @@
                     <div class="step-num">2</div>
                     <div class="step-info">
                         <h4>Escanea su código QR o escríbenos</h4>
-                        <p>Apunta con la cámara de tu móvil al código QR de la pieza para abrir WhatsApp con los datos ya rellenados, o mándanos un mensaje directo al <strong>660 904 515</strong>.</p>
+                        <p>Apunta con la cámara de tu móvil al código QR de la pieza para abrir WhatsApp con los datos ya rellenados, o mándanos un mensaje directo al <a href="{{ general_wa_url }}" style="color: #38bdf8; font-weight: 800; text-decoration: none;" target="_blank"><strong>+34 {{ whatsapp_display }}</strong></a>.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Datos de Contacto del Taller -->
             <div class="contact-grid">
-                <div class="contact-item">
+                <a href="{{ general_wa_url }}" class="contact-item" target="_blank">
                     <strong>WhatsApp Directo</strong>
                     +34 {{ whatsapp_display }}
-                </div>
-                <div class="contact-item">
+                </a>
+                <a href="{{ website_url }}" class="contact-item" target="_blank">
                     <strong>Tienda Web Oficial</strong>
                     www.proprint3d.shop
-                </div>
-                <div class="contact-item">
+                </a>
+                <a href="mailto:info@proprint3d.shop" class="contact-item">
                     <strong>Correo Electrónico</strong>
                     info@proprint3d.shop
-                </div>
-                <div class="contact-item">
+                </a>
+                <a href="https://es.wallapop.com/user/proprint3" class="contact-item" target="_blank">
                     <strong>Wallapop Verificado</strong>
                     5.0 ★ (proprint3)
-                </div>
-                <div class="contact-item">
+                </a>
+                <a href="https://instagram.com/proprint3d_spain" class="contact-item" target="_blank">
                     <strong>Redes Sociales</strong>
                     @proprint3d_spain (TikTok / Instagram)
-                </div>
+                </a>
                 <div class="contact-item">
                     <strong>Ubicación del Taller</strong>
                     {{ location }}

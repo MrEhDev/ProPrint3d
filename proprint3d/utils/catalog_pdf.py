@@ -275,6 +275,10 @@ def build_catalog_context(
                     'products': orphan_items[i:i + chunk_size]
                 })
 
+    general_wa_msg = f"Hola {greeting}, he visto vuestro catálogo y me gustaría solicitar información."
+    general_wa_url = f"https://wa.me/{wa_phone}?text={urllib.parse.quote(general_wa_msg)}"
+    website_url = "https://proprint3d.shop"
+
     return {
         'category_name': display_title,
         'category_subtitle': display_subtitle,
@@ -286,6 +290,8 @@ def build_catalog_context(
         'hero_b64': hero_b64,
         'current_year': datetime.now().year,
         'whatsapp_display': whatsapp_display,
+        'general_wa_url': general_wa_url,
+        'website_url': website_url,
         'slogan': display_slogan,
         'location': location,
         'branch': branch,
