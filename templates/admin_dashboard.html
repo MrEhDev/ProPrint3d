@@ -317,6 +317,33 @@
                         </div>
                     </div>
 
+                    <!-- RESUMEN DE RENTABILIDAD EN TIEMPO REAL (IGUAL QUE EN PEDIDOS) -->
+                    <div id="product-profitability-card" class="p-3.5 bg-gradient-to-br from-emerald-50/80 via-white to-gray-50 dark:from-emerald-950/30 dark:via-gray-800/80 dark:to-gray-900/80 rounded-xl border border-emerald-200 dark:border-emerald-800/50 space-y-2.5 shadow-sm transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Rentabilidad y Métricas
+                            </span>
+                            <span id="product-margin-badge" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60">
+                                Margen: 0%
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-700/70 flex flex-col justify-center">
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Coste Fab.</p>
+                                <p class="text-sm sm:text-base font-black text-red-500 mt-0.5">€<span id="kpi-product-cost">0.00</span></p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex flex-col justify-center">
+                                <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Beneficio</p>
+                                <p class="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">€<span id="kpi-product-profit">0.00</span></p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-cyan-50/90 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/60 flex flex-col justify-center">
+                                <p class="text-[10px] text-cyan-800 dark:text-cyan-300 font-bold uppercase tracking-wider">⚡ €/h Máq.</p>
+                                <p class="text-sm sm:text-base font-black text-cyan-700 dark:text-cyan-300 mt-0.5" id="kpi-product-hourly">--</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Toggles Ergonómicos para Móvil -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 cursor-pointer hover:border-amber-400 transition select-none">
@@ -471,6 +498,65 @@
         const btnX40 = document.getElementById('apply-suggestion-x40-btn');
         const calcBtn = document.getElementById('force-calc-btn');
 
+        const kpiCost = document.getElementById('kpi-product-cost');
+        const kpiProfit = document.getElementById('kpi-product-profit');
+        const kpiHourly = document.getElementById('kpi-product-hourly');
+        const kpiMarginBadge = document.getElementById('product-margin-badge');
+        const salePriceInput = document.querySelector('input[name="sale_price"]');
+        const onSaleCheckbox = document.querySelector('input[name="is_on_sale"]');
+
+        function updateProfitability() {
+            const w = parseFloat(weightInput?.value) || 0;
+            const h = parseFloat(hoursInput?.value) || 0;
+            const m = parseFloat(minsInput?.value) || 0;
+            const extra = parseFloat(extraInput?.value) || 0;
+            const totalHours = h + (m / 60);
+
+            const cost_filament = 0.02 * w;
+            const cost_energy = 0.15 * 0.12 * totalHours;
+            const cost_wear = 0.30 * totalHours;
+            const cost_subtotal = cost_filament + cost_energy + cost_wear;
+            const error_margin = cost_subtotal * 0.15;
+            const totalCost = (w > 0 || totalHours > 0) ? (cost_subtotal + error_margin + extra) : extra;
+
+            let finalPrice = parseFloat(priceInput?.value) || 0;
+            const isOnSale = onSaleCheckbox?.checked;
+            const salePrice = parseFloat(salePriceInput?.value) || 0;
+            if (isOnSale && salePrice > 0) {
+                finalPrice = salePrice;
+            }
+
+            const profit = Math.round((finalPrice - totalCost) * 100) / 100;
+            const margin = finalPrice > 0 ? ((profit / finalPrice) * 100).toFixed(0) : 0;
+            const hourlyRate = totalHours > 0 ? (profit / totalHours).toFixed(2) : '0.00';
+
+            if (kpiCost) kpiCost.textContent = totalCost.toFixed(2);
+            if (kpiProfit) {
+                kpiProfit.textContent = profit.toFixed(2);
+                if (profit < 0) {
+                    kpiProfit.className = 'text-sm sm:text-base font-black text-red-500 mt-0.5';
+                } else {
+                    kpiProfit.className = 'text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5';
+                }
+            }
+            if (kpiHourly) {
+                kpiHourly.textContent = totalHours > 0 ? `€${hourlyRate}/h` : '--';
+                if (parseFloat(hourlyRate) < 0) {
+                    kpiHourly.className = 'text-sm sm:text-base font-black text-red-500 mt-0.5';
+                } else {
+                    kpiHourly.className = 'text-sm sm:text-base font-black text-cyan-700 dark:text-cyan-300 mt-0.5';
+                }
+            }
+            if (kpiMarginBadge) {
+                kpiMarginBadge.textContent = `Margen: ${margin}%${isOnSale && salePrice > 0 ? ' (Oferta)' : ''}`;
+                if (profit < 0) {
+                    kpiMarginBadge.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-red-100 text-red-700 border border-red-300';
+                } else {
+                    kpiMarginBadge.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60';
+                }
+            }
+        }
+
         function syncStickyPrice() {
             if (priceInput && stickyPriceDisplay) {
                 const val = parseFloat(priceInput.value) || 0;
@@ -479,8 +565,19 @@
         }
 
         if (priceInput) {
-            priceInput.addEventListener('input', syncStickyPrice);
+            priceInput.addEventListener('input', () => {
+                syncStickyPrice();
+                updateProfitability();
+            });
             syncStickyPrice();
+        }
+
+        if (salePriceInput) {
+            salePriceInput.addEventListener('input', updateProfitability);
+        }
+
+        if (onSaleCheckbox) {
+            onSaleCheckbox.addEventListener('change', updateProfitability);
         }
 
         function calculateSuggested() {
@@ -513,6 +610,8 @@
             } else {
                 if (suggestionContainer) suggestionContainer.classList.add('hidden');
             }
+
+            updateProfitability();
         }
 
         if (calcBtn) calcBtn.addEventListener('click', calculateSuggested);
@@ -525,18 +624,21 @@
             btnX25.addEventListener('click', () => {
                 priceInput.value = valX25.textContent;
                 syncStickyPrice();
+                updateProfitability();
             });
         }
         if (btnX30 && priceInput) {
             btnX30.addEventListener('click', () => {
                 priceInput.value = valX30.textContent;
                 syncStickyPrice();
+                updateProfitability();
             });
         }
         if (btnX40 && priceInput) {
             btnX40.addEventListener('click', () => {
                 priceInput.value = valX40.textContent;
                 syncStickyPrice();
+                updateProfitability();
             });
         }
 
