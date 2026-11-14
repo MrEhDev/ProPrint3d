@@ -33,11 +33,14 @@ def generate_qr_base64(data_url):
         logger.warning(f"Error generando QR: {e}")
         return None
 
+_IMAGE_B64_CACHE = {}
+
 def get_optimized_image_base64(file_path_or_field, max_dim=400, quality=80):
     """
     Lee una imagen de disco o FieldFile, la redimensiona de forma eficiente
     y devuelve una cadena data:image/jpeg;base64,... ultraligera (20-40 KB).
-    Evita desbordamientos de memoria (OOM) y bloqueos en WeasyPrint.
+    Utiliza caché en memoria basada en la ruta y fecha de modificación del archivo
+    para evitar re-procesamiento redundante con PIL y picos de memoria (OOM).
     """
     if not file_path_or_field:
         return None
@@ -57,6 +60,12 @@ def get_optimized_image_base64(file_path_or_field, max_dim=400, quality=80):
         if not file_path:
             return None
 
+        # Comprobar caché por ruta, mtime y parámetros de resolución
+        mtime = os.path.getmtime(file_path)
+        cache_key = (file_path, mtime, max_dim, quality)
+        if cache_key in _IMAGE_B64_CACHE:
+            return _IMAGE_B64_CACHE[cache_key]
+
         with Image.open(file_path) as img:
             # Manejar transparencias / modos de color
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -73,7 +82,13 @@ def get_optimized_image_base64(file_path_or_field, max_dim=400, quality=80):
 
             buf = io.BytesIO()
             img.save(buf, format="JPEG", quality=quality, optimize=True)
-            return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+            res = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+
+            # Evitar acumulación excesiva en RAM (máx 150 imágenes en memoria)
+            if len(_IMAGE_B64_CACHE) > 150:
+                _IMAGE_B64_CACHE.clear()
+            _IMAGE_B64_CACHE[cache_key] = res
+            return res
 
     except Exception as e:
         logger.warning(f"Error optimizando imagen para PDF ({file_path_or_field}): {e}")
@@ -311,6 +326,35 @@ def generate_catalog_pdf_bytes(
     branch=None,
 ):
     """Genera el PDF del catálogo de manera eficiente y devuelve (pdf_bytes, filename)."""
+    import gc
+    from django.db import models as db_models
+    from django.core.cache import cache
+    from proprint3d.models import Product
+
+    # Clave de caché para evitar sobrecarga y 500 por ejecuciones simultáneas o duplicadas
+    branch_slug = branch.slug if branch else 'default'
+    prod_meta = Product.objects.filter(is_active=True).aggregate(
+        count=db_models.Count('id'),
+        max_id=db_models.Max('id')
+    )
+    cache_signature = (
+        str(category_slugs),
+        str(category_slug),
+        bool(include_prices),
+        bool(include_descriptions),
+        (custom_title or '').strip(),
+        (custom_subtitle or '').strip(),
+        (custom_slogan or '').strip(),
+        (custom_description or '').strip(),
+        branch_slug,
+        prod_meta.get('count', 0),
+        prod_meta.get('max_id', 0)
+    )
+    cache_key = f"catalog_pdf_{abs(hash(cache_signature))}"
+    cached_pdf = cache.get(cache_key)
+    if cached_pdf:
+        return cached_pdf
+
     context = build_catalog_context(
         category_slug=category_slug,
         category_slugs=category_slugs,
@@ -334,4 +378,11 @@ def generate_catalog_pdf_bytes(
     date_str = datetime.now().strftime('%Y%m%d')
     filename = f"Catalogo_ProPrint3D_{clean_cat}_{date_str}.pdf"
     
-    return pdf_bytes, filename
+    result = (pdf_bytes, filename)
+    # Guardar en caché durante 10 minutos (600s)
+    cache.set(cache_key, result, timeout=600)
+    
+    # Liberar memoria de WeasyPrint inmediatamente
+    gc.collect()
+    
+    return result

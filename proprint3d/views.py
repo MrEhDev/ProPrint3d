@@ -688,11 +688,17 @@ def generate_category_catalog_pdf_view(request, category_slug=None):
         if branch_param and branch_param != 'all':
             catalog_branch = Branch.objects.filter(slug=branch_param, is_active=True).first()
 
-        if not catalog_branch and hasattr(request.user, 'profile') and request.user.profile.branch:
-            catalog_branch = request.user.profile.branch
+        try:
+            if not catalog_branch and hasattr(request.user, 'profile') and request.user.profile and request.user.profile.branch:
+                catalog_branch = request.user.profile.branch
+        except Exception:
+            pass
 
-        if not catalog_branch and request.session.get('branch_slug'):
-            catalog_branch = Branch.objects.filter(slug=request.session.get('branch_slug'), is_active=True).first()
+        try:
+            if not catalog_branch and request.session.get('branch_slug'):
+                catalog_branch = Branch.objects.filter(slug=request.session.get('branch_slug'), is_active=True).first()
+        except Exception:
+            pass
 
         if not catalog_branch:
             catalog_branch = Branch.objects.filter(is_main=True, is_active=True).first()

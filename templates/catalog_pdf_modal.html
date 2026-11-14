@@ -123,10 +123,10 @@
                 Cancelar
             </button>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="executeCatalogPdfGeneration(true)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-primary hover:bg-secondary text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="btn-catalog-preview" onclick="executeCatalogPdfGeneration(true)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-primary hover:bg-secondary text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <span>👁️</span> Vista Previa
                 </button>
-                <button type="button" onclick="executeCatalogPdfGeneration(false)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="btn-catalog-download" onclick="executeCatalogPdfGeneration(false)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <span>⬇️</span> Descargar PDF
                 </button>
             </div>
@@ -195,9 +195,29 @@ function resetCatalogCoverDefaults() {
     if (desc) desc.value = '';
 }
 
+let isGeneratingPdf = false;
+
 function executeCatalogPdfGeneration(isPreview) {
+    if (isGeneratingPdf) return;
     const modal = document.getElementById('catalog-pdf-config-modal');
     if (!modal) return;
+
+    isGeneratingPdf = true;
+
+    const previewBtn = document.getElementById('btn-catalog-preview');
+    const downloadBtn = document.getElementById('btn-catalog-download');
+    const prevPreviewHtml = previewBtn ? previewBtn.innerHTML : '';
+    const prevDownloadHtml = downloadBtn ? downloadBtn.innerHTML : '';
+
+    if (previewBtn) {
+        previewBtn.disabled = true;
+        previewBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    if (downloadBtn) {
+        downloadBtn.disabled = true;
+        downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        downloadBtn.innerHTML = '<span>⏳</span> Generando PDF...';
+    }
 
     const checkboxes = modal.querySelectorAll('.cat-checkbox:checked');
     const selectedSlugs = Array.from(checkboxes).map(cb => cb.value);
@@ -229,7 +249,21 @@ function executeCatalogPdfGeneration(isPreview) {
 
     const url = "{% url 'generate_catalog_pdf' %}?" + params.toString();
     window.open(url, '_blank');
-    closeCatalogPdfModal();
+
+    setTimeout(() => {
+        closeCatalogPdfModal();
+        isGeneratingPdf = false;
+        if (previewBtn) {
+            previewBtn.disabled = false;
+            previewBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            previewBtn.innerHTML = prevPreviewHtml;
+        }
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            downloadBtn.innerHTML = prevDownloadHtml;
+        }
+    }, 1200);
 }
 
 document.addEventListener('keydown', function(e) {
