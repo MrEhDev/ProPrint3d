@@ -236,23 +236,35 @@
             letter-spacing: 1px;
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 8mm;
+        .product-grid-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 4mm 4mm;
+            margin: 0;
             flex: 1;
+        }
+
+        .product-grid-cell {
+            width: 50%;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .product-cell-empty {
+            visibility: hidden;
         }
 
         .product-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 6mm 7mm 5mm 7mm;
+            border-radius: 12px;
+            padding: 5mm 6mm 4mm 6mm;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+            height: 106mm;
+            box-sizing: border-box;
             text-decoration: none;
             color: inherit;
         }
@@ -313,11 +325,18 @@
         /* =========================================================
            DISEÑO HORIZONTAL (TARJETAS A LO ANCHO - 3 POR PÁGINA)
            ========================================================= */
-        .product-horizontal-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6mm;
+        .product-horizontal-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0 4mm;
+            margin: 0;
             flex: 1;
+        }
+
+        .product-horizontal-cell {
+            vertical-align: middle;
+            padding: 0;
         }
 
         .product-horizontal-card {
@@ -330,7 +349,6 @@
             align-items: center;
             gap: 6mm;
             height: 68mm;
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
             box-sizing: border-box;
             text-decoration: none;
             color: inherit;
@@ -703,109 +721,122 @@
 
         {% if include_descriptions %}
         <!-- FORMATO HORIZONTAL (A LO ANCHO - 3 POR PÁGINA CON DESCRIPCIÓN) -->
-        <div class="product-horizontal-list">
+        <table class="product-horizontal-table">
             {% for prod in page_data.products %}
-            <a href="{{ prod.wa_url }}" class="product-horizontal-card" target="_blank">
-                <!-- Imagen grande a la izquierda -->
-                <div class="product-horizontal-img-wrap">
-                    {% if prod.image_b64 %}
-                    <img src="{{ prod.image_b64 }}" alt="{{ prod.title }}" class="product-horizontal-img">
-                    {% endif %}
-                </div>
-
-                <!-- Contenido estructurado a la derecha -->
-                <div class="product-horizontal-content">
-                    <div class="product-horizontal-top">
-                        <div class="product-horizontal-title">{{ prod.title }}</div>
-                        {% if prod.dimensions %}
-                        <div class="product-horizontal-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
-                        {% endif %}
-                        {% if prod.description %}
-                        <div class="product-horizontal-desc">{{ prod.short_description }}</div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Pie: Precio y QR WhatsApp -->
-                    <div class="product-horizontal-bottom">
-                        {% if include_prices %}
-                        <div class="price-box">
-                            {% if prod.is_on_sale and prod.sale_price %}
-                            <span class="price-label">Oferta</span>
-                            <span class="price-old">{{ prod.price }}</span>
-                            <span class="price-sale">{{ prod.sale_price }}</span>
-                            {% else %}
-                            <span class="price-label">Precio</span>
-                            <span class="price-val">{{ prod.price }}</span>
+            <tr>
+                <td class="product-horizontal-cell">
+                    <a href="{{ prod.wa_url }}" class="product-horizontal-card" target="_blank">
+                        <!-- Imagen grande a la izquierda -->
+                        <div class="product-horizontal-img-wrap">
+                            {% if prod.image_b64 %}
+                            <img src="{{ prod.image_b64 }}" alt="{{ prod.title }}" class="product-horizontal-img">
                             {% endif %}
                         </div>
-                        {% else %}
-                        <div class="price-box">
-                            <span class="price-label">Presupuesto</span>
-                            <span style="font-size: 8.5pt; font-weight: 800; color: #0284c7;">A consultar</span>
-                        </div>
-                        {% endif %}
 
-                        <div class="qr-box">
-                            <div class="qr-text">Clic o escanea</div>
-                            <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
+                        <!-- Contenido estructurado a la derecha -->
+                        <div class="product-horizontal-content">
+                            <div class="product-horizontal-top">
+                                <div class="product-horizontal-title">{{ prod.title }}</div>
+                                {% if prod.dimensions %}
+                                <div class="product-horizontal-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
+                                {% endif %}
+                                {% if prod.description %}
+                                <div class="product-horizontal-desc">{{ prod.short_description }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Pie: Precio y QR WhatsApp -->
+                            <div class="product-horizontal-bottom">
+                                {% if include_prices %}
+                                <div class="price-box">
+                                    {% if prod.is_on_sale and prod.sale_price %}
+                                    <span class="price-label">Oferta</span>
+                                    <span class="price-old">{{ prod.price }}</span>
+                                    <span class="price-sale">{{ prod.sale_price }}</span>
+                                    {% else %}
+                                    <span class="price-label">Precio</span>
+                                    <span class="price-val">{{ prod.price }}</span>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="price-box">
+                                    <span class="price-label">Presupuesto</span>
+                                    <span style="font-size: 8.5pt; font-weight: 800; color: #0284c7;">A consultar</span>
+                                </div>
+                                {% endif %}
+
+                                <div class="qr-box">
+                                    <div class="qr-text">Clic o escanea</div>
+                                    <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </a>
+                    </a>
+                </td>
+            </tr>
             {% endfor %}
-        </div>
+        </table>
 
         {% else %}
         <!-- FORMATO REJILLA 2x2 (4 POR PÁGINA SIN DESCRIPCIÓN) -->
-        <div class="product-grid">
-            {% for prod in page_data.products %}
-            <a href="{{ prod.wa_url }}" class="product-card" target="_blank">
-                <div>
-                    <!-- Imagen del Producto -->
-                    <div class="product-img-wrap">
-                        {% if prod.image_b64 %}
-                        <img src="{{ prod.image_b64 }}" alt="{{ prod.title }}" class="product-img">
-                        {% endif %}
-                    </div>
+        <table class="product-grid-table">
+            {% for row in page_data.product_rows %}
+            <tr>
+                {% for prod in row %}
+                <td class="product-grid-cell">
+                    <a href="{{ prod.wa_url }}" class="product-card" target="_blank">
+                        <div>
+                            <!-- Imagen del Producto -->
+                            <div class="product-img-wrap">
+                                {% if prod.image_b64 %}
+                                <img src="{{ prod.image_b64 }}" alt="{{ prod.title }}" class="product-img">
+                                {% endif %}
+                            </div>
 
-                    <!-- Título -->
-                    <div class="product-title">{{ prod.title }}</div>
+                            <!-- Título -->
+                            <div class="product-title">{{ prod.title }}</div>
 
-                    <!-- Dimensiones (si están disponibles) -->
-                    {% if prod.dimensions %}
-                    <div class="product-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
-                    {% endif %}
-                </div>
+                            <!-- Dimensiones (si están disponibles) -->
+                            {% if prod.dimensions %}
+                            <div class="product-dims"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -0.5px; margin-right: 2px; display: inline-block;"><path d="M21.3 8.7 8.7 21.3c-1 1-2.5 1-3.4 0l-2.6-2.6c-1-1-1-2.5 0-3.4L15.3 2.7c1-1 2.5-1 3.4 0l2.6 2.6c1 1 1 2.5 0 3.4Z"/><path d="m14.5 3.5 2 2"/><path d="m11.5 6.5 2 2"/><path d="m8.5 9.5 2 2"/><path d="m5.5 12.5 2 2"/></svg>{{ prod.dimensions }}</div>
+                            {% endif %}
+                        </div>
 
-                <!-- Pie de tarjeta: Precio y QR WhatsApp -->
-                <div class="product-bottom">
-                    {% if include_prices %}
-                    <div class="price-box">
-                        {% if prod.is_on_sale and prod.sale_price %}
-                        <span class="price-label">Oferta</span>
-                        <span class="price-old">{{ prod.price }}</span>
-                        <span class="price-sale">{{ prod.sale_price }}</span>
-                        {% else %}
-                        <span class="price-label">Precio</span>
-                        <span class="price-val">{{ prod.price }}</span>
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <div class="price-box">
-                        <span class="price-label">Presupuesto</span>
-                        <span style="font-size: 8.5pt; font-weight: 800; color: #0284c7;">A consultar</span>
-                    </div>
-                    {% endif %}
+                        <!-- Pie de tarjeta: Precio y QR WhatsApp -->
+                        <div class="product-bottom">
+                            {% if include_prices %}
+                            <div class="price-box">
+                                {% if prod.is_on_sale and prod.sale_price %}
+                                <span class="price-label">Oferta</span>
+                                <span class="price-old">{{ prod.price }}</span>
+                                <span class="price-sale">{{ prod.sale_price }}</span>
+                                {% else %}
+                                <span class="price-label">Precio</span>
+                                <span class="price-val">{{ prod.price }}</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="price-box">
+                                <span class="price-label">Presupuesto</span>
+                                <span style="font-size: 8.5pt; font-weight: 800; color: #0284c7;">A consultar</span>
+                            </div>
+                            {% endif %}
 
-                    <!-- QR directo a WhatsApp con mensaje pre-cargado -->
-                    <div class="qr-box">
-                        <div class="qr-text">Clic o escanea</div>
-                        <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
-                    </div>
-                </div>
-            </a>
+                            <!-- QR directo a WhatsApp con mensaje pre-cargado -->
+                            <div class="qr-box">
+                                <div class="qr-text">Clic o escanea</div>
+                                <img src="{{ prod.qr_b64 }}" alt="QR WhatsApp" class="qr-img">
+                            </div>
+                        </div>
+                    </a>
+                </td>
+                {% endfor %}
+                {% if row|length == 1 %}
+                <td class="product-grid-cell product-cell-empty"></td>
+                {% endif %}
+            </tr>
             {% endfor %}
-        </div>
+        </table>
         {% endif %}
 
         <!-- Pie de página interior -->

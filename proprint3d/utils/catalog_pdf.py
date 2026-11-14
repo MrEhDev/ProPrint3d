@@ -15,12 +15,12 @@ import weasyprint
 logger = logging.getLogger(__name__)
 
 def generate_qr_base64(data_url):
-    """Genera una imagen QR en formato data:image/png;base64."""
+    """Genera una imagen QR en formato data:image/png;base64 ultraligera y rápida."""
     try:
         qr = qrcode.QRCode(
-            version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=5,
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=3,
             border=1,
         )
         qr.add_data(data_url)
@@ -194,7 +194,7 @@ def build_catalog_context(
             qr_b64 = generate_qr_base64(wa_url)
 
             # Imagen optimizada del producto (con fallback a hero_b64)
-            img_b64 = get_optimized_image_base64(p.main_image, max_dim=400, quality=80) or hero_b64
+            img_b64 = get_optimized_image_base64(p.main_image, max_dim=300, quality=75) or hero_b64
 
             p_price = float(p.price) if p.price is not None else 0.0
             price_formatted = f"{p_price:.2f}".replace('.', ',') + " €"
@@ -233,9 +233,12 @@ def build_catalog_context(
 
         # Dividir los productos de esta categoría en páginas con su encabezado correspondiente
         for i in range(0, len(cat_items), chunk_size):
+            slice_items = cat_items[i:i + chunk_size]
+            rows = [slice_items[j:j+2] for j in range(0, len(slice_items), 2)]
             pages.append({
                 'category_name': cat.name,
-                'products': cat_items[i:i + chunk_size]
+                'products': slice_items,
+                'product_rows': rows,
             })
 
     # Si hay productos sin categoría y estamos en catálogo general
@@ -251,7 +254,7 @@ def build_catalog_context(
             msg = f"Hola {greeting}, me interesa la pieza '{p_title}' del catálogo."
             wa_url = f"https://wa.me/{wa_phone}?text={urllib.parse.quote(msg)}"
             qr_b64 = generate_qr_base64(wa_url)
-            img_b64 = get_optimized_image_base64(p.main_image, max_dim=400, quality=80) or hero_b64
+            img_b64 = get_optimized_image_base64(p.main_image, max_dim=300, quality=75) or hero_b64
 
             p_price = float(p.price) if p.price is not None else 0.0
             price_formatted = f"{p_price:.2f}".replace('.', ',') + " €"
@@ -285,9 +288,12 @@ def build_catalog_context(
         if orphan_items:
             total_products_count += len(orphan_items)
             for i in range(0, len(orphan_items), chunk_size):
+                slice_items = orphan_items[i:i + chunk_size]
+                rows = [slice_items[j:j+2] for j in range(0, len(slice_items), 2)]
                 pages.append({
                     'category_name': 'Piezas Especiales',
-                    'products': orphan_items[i:i + chunk_size]
+                    'products': slice_items,
+                    'product_rows': rows,
                 })
 
     general_wa_msg = f"Hola {greeting}, he visto vuestro catálogo y me gustaría solicitar información."
