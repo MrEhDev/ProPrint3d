@@ -3,8 +3,6 @@ Allow: /
 Allow: /trofeos-medallas-personalizadas/
 Allow: /custom-order/
 Allow: /product/
-Allow: /static/
-Allow: /media/
 Allow: /llms.txt
 
 Disallow: /gestion-taller/
