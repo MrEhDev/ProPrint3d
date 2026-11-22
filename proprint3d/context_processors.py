@@ -48,7 +48,7 @@ def branch_context(request):
 
     all_branches = list(Branch.objects.filter(is_active=True).order_by('-is_main', 'name'))
 
-    whatsapp_number = current_branch.whatsapp if current_branch else "34660904515"
+    whatsapp_number = current_branch.whatsapp if current_branch else "34621042622"
     greeting_name = current_branch.greeting_name if current_branch else "ProPrint3D"
 
     return {

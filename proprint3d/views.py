@@ -224,7 +224,7 @@ def product_detail_view(request, slug):
         current_branch = Branch.objects.filter(is_main=True, is_active=True).first()
     
     greeting = current_branch.greeting_name if current_branch else "ProPrint3D"
-    whatsapp_num = current_branch.whatsapp if current_branch else "34660904515"
+    whatsapp_num = current_branch.whatsapp if current_branch else "34621042622"
 
     absolute_url = request.build_absolute_uri()
     wa_message = f"Hola {greeting}, estoy interesado en la pieza: {product.title}\n\n {absolute_url}"
@@ -2050,7 +2050,7 @@ def cart_view(request):
         current_branch = Branch.objects.filter(is_main=True, is_active=True).first()
     
     greeting = current_branch.greeting_name if current_branch else "ProPrint3D"
-    whatsapp_num = current_branch.whatsapp if current_branch else "34660904515"
+    whatsapp_num = current_branch.whatsapp if current_branch else "34621042622"
 
     # Construir mensaje de WhatsApp
     if items.exists():

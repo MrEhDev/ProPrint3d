@@ -50,8 +50,8 @@ def compress_image_field(image_field, max_width=1200, quality=80):
 class Branch(models.Model):
     name = models.CharField(max_length=100, help_text="Nombre de la sede (ej. España, Canarias)")
     slug = models.SlugField(max_length=50, unique=True, help_text="Identificador único (ej. espana, canarias)")
-    whatsapp = models.CharField(max_length=20, default="34660904515", help_text="WhatsApp con prefijo (sin + ni espacios)")
-    phone = models.CharField(max_length=30, default="+34 660 90 45 15", help_text="Teléfono visible")
+    whatsapp = models.CharField(max_length=20, default="34621042622", help_text="WhatsApp con prefijo (sin + ni espacios)")
+    phone = models.CharField(max_length=30, default="+34 621 04 26 22", help_text="Teléfono visible")
     email = models.EmailField(blank=True, default="proprint3d.es@gmail.com", help_text="Email de contacto")
     greeting_name = models.CharField(max_length=100, default="ProPrint3D", help_text="Nombre en saludos (ej. ProPrint3D, ProPrint3D Canarias)")
     address = models.CharField(max_length=250, blank=True, default='', help_text="Dirección física de la sede")

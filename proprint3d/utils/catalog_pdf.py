@@ -116,8 +116,8 @@ def build_catalog_context(
     if not branch:
         branch = Branch.objects.filter(is_main=True, is_active=True).first()
 
-    wa_phone = branch.whatsapp if branch else "34660904515"
-    whatsapp_display = branch.display_phone_national if branch else "660 904 515"
+    wa_phone = branch.whatsapp if branch else "34621042622"
+    whatsapp_display = branch.display_phone_national if branch else "621 042 622"
     location = branch.display_location if branch else "Lliçà d'Amunt (Barcelona, España)"
     greeting = branch.greeting_name if branch else "ProPrint3D"
 

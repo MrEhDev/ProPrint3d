@@ -375,8 +375,8 @@ class BranchMultiSiteTestCase(TestCase):
             slug='espana',
             defaults={
                 'name': 'España',
-                'whatsapp': '34660904515',
-                'phone': '+34 660 90 45 15',
+                'whatsapp': '34621042622',
+                'phone': '+34 621 04 26 22',
                 'greeting_name': 'ProPrint3D',
                 'is_main': True,
                 'is_active': True,
@@ -426,7 +426,7 @@ class BranchMultiSiteTestCase(TestCase):
         # Sin seleccionar: defecto España
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['current_whatsapp'], '34660904515')
+        self.assertEqual(response.context['current_whatsapp'], '34621042622')
 
         # Con cambio a Canarias
         self.client.get('/cambiar-sede/canarias/')
@@ -466,7 +466,7 @@ class BranchMultiSiteTestCase(TestCase):
         self.assertEqual(ctx_canarias['location'], 'Santa Cruz de Tenerife')
 
         ctx_espana = build_catalog_context(branch=self.branch_espana)
-        self.assertEqual(ctx_espana['whatsapp_display'], '660 904 515')
+        self.assertEqual(ctx_espana['whatsapp_display'], '621 042 622')
         self.assertIn('Barcelona', ctx_espana['location'])
 
     def test_crm_superadmin_creates_order_in_canarias(self):
