@@ -673,9 +673,7 @@ def whatsapp_catalog_feed_view(request):
     response.write('\ufeff')
     
     writer = csv.writer(response)
-    # Cabecera estándar de catálogo de Meta.
-    # Incluimos explícitamente item_group_id vacío para forzar a Meta a desvincular
-    # y sobrescribir cualquier agrupación previa en caché.
+    # Cabecera estándar de catálogo de Meta
     writer.writerow([
         'id',
         'title',
@@ -689,7 +687,6 @@ def whatsapp_catalog_feed_view(request):
         'brand',
         'google_product_category',
         'product_type',
-        'item_group_id',
     ])
     
     base_url = request.build_absolute_uri('/')[:-1]
@@ -737,7 +734,6 @@ def whatsapp_catalog_feed_view(request):
             brand,
             'Arts & Entertainment > Hobbies & Creative Arts > Crafts & Hobbies > 3D Printing',
             product_type,
-            '',  # Vacío explícito para desagrupar variantes en Meta
         ])
         
     return response
