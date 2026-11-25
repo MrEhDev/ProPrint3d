@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 import datetime
 
-from proprint3d.models import Customer, Order, OrderItem, Branch, UserProfile, Filament
+from proprint3d.models import Customer, Order, OrderItem, Branch, UserProfile, Filament, Product, Cart, CartItem
 from proprint3d.utils.correos_rates import (
     calculate_all_correos_options,
     calculate_volumetric_weight_grams,
@@ -758,6 +758,40 @@ class SitemapTestCase(TestCase):
         self.assertIn('application/xml', resp['Content-Type'])
         self.assertNotIn('X-Robots-Tag', resp.headers)
         self.assertIn('<urlset', resp.content.decode('utf-8'))
+
+
+class CartAjaxTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.product = Product.objects.create(
+            title="Soporte Auriculares 3D",
+            slug="soporte-auriculares-3d",
+            description="Soporte resistente impreso en PLA.",
+            price=Decimal('15.50'),
+            is_active=True
+        )
+
+    def test_add_to_cart_standard_redirect(self):
+        resp = self.client.post(f"/cart/add/{self.product.id}/")
+        self.assertEqual(resp.status_code, 302)
+        cart = Cart.objects.first()
+        self.assertIsNotNone(cart)
+        self.assertEqual(cart.items.count(), 1)
+        self.assertEqual(cart.items.first().quantity, 1)
+
+    def test_add_to_cart_ajax_json_response(self):
+        resp = self.client.post(
+            f"/cart/add/{self.product.id}/",
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data.get('success'))
+        self.assertEqual(data.get('cart_item_count'), 1)
+        self.assertEqual(data.get('cart_total'), '15.50')
+        self.assertEqual(data['product']['title'], 'Soporte Auriculares 3D')
+        self.assertEqual(data['product']['quantity'], 1)
+
 
 
 

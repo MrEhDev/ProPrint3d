@@ -2073,7 +2073,7 @@ def cart_view(request):
     return render(request, 'cart.html', context)
 
 def add_to_cart_view(request, product_id):
-    """Añade un producto al carrito."""
+    """Añade un producto al carrito (soporta peticiones normales y AJAX)."""
     if request.method == 'POST':
         cart = _get_or_create_cart(request)
         product = get_object_or_404(Product, id=product_id)
@@ -2083,6 +2083,29 @@ def add_to_cart_view(request, product_id):
         if not created:
             cart_item.quantity += 1
             cart_item.save()
+
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+            request.headers.get('accept') == 'application/json' or
+            request.POST.get('ajax') == '1'
+        )
+        if is_ajax:
+            total_items = sum(item.quantity for item in cart.items.all())
+            unit_price = float(product.sale_price if (product.is_on_sale and product.sale_price) else product.price)
+            cart_total = float(cart.total_price)
+            return JsonResponse({
+                'success': True,
+                'cart_item_count': total_items,
+                'cart_total': f"{cart_total:.2f}",
+                'product': {
+                    'id': product.id,
+                    'title': product.title,
+                    'price': f"{unit_price:.2f}",
+                    'image_url': product.main_image.url if product.main_image else None,
+                    'quantity': cart_item.quantity,
+                    'item_total': f"{float(cart_item.total_price):.2f}",
+                }
+            })
             
         return redirect(request.META.get('HTTP_REFERER', 'catalog'))
     return redirect('catalog')
