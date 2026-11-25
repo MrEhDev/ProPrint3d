@@ -711,6 +711,12 @@ def whatsapp_catalog_feed_view(request):
         else:
             image_link = default_image_url
             
+        # Asegurar protocolo HTTPS para cumplir los requisitos de Meta
+        if not product_link.startswith('https://') and 'localhost' not in product_link and '127.0.0.1' not in product_link:
+            product_link = 'https://' + product_link.split('://', 1)[-1]
+        if not image_link.startswith('https://') and 'localhost' not in image_link and '127.0.0.1' not in image_link:
+            image_link = 'https://' + image_link.split('://', 1)[-1]
+            
         brand = "ProPrint3D"
         first_cat = product.categories.first()
         category_slug_val = first_cat.slug if first_cat else ""
