@@ -87,18 +87,18 @@
 
                 {% if product.main_image or product.images.all %}
                 <!-- Visor Principal Cuadrado con Fondo Suave y Apertura Lightbox al hacer clic -->
-                <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-b from-gray-100/90 to-gray-200/90 dark:from-slate-800/80 dark:to-slate-900/90 group cursor-zoom-in" 
+                <div class="relative w-full aspect-square max-h-[380px] sm:max-h-none rounded-2xl overflow-hidden bg-gradient-to-b from-gray-100/90 to-gray-200/90 dark:from-slate-800/80 dark:to-slate-900/90 group cursor-zoom-in select-none" 
                      id="product-carousel" 
                      onclick="openLightbox()" 
                      title="Haz clic para ver en pantalla completa">
                     
                     {% if product.main_image %}
                     <img src="{{ product.main_image.url }}" alt="{{ product.title }}"
-                        class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 opacity-100 carousel-image group-hover:scale-105">
+                        class="absolute inset-0 w-full h-full object-contain p-2.5 sm:p-4 transition-all duration-500 opacity-100 carousel-image group-hover:scale-105 pointer-events-none">
                     {% endif %}
                     {% for img in product.images.all %}
                     <img src="{{ img.image.url }}" alt="{{ product.title }}"
-                        class="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-all duration-500 {% if not product.main_image and forloop.first %}opacity-100{% else %}opacity-0{% endif %} carousel-image group-hover:scale-105">
+                        class="absolute inset-0 w-full h-full object-contain p-2.5 sm:p-4 transition-all duration-500 {% if not product.main_image and forloop.first %}opacity-100{% else %}opacity-0{% endif %} carousel-image group-hover:scale-105 pointer-events-none">
                     {% endfor %}
 
                     <!-- Indicador Flotante Pantalla Completa -->
@@ -109,42 +109,49 @@
 
                     <!-- Botones de Navegación Glass (Solo visibles si hay más de 1 imagen) -->
                     {% if product.images.all.count > 0 %}
-                    <button onclick="event.stopPropagation(); prevImage();"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
+                    <button type="button" onclick="event.stopPropagation(); prevImage();"
+                        class="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2 sm:p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
                         aria-label="Foto anterior">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    <button onclick="event.stopPropagation(); nextImage();"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
+                    <button type="button" onclick="event.stopPropagation(); nextImage();"
+                        class="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-10 backdrop-blur-md bg-dark/60 hover:bg-dark/90 text-white border border-white/20 p-2 sm:p-2.5 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
                         aria-label="Siguiente foto">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
+
+                    <!-- Indicador móvil de foto actual (ej. 1 / 3) -->
+                    <div class="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-xl bg-black/55 text-white text-[11px] font-bold backdrop-blur-md shadow-sm sm:hidden pointer-events-none flex items-center gap-1">
+                        <span id="mobile-photo-indicator">1</span>
+                        <span>/</span>
+                        <span>{% if product.main_image %}{{ product.images.all.count|add:1 }}{% else %}{{ product.images.all.count }}{% endif %}</span>
+                    </div>
                     {% endif %}
                 </div>
 
                 <!-- Tira de Miniaturas Glass -->
                 {% if product.images.all.count > 0 %}
-                <div class="mt-3 flex p-2 gap-2.5 overflow-x-auto bg-gray-100/70 dark:bg-slate-900/60 rounded-2xl backdrop-blur-sm border border-gray-200/60 dark:border-gray-800/80 scrollbar-none">
+                <div class="mt-2.5 sm:mt-3 flex p-1.5 sm:p-2 gap-2 sm:gap-2.5 overflow-x-auto bg-gray-100/70 dark:bg-slate-900/60 rounded-2xl backdrop-blur-sm border border-gray-200/60 dark:border-gray-800/80 scrollbar-none">
                     {% if product.main_image %}
                     <div onclick="goToImage(0)"
-                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-primary overflow-hidden carousel-thumb transition-all hover:border-primary p-1 shadow-sm">
-                        <img src="{{ product.main_image.url }}" class="w-full h-full object-contain">
+                        class="w-14 h-14 sm:w-20 sm:h-20 aspect-square flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-primary overflow-hidden carousel-thumb transition-all hover:border-primary p-1 shadow-sm">
+                        <img src="{{ product.main_image.url }}" class="w-full h-full object-contain pointer-events-none">
                     </div>
                     {% for img in product.images.all %}
                     <div onclick="goToImage({{ forloop.counter }})"
-                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-transparent overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
-                        <img src="{{ img.image.url }}" class="w-full h-full object-contain">
+                        class="w-14 h-14 sm:w-20 sm:h-20 aspect-square flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 border-transparent overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
+                        <img src="{{ img.image.url }}" class="w-full h-full object-contain pointer-events-none">
                     </div>
                     {% endfor %}
                     {% else %}
                     {% for img in product.images.all %}
                     <div onclick="goToImage({{ forloop.counter0 }})"
-                        class="w-18 h-18 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 {% if forloop.first %}border-primary{% else %}border-transparent{% endif %} overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
-                        <img src="{{ img.image.url }}" class="w-full h-full object-contain">
+                        class="w-14 h-14 sm:w-20 sm:h-20 aspect-square flex-shrink-0 rounded-xl cursor-pointer bg-white dark:bg-slate-800 border-2 {% if forloop.first %}border-primary{% else %}border-transparent{% endif %} overflow-hidden carousel-thumb transition-all hover:border-primary/50 p-1 shadow-sm">
+                        <img src="{{ img.image.url }}" class="w-full h-full object-contain pointer-events-none">
                     </div>
                     {% endfor %}
                     {% endif %}
@@ -165,6 +172,11 @@
                             thumb.classList.toggle('border-primary', idx === currentImg);
                             thumb.classList.toggle('border-transparent', idx !== currentImg);
                         });
+                        const mobInd = document.getElementById('mobile-photo-indicator');
+                        if (mobInd) mobInd.textContent = currentImg + 1;
+                        if (thumbs[currentImg]) {
+                            thumbs[currentImg].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
                     }
                     function nextImage() { 
                         if (images.length <= 1) return;
@@ -179,6 +191,21 @@
                     function goToImage(idx) { 
                         currentImg = idx; 
                         updateCarousel(); 
+                    }
+
+                    // Gestos táctiles de deslizamiento (Swipe) en móvil
+                    let touchStartX = 0;
+                    let touchEndX = 0;
+                    const carouselEl = document.getElementById('product-carousel');
+                    if (carouselEl) {
+                        carouselEl.addEventListener('touchstart', e => {
+                            touchStartX = e.changedTouches[0].screenX;
+                        }, { passive: true });
+                        carouselEl.addEventListener('touchend', e => {
+                            touchEndX = e.changedTouches[0].screenX;
+                            if (touchEndX < touchStartX - 40) nextImage();
+                            if (touchEndX > touchStartX + 40) prevImage();
+                        }, { passive: true });
                     }
 
                     // Sincronización y Apertura del Lightbox Fullscreen
