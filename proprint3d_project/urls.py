@@ -9,12 +9,11 @@ from django.conf.urls.static import static
 from django.views.generic.base import TemplateView
 from django.http import FileResponse, HttpResponse
 from django.contrib.sitemaps.views import sitemap
-from proprint3d.sitemaps import StaticViewSitemap, ProductSitemap, CategorySitemap
+from proprint3d.sitemaps import StaticViewSitemap, ProductSitemap
 
 sitemaps = {
     'static': StaticViewSitemap,
     'products': ProductSitemap,
-    'categories': CategorySitemap,
 }
 
 def clean_sitemap_view(request, **kwargs):

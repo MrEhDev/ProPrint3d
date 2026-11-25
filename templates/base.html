@@ -8,7 +8,7 @@
     <meta name="description" content="{% block meta_description %}ProPrint3D: Taller de fabricación e impresión 3D profesional en España. Piezas terminadas de alta precisión, acabados finos y presupuestos a medida en minutos.{% endblock %}">
     <meta name="keywords" content="impresión 3D España, piezas 3D terminadas, comprar piezas 3D impresas, taller de impresión 3D Barcelona, prototipado rápido, piezas a medida PLA PETG, taller 3D, encargos 3D, ProPrint3D">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <link rel="canonical" href="{% block canonical_url %}https://proprint3d.shop{{ request.path }}{% endblock %}">
 
     <!-- Favicon & Iconos Multi-Resolución Google Search & Navegadores -->
     <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon-48x48.png' %}">
@@ -26,7 +26,7 @@
     <meta property="og:locale" content="es_ES">
     <meta property="og:title" content="{% block og_title %}ProPrint3D - Fabricación 3D de Alta Precisión{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Taller de impresión 3D profesional. Piezas terminadas listas para entrega y presupuestos a medida en minutos.{% endblock %}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:url" content="{% block og_url %}https://proprint3d.shop{{ request.path }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endblock %}">
 
     <!-- Twitter Cards -->

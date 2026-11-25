@@ -6,6 +6,8 @@
 
 {% block og_title %}{{ product.title }} - Impresión 3D Profesional{% endblock %}
 {% block og_description %}{{ product.description|truncatewords:20|striptags }}{% endblock %}
+{% block canonical_url %}https://proprint3d.shop{{ product.get_absolute_url }}{% endblock %}
+{% block og_url %}https://proprint3d.shop{{ product.get_absolute_url }}{% endblock %}
 {% block og_image %}{% if product.main_image %}https://proprint3d.shop{{ product.main_image.url }}{% else %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endif %}{% endblock %}
 {% block twitter_image %}{% if product.main_image %}https://proprint3d.shop{{ product.main_image.url }}{% else %}https://proprint3d.shop{% static 'images/hero_3d_render.png' %}{% endif %}{% endblock %}
 

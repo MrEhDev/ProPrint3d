@@ -1,9 +1,10 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
-from .models import Product, Category
+from .models import Product
 
 class StaticViewSitemap(Sitemap):
     """Sitemap para las vistas estáticas públicas principales."""
+    protocol = 'https'
     changefreq = "daily"
     priority = 1.0
 
@@ -25,6 +26,7 @@ class StaticViewSitemap(Sitemap):
 
 class ProductSitemap(Sitemap):
     """Sitemap para todas las fichas de productos activas."""
+    protocol = 'https'
     changefreq = "weekly"
     priority = 0.9
 
@@ -36,16 +38,4 @@ class ProductSitemap(Sitemap):
 
     def location(self, obj):
         return obj.get_absolute_url()
-
-
-class CategorySitemap(Sitemap):
-    """Sitemap para las categorías con piezas activas."""
-    changefreq = "weekly"
-    priority = 0.7
-
-    def items(self):
-        return Category.objects.filter(products__is_active=True).distinct().order_by('name')
-
-    def location(self, obj):
-        return reverse('catalog') + f"?category={obj.slug}"
 

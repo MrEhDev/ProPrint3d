@@ -5,6 +5,15 @@ Allow: /custom-order/
 Allow: /product/
 Allow: /llms.txt
 
+# Bloquear rastreo e indexación de parámetros de filtros y búsquedas duplicadas
+Disallow: /*?*q=
+Disallow: /*?*category=
+Disallow: /*?*sede=
+Disallow: /*?*branch=
+Disallow: /*?*page=
+Disallow: /cart/
+Disallow: /catalog/whatsapp-catalog.csv
+Disallow: /catalog/meta-catalog.csv
 Disallow: /gestion-taller/
 Disallow: /crm/
 Disallow: /CRM/
