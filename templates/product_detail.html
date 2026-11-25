@@ -41,14 +41,32 @@
 ====================================================================== -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-    <!-- Botón volver con estilo Glass -->
-    <a href="{% url 'catalog' %}"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-dark/60 hover:bg-white dark:hover:bg-dark hover:text-primary dark:hover:text-primary border border-gray-200/60 dark:border-gray-800 shadow-sm backdrop-blur-md mb-8 transition-all hover:-translate-x-0.5">
+    <!-- Botón volver con estilo Glass inteligente -->
+    <a href="{% url 'catalog' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+        onclick="return handleBackToCatalog(this.href);"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-dark/60 hover:bg-white dark:hover:bg-dark hover:text-primary dark:hover:text-primary border border-gray-200/60 dark:border-gray-800 shadow-sm backdrop-blur-md mb-8 transition-all hover:-translate-x-0.5 cursor-pointer">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
         <span>Volver al Catálogo</span>
     </a>
+
+    <script>
+    function handleBackToCatalog(fallbackHref) {
+        if (window.history.length > 1 && document.referrer) {
+            try {
+                const refUrl = new URL(document.referrer);
+                // Si el usuario navegó desde el catálogo en este mismo sitio web:
+                if (refUrl.origin === window.location.origin && (refUrl.pathname === '{% url 'catalog' %}' || refUrl.pathname === '/')) {
+                    window.history.back();
+                    return false;
+                }
+            } catch (err) {}
+        }
+        window.location.href = fallbackHref;
+        return false;
+    }
+    </script>
 
     <!-- Layout Principal: Galería Sticky a la izquierda y Detalles a la derecha -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
@@ -355,7 +373,7 @@
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {% for related in related_products %}
-            <a href="{% url 'product_detail' related.slug %}" class="group block bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200/70 dark:border-gray-800/80 hover:-translate-y-1">
+            <a href="{% url 'product_detail' related.slug %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" class="group block bg-white/70 dark:bg-dark/70 backdrop-blur-xl rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200/70 dark:border-gray-800/80 hover:-translate-y-1">
                 <div class="aspect-square bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-800/50 dark:to-slate-900/60 relative overflow-hidden p-2">
                     {% if related.main_image %}
                     <img src="{{ related.main_image.url }}" alt="{{ related.title }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
