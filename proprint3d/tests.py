@@ -793,6 +793,46 @@ class CartAjaxTestCase(TestCase):
         self.assertEqual(data['product']['quantity'], 1)
 
 
+class WhatsAppCatalogFeedTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.product1 = Product.objects.create(
+            title="Llavero Copa Mundial",
+            slug="llavero-copa-mundial",
+            description="Llavero impreso en 3D color dorado.",
+            price=Decimal('7.50'),
+            is_active=True
+        )
+        self.product_hidden = Product.objects.create(
+            title="Pieza Oculta Prototipo",
+            slug="pieza-oculta-prototipo",
+            description="No debe aparecer en el catálogo público.",
+            price=Decimal('20.00'),
+            is_active=False
+        )
+
+    def test_whatsapp_catalog_feed_csv(self):
+        resp = self.client.get('/catalog/whatsapp-catalog.csv')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('text/csv', resp['Content-Type'])
+        content = resp.content.decode('utf-8-sig')
+        # Verificar cabecera requerida por Meta
+        self.assertIn('id,title,description,availability,condition,price,sale_price,link,image_link,brand', content)
+        # Producto activo debe estar
+        self.assertIn(f"PROPRINT-{self.product1.id}", content)
+        self.assertIn("Llavero Copa Mundial", content)
+        self.assertIn("7.50 EUR", content)
+        self.assertIn("in stock", content)
+        # Producto oculto no debe estar
+        self.assertNotIn("Pieza Oculta Prototipo", content)
+
+    def test_whatsapp_catalog_download_param(self):
+        resp = self.client.get('/catalog/whatsapp-catalog.csv?download=1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('attachment', resp['Content-Disposition'])
+
+
+
 
 
 

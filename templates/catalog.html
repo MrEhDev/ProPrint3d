@@ -160,17 +160,24 @@
         </div>
 
         {% if request.user.is_staff %}
-        <!-- Barra de Herramientas Admin: Catálogo en PDF -->
-        <div class="flex items-center justify-between sm:justify-end gap-3 pt-3">
+        <!-- Barra de Herramientas Admin: Catálogos PDF y WhatsApp/Meta -->
+        <div class="flex items-center justify-between sm:justify-end gap-2.5 pt-3 flex-wrap">
             <span class="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:inline">
-                Herramienta de ventas:
+                Canales de venta:
             </span>
             <button type="button" 
+               onclick="openCatalogWhatsAppModal('{% if category_slug and category_slug != 'ocultos' and category_slug != 'ofertas' %}{{ category_slug }}{% endif %}')"
+               class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 hover:bg-emerald-200/90 dark:hover:bg-emerald-900/80 border border-emerald-300/80 dark:border-emerald-700 shadow-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+               title="Sincronizar o exportar catálogo con WhatsApp Business & Meta">
+                <span>💬</span>
+                <span>Catálogo WhatsApp & Meta</span>
+            </button>
+            <button type="button" 
                onclick="openCatalogPdfModal('{% if category_slug and category_slug != 'ocultos' and category_slug != 'ofertas' %}{{ category_slug }}{% endif %}')"
-               class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300/70 dark:border-emerald-800/70 shadow-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+               class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300/70 dark:border-gray-700 shadow-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
                title="Personalizar y generar catálogo en PDF">
                 <span>📄</span>
-                <span>Configurar Catálogo PDF {% if category_slug and category_slug != 'ocultos' and category_slug != 'ofertas' %}de <strong>{{ category_slug|title }}</strong>{% else %}General{% endif %}</span>
+                <span>Catálogo PDF</span>
             </button>
         </div>
         {% endif %}

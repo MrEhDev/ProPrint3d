@@ -1,0 +1,175 @@
+<!-- =====================================================================
+     MODAL SINCRONIZADOR DE CATÁLOGO WHATSAPP BUSINESS & META (ADMIN)
+     Propósito: Generar y copiar el Data Feed automático en vivo o descargar
+     el CSV compatible con Meta Commerce Manager para WhatsApp Catalog.
+====================================================================== -->
+<div id="catalog-whatsapp-config-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none" onclick="closeCatalogWhatsAppModal()">
+    <div class="bg-white dark:bg-dark max-w-xl w-full max-h-[92vh] rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        
+        <!-- Cabecera del Modal -->
+        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0 bg-emerald-50/50 dark:bg-emerald-950/20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
+                    💬
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white leading-tight">Catálogo WhatsApp Business & Meta</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Sincronización desatendida y exportación CSV oficial</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeCatalogWhatsAppModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl font-bold p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer" aria-label="Cerrar modal">
+                &times;
+            </button>
+        </div>
+
+        <!-- Contenido desplazable -->
+        <div class="overflow-y-auto flex-1 p-5 sm:p-6 space-y-6">
+
+            <!-- Selector de Alcance (Todo el catálogo vs Categoría específica) -->
+            <div>
+                <label class="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-2">
+                    📁 Alcance del Catálogo:
+                </label>
+                <select id="whatsapp-modal-cat-select" onchange="updateWhatsAppModalLinks()" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
+                    <option value="">Todo el catálogo general (Recomendado)</option>
+                    <option value="ofertas">🔥 Solo piezas en oferta</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat.slug }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- BLOQUE 1: Sincronización Automática (Data Feed URL) -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/60 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold">1</span>
+                        <h4 class="text-sm font-black text-gray-900 dark:text-white">Sincronización Automática (Data Feed)</h4>
+                    </div>
+                    <span class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                        Recomendado
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Pega esta URL en <strong>Meta Commerce Manager</strong>. Meta consultará este enlace periódicamente y actualizará precios, fotos y stock en WhatsApp de forma automática:
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="whatsapp-feed-url-input" readonly 
+                           class="flex-1 px-3 py-2 text-xs font-mono rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark text-gray-800 dark:text-gray-200 select-all cursor-text"
+                           value="">
+                    <button type="button" onclick="copyWhatsAppFeedUrl()" id="btn-copy-whatsapp-feed" 
+                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                        <span id="copy-icon">📋</span>
+                        <span id="copy-text">Copiar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BLOQUE 2: Descarga Manual Directa en CSV -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 space-y-3">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-600 text-white text-[11px] font-bold">2</span>
+                    <h4 class="text-sm font-black text-gray-900 dark:text-white">Descarga Manual en Archivo CSV</h4>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Si prefieres subir un archivo puntualmente en lugar de enlazar el feed automático, descárgalo directamente con el formato oficial UTF-8 de Meta:
+                </p>
+                <a id="btn-download-whatsapp-csv" href="{% url 'whatsapp_catalog_feed' %}?download=1" target="_blank"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-dark hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm transition cursor-pointer">
+                    <span>📥</span>
+                    <span>Descargar archivo CSV de WhatsApp</span>
+                </a>
+            </div>
+
+            <!-- BLOQUE 3: Guía Rápida paso a paso -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <span>📖</span> Cómo conectarlo en 4 pasos:
+                </h4>
+                <ol class="text-xs text-gray-600 dark:text-gray-300 space-y-2 list-decimal list-inside leading-relaxed">
+                    <li>Entra en tu cuenta de <a href="https://business.facebook.com/commerce/" target="_blank" rel="noopener noreferrer" class="text-emerald-600 dark:text-emerald-400 font-bold underline">Meta Commerce Manager &rarr;</a></li>
+                    <li>Selecciona tu catálogo y ve a <strong>Catálogo &gt; Orígenes de datos &gt; Añadir artículos</strong>.</li>
+                    <li>Elige <strong>"Flujo de datos" (Data Feed)</strong> y luego <strong>"Lista programada" (Scheduled feed)</strong>.</li>
+                    <li>Pega la URL copiada en el <em>Paso 1</em> y selecciona frecuencia <strong>Diaria</strong>. ¡Listo!</li>
+                </ol>
+            </div>
+
+        </div>
+
+        <!-- Pie del Modal -->
+        <div class="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end bg-gray-50/60 dark:bg-gray-900/40">
+            <button type="button" onclick="closeCatalogWhatsAppModal()" class="px-5 py-2.5 rounded-xl font-bold text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition cursor-pointer">
+                Entendido, cerrar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function openCatalogWhatsAppModal(categorySlug) {
+    const modal = document.getElementById('catalog-whatsapp-config-modal');
+    const select = document.getElementById('whatsapp-modal-cat-select');
+    if (select && categorySlug) {
+        select.value = categorySlug;
+    }
+    updateWhatsAppModalLinks();
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+}
+
+function closeCatalogWhatsAppModal() {
+    const modal = document.getElementById('catalog-whatsapp-config-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+}
+
+function updateWhatsAppModalLinks() {
+    const select = document.getElementById('whatsapp-modal-cat-select');
+    const input = document.getElementById('whatsapp-feed-url-input');
+    const btnDownload = document.getElementById('btn-download-whatsapp-csv');
+    
+    const cat = select ? select.value : '';
+    const origin = window.location.origin;
+    let feedPath = "{% url 'whatsapp_catalog_feed' %}";
+    
+    if (cat) {
+        feedPath += '?category=' + encodeURIComponent(cat);
+    }
+    
+    const fullUrl = origin + feedPath;
+    if (input) {
+        input.value = fullUrl;
+    }
+    if (btnDownload) {
+        btnDownload.href = feedPath + (cat ? '&' : '?') + 'download=1';
+    }
+}
+
+function copyWhatsAppFeedUrl() {
+    const input = document.getElementById('whatsapp-feed-url-input');
+    const copyText = document.getElementById('copy-text');
+    const copyIcon = document.getElementById('copy-icon');
+    if (!input) return;
+    
+    navigator.clipboard.writeText(input.value).then(() => {
+        if (copyText) copyText.textContent = '¡Copiado!';
+        if (copyIcon) copyIcon.textContent = '✅';
+        setTimeout(() => {
+            if (copyText) copyText.textContent = 'Copiar';
+            if (copyIcon) copyIcon.textContent = '📋';
+        }, 2500);
+    }).catch(err => {
+        input.select();
+        document.execCommand('copy');
+        if (copyText) copyText.textContent = '¡Copiado!';
+        setTimeout(() => {
+            if (copyText) copyText.textContent = 'Copiar';
+        }, 2500);
+    });
+}
+</script>

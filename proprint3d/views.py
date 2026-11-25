@@ -1,5 +1,6 @@
 import os
 import io
+import csv
 import decimal
 import unicodedata
 import re
@@ -9,6 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.db.models import Q, Max, Sum, F, Count
 from django.views.decorators.http import require_POST
+from django.utils.html import strip_tags
 
 from functools import wraps
 from django.contrib import messages
@@ -640,6 +642,96 @@ def generate_order_quote_pdf_view(request, order_id):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+# =====================================================================
+# VISTA: whatsapp_catalog_feed_view
+# Propósito: Exportar / Sincronizar catálogo para WhatsApp Business y Meta
+# =====================================================================
+def whatsapp_catalog_feed_view(request):
+    """
+    Genera el Data Feed oficial en formato CSV compatible con Meta Commerce Manager,
+    WhatsApp Business Catalog, Facebook Shop e Instagram Shopping.
+    Soporta descarga directa con ?download=1 o sincronización desatendida por URL.
+    """
+    category_slug = request.GET.get('category', '').strip()
+    
+    # Solo piezas activas en el catálogo público
+    products_qs = Product.objects.filter(is_active=True).prefetch_related('categories').order_by('-created_at')
+    if category_slug:
+        if category_slug == 'ofertas':
+            products_qs = products_qs.filter(is_on_sale=True)
+        else:
+            products_qs = products_qs.filter(categories__slug=category_slug).distinct()
+            
+    is_download = request.GET.get('download') == '1'
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    disposition = 'attachment' if is_download else 'inline'
+    filename = f"catalogo_proprint3d_{category_slug or 'completo'}.csv"
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+    
+    # Escribir BOM UTF-8 para compatibilidad perfecta con Excel y Meta
+    response.write('\ufeff')
+    
+    writer = csv.writer(response)
+    # Cabecera estándar de catálogo de Meta
+    writer.writerow([
+        'id',
+        'title',
+        'description',
+        'availability',
+        'condition',
+        'price',
+        'sale_price',
+        'link',
+        'image_link',
+        'brand',
+        'google_product_category',
+        'item_group_id',
+    ])
+    
+    base_url = request.build_absolute_uri('/')[:-1]
+    default_image_url = f"{base_url}/static/images/hero_3d_render.png"
+    
+    for product in products_qs:
+        item_id = f"PROPRINT-{product.id}"
+        title = product.title.replace('\n', ' ').replace('\r', ' ').strip()[:150]
+        desc = strip_tags(product.description or product.title).replace('\n', ' ').replace('\r', ' ').strip()
+        if not desc:
+            desc = title
+        desc = desc[:5000]
+        
+        availability = 'in stock'
+        condition = 'new'
+        price = f"{float(product.price):.2f} EUR"
+        sale_price = f"{float(product.sale_price):.2f} EUR" if (product.is_on_sale and product.sale_price) else ""
+        
+        product_link = request.build_absolute_uri(reverse('product_detail', args=[product.slug]))
+        if product.main_image:
+            image_link = request.build_absolute_uri(product.main_image.url)
+        else:
+            image_link = default_image_url
+            
+        brand = "ProPrint3D"
+        first_cat = product.categories.first()
+        category_slug_val = first_cat.slug if first_cat else ""
+        
+        writer.writerow([
+            item_id,
+            title,
+            desc,
+            availability,
+            condition,
+            price,
+            sale_price,
+            product_link,
+            image_link,
+            brand,
+            'Arts & Entertainment > Hobbies & Creative Arts > Crafts & Hobbies > 3D Printing',
+            category_slug_val,
+        ])
+        
+    return response
+
 
 # =====================================================================
 # VISTA: generate_category_catalog_pdf_view

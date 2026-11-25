@@ -148,6 +148,14 @@
                 <span>Catálogo PDF</span>
             </button>
 
+            <!-- Botón Catálogo WhatsApp / Meta -->
+            <button type="button" onclick="openCatalogWhatsAppModal()"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base cursor-pointer"
+                title="Sincronizar y exportar catálogo a WhatsApp Business y Meta">
+                <span>💬</span>
+                <span>Catálogo WhatsApp</span>
+            </button>
+
             <a href="{% url 'order_create' %}{% if selected_branch_slug and selected_branch_slug != 'all' %}?branch={{ selected_branch_slug }}{% endif %}"
                 class="bg-primary hover:bg-secondary text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-md inline-flex items-center gap-2 transform hover:-translate-y-0.5 text-sm sm:text-base">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

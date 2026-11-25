@@ -40,6 +40,8 @@ urlpatterns = [
     # CRM de Pedidos (admite /crm/ y /CRM/)
     path('crm/', views.crm_dashboard_view, name='crm_dashboard'),
     path('CRM/', views.crm_dashboard_view),
+    path('catalog/whatsapp-catalog.csv', views.whatsapp_catalog_feed_view, name='whatsapp_catalog_feed'),
+    path('catalog/meta-catalog.csv', views.whatsapp_catalog_feed_view, name='meta_catalog_feed'),
     path('crm/catalogo-pdf/', views.generate_category_catalog_pdf_view, name='generate_catalog_pdf'),
     path('crm/catalogo-pdf/<slug:category_slug>/', views.generate_category_catalog_pdf_view, name='generate_catalog_pdf_category'),
     path('crm/order/new/', views.order_create_view, name='order_create'),
