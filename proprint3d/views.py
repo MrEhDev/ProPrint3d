@@ -673,7 +673,8 @@ def whatsapp_catalog_feed_view(request):
     response.write('\ufeff')
     
     writer = csv.writer(response)
-    # Cabecera estándar de catálogo de Meta
+    # Cabecera estándar de catálogo de Meta (usamos product_type en lugar de item_group_id
+    # para evitar que Meta agrupe piezas distintas como variantes de un mismo producto)
     writer.writerow([
         'id',
         'title',
@@ -686,7 +687,7 @@ def whatsapp_catalog_feed_view(request):
         'image_link',
         'brand',
         'google_product_category',
-        'item_group_id',
+        'product_type',
     ])
     
     base_url = request.build_absolute_uri('/')[:-1]
@@ -719,7 +720,7 @@ def whatsapp_catalog_feed_view(request):
             
         brand = "ProPrint3D"
         first_cat = product.categories.first()
-        category_slug_val = first_cat.slug if first_cat else ""
+        product_type = first_cat.name if first_cat else "Impresión 3D"
         
         writer.writerow([
             item_id,
@@ -733,7 +734,7 @@ def whatsapp_catalog_feed_view(request):
             image_link,
             brand,
             'Arts & Entertainment > Hobbies & Creative Arts > Crafts & Hobbies > 3D Printing',
-            category_slug_val,
+            product_type,
         ])
         
     return response
